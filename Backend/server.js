@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const jwt =require('jsonwebtoken');
@@ -6,6 +7,10 @@ dotenv.config();
 connectDB();
 
 const app = express();
+app.use(cors({
+  origin: 'http://localhost:5174',
+  credentials: true
+}));
 app.use(express.json());
 
 // Auth routes

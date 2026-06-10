@@ -1,0 +1,80 @@
+:root {
+  --green-primary: #cc9a50;
+  --green-deep: #a88b07;
+  --green-mint: #E1F5EE;
+  --amber-warm: #FAEEDA;
+
+  --bg-base: #FFFFFF;
+  --bg-surface: #F4FAF7;
+  --bg-card: #FFFFFF;
+  --bg-section-alt: #E1F5EE;
+
+  --text-primary: #237cb4;
+  --text-secondary: #0c8baa;
+  --text-muted: #0ab5cc;
+  --text-on-green: #FFFFFF;
+
+  --border-color: #C8E6DA;
+  --card-shadow: 0 2px 12px rgba(15, 148, 201, 0.616);
+
+  --nav-bg: #FFFFFF;
+  --footer-bg: #0f8696;
+  --footer-text: #E1F5EE;
+
+  --radius: 8px;
+  --transition: all 0.2s ease;
+}
+
+[data-theme="dark"] {
+  --bg-base: #0A1A15;
+  --bg-surface: #0F2318;
+  --bg-card: #132B1F;
+  --bg-section-alt: #0F2318;
+
+  --text-primary: #E8F5F0;
+  --text-secondary: #A8CFC0;
+  --text-muted: #6B9E8A;
+
+  --border-color: #1D4A35;
+  --card-shadow: 0 2px 12px rgba(8, 144, 168, 0.4);
+
+  --nav-bg: #0A1A15;
+  --footer-bg: #061510;
+  --footer-text: #A8CFC0;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  outline: none;
+  font-family: inherit;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  outline: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
