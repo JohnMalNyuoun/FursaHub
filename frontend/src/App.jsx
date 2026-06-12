@@ -26,7 +26,7 @@ import AdminOrganisations from './pages/admin/Organisations';
 import AdminCourses from './pages/admin/Courses';
 import AdminUsers from './pages/admin/Users';
 
-// Route guards
+// Route guards 
 const YouthRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return null;
@@ -45,7 +45,7 @@ const AdminRoute = ({ children }) => {
   return user?.role === 'admin' ? children : <Navigate to="/admin/login" />;
 };
 
-function App() {
+function App () {
   return (
     <Routes>
       {/* Public */}
