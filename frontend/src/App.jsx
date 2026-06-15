@@ -25,7 +25,7 @@ import AdminDashboard from './pages/admin/Dashboard';
 import AdminOrganisations from './pages/admin/Organisations';
 import AdminCourses from './pages/admin/Courses';
 import AdminUsers from './pages/admin/Users';
-
+import Landing from './pages/Landing';
 // Route guards 
 const YouthRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -39,17 +39,17 @@ const OrgRoute = ({ children }) => {
   return user?.role === 'organisation' ? children : <Navigate to="/org/login" />;
 };
 
+
 const AdminRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return null;
-  return user?.role === 'admin' ? children : <Navigate to="/admin/login" />;
+  return user?.role === 'admin' ? children : <Navigate to="/login" />;
 };
-
 function App () {
   return (
     <Routes>
       {/* Public */}
-      <Route path="/" element={<Navigate to="/login" />} />
+      <Route path="/" element={<Landing />} />
       <Route path="/login" element={<YouthLogin />} />
       <Route path="/register" element={<YouthRegister />} />
       <Route path="/org/login" element={<OrgLogin />} />

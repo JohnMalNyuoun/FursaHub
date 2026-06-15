@@ -91,7 +91,23 @@ const courseSchema = new mongoose.Schema({
   isFeatured: {
     type: Boolean,
     default: false
+  },
+  outcomeQuestions: [
+  {
+    question: { type: String, required: true },
+    fieldType: {
+      type: String,
+      enum: ['text', 'textarea', 'select', 'yes_no'],
+      default: 'textarea'
+    },
+    options: [String],
+    isRequired: { type: Boolean, default: true }
   }
+],
+outcomeQuestionsAdded: {
+  type: Boolean,
+  default: false
+}
 
 }, { timestamps: true });
 

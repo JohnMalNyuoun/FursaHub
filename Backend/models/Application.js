@@ -57,7 +57,36 @@ const applicationSchema = new mongoose.Schema({
   },
   reviewedAt: {
     type: Date
+  },
+  // Completion tracking
+completionStatus: {
+  type: String,
+  enum: ['enrolled', 'completed', 'dropped_out', 'not_attended'],
+  default: null
+},
+completionMarkedAt: {
+  type: Date
+},
+completionMarkedBy: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Organisation'
+},
+
+// Outcome form
+outcomeAnswers: [
+  {
+    question: { type: String },
+    answer: { type: String }
   }
+],
+outcomeSubmittedAt: {
+  type: Date
+},
+outcomeSubmitted: {
+  type: Boolean,
+  default: false
+}
+
 }, { timestamps: true });
 
 // One application per youth per course

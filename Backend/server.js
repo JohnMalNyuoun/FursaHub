@@ -8,7 +8,7 @@ connectDB();
 
 const app = express();
 app.use(cors({
-  origin: 'http://localhost:5174',
+  origin: ['http://localhost:5174', 'http://localhost:5173', 'http://localhost:5172', 'http://localhost:5171'],
   credentials: true
 }));
 app.use(express.json());
@@ -34,7 +34,8 @@ app.use('/api/org/notifications', require('./routes/organisation/notifications')
 app.use('/api/admin/organisations', require('./routes/admin/organisations'));
 app.use('/api/admin/courses', require('./routes/admin/courses'));
 app.use('/api/admin/users', require('./routes/admin/users'));
-
+app.use('/api/org/impact', require('./routes/organisation/impact'));
+app.use('/api/youth/outcomes', require('./routes/youth/outcomes'));
 app.get('/', (req, res) => {
   res.json({ message: 'FursaHub API Running' });
 });

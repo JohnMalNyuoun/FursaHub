@@ -26,7 +26,11 @@ const YouthLogin = () => {
     try {
       const res = await youthLogin(form);
       login(res.data.user, res.data.token);
-      navigate('/home');
+      if (res.data.user.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/home');
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
     } finally {
