@@ -1,4 +1,4 @@
-const Course = require('../../models/Course');
+const Course = require('../../models/course');
 const User = require('../../models/Users');
 const Organisation = require('../../models/Organisation');
 const Application = require('../../models/Application');

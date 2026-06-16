@@ -1,4 +1,4 @@
-const Course = require('../../models/Course');
+const Course = require('../../models/course');
 const { success, error } = require('../../utils/apiResponse');
 
 // @desc    Get all published courses

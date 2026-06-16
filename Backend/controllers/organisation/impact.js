@@ -1,5 +1,5 @@
 const Application = require('../../models/Application');
-const Course = require('../../models/Course');
+const Course = require('../../models/course');
 const { success, error } = require('../../utils/apiResponse');
 const { notify } = require('../../services/notificationService');
 
