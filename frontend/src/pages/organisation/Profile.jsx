@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
-import { getOrgProfile } from '../../services/profileService';
+import { getOrgProfile, updateOrgLanguage } from '../../services/profileService';
 
 const SETTINGS_KEY = 'fh_settings_org_tab';
 
@@ -47,6 +47,9 @@ const OrgProfile = () => {
       try {
         const res = await getOrgProfile();
         setProfile(res.data);
+        if (res.data?.language) {
+          setSettings((current) => ({ ...current, language: res.data.language }));
+        }
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to load profile');
       } finally {
@@ -197,7 +200,15 @@ const OrgProfile = () => {
                   <span style={{ color: '#7A9BB5', fontWeight: 700 }}>Language</span>
                   <select
                     value={settings.language}
-                    onChange={(e) => setSettings((current) => ({ ...current, language: e.target.value }))}
+                    onChange={async (e) => {
+                      const language = e.target.value;
+                      setSettings((current) => ({ ...current, language }));
+                      try {
+                        await updateOrgLanguage(language);
+                      } catch (err) {
+                        console.error(err);
+                      }
+                    }}
                     style={{
                       width: '220px',
                       padding: '10px 12px',
@@ -210,6 +221,7 @@ const OrgProfile = () => {
                     <option value="en">English</option>
                     <option value="sw">Swahili</option>
                     <option value="fr">French</option>
+                    <option value="ar">Arabic</option>
                   </select>
                 </div>
 

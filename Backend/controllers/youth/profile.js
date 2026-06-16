@@ -46,6 +46,7 @@ const updateProfile = async (req, res) => {
       communityType: user.communityType,
       notificationsEnabled: user.notificationsEnabled,
       theme: user.theme,
+      language: user.language,
       role: user.role
     });
   } catch (err) {
@@ -155,11 +156,35 @@ const updateTheme = async (req, res) => {
   }
 };
 
+// @desc    Update language preference
+// @route   PUT /api/youth/profile/language
+// @access  Youth
+const updateLanguage = async (req, res) => {
+  try {
+    const { language } = req.body;
+
+    if (!['en', 'sw', 'fr', 'ar'].includes(language)) {
+      return error(res, 400, 'Invalid language value');
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) return error(res, 404, 'User not found');
+
+    user.language = language;
+    await user.save();
+
+    return success(res, 200, 'Language updated', { language: user.language });
+  } catch (err) {
+    return error(res, 500, err.message);
+  }
+};
+
 module.exports = {
   getProfile,
   updateProfile,
   updatePhoto,
   changePassword,
   updateNotifications,
-  updateTheme
+  updateTheme,
+  updateLanguage
 };

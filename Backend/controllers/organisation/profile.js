@@ -45,6 +45,7 @@ const updateProfile = async (req, res) => {
       logo: org.logo,
       type: org.type,
       status: org.status,
+      language: org.language,
       role: org.role
     });
   } catch (err) {
@@ -131,10 +132,34 @@ const updateNotifications = async (req, res) => {
   }
 };
 
+// @desc    Update language preference
+// @route   PUT /api/org/profile/language
+// @access  Organisation
+const updateLanguage = async (req, res) => {
+  try {
+    const { language } = req.body;
+
+    if (!['en', 'sw', 'fr', 'ar'].includes(language)) {
+      return error(res, 400, 'Invalid language value');
+    }
+
+    const org = await Organisation.findById(req.user.id);
+    if (!org) return error(res, 404, 'Organisation not found');
+
+    org.language = language;
+    await org.save();
+
+    return success(res, 200, 'Language updated', { language: org.language });
+  } catch (err) {
+    return error(res, 500, err.message);
+  }
+};
+
 module.exports = {
   getProfile,
   updateProfile,
   updateLogo,
   changePassword,
-  updateNotifications
+  updateNotifications,
+  updateLanguage
 };

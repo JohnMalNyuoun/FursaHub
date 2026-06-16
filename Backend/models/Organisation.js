@@ -71,6 +71,11 @@ const organisationSchema = new mongoose.Schema({
   notificationsEnabled: {
     type: Boolean,
     default: true
+  },
+  language: {
+    type: String,
+    enum: ['en', 'sw', 'fr', 'ar'],
+    default: 'en'
   }
 }, { timestamps: true });
 
