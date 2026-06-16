@@ -122,6 +122,19 @@
   color: #4c687f !important;
 }
 
+/* Soften gold accents for minimal light mode aesthetic. */
+:root[data-theme='light'] [style*="#F5A623"] {
+  background: #f0d8b3 !important;
+  color: #5a4028 !important;
+}
+
+:root[data-theme='light'] .fh-badge,
+:root[data-theme='light'] .fh-filter-pill {
+  background: #f5f0e8 !important;
+  border-color: #d4b89a !important;
+  color: #6b5a47 !important;
+}
+
 * {
   margin: 0;
   padding: 0;
