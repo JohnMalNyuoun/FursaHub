@@ -5,8 +5,8 @@ import { AuthProvider } from './context/AuthContext'
 import './index.css'
 import App from './App.jsx'
 
-const savedYouthSettings = localStorage.getItem('fh_settings_youth');
-const savedOrgSettings = localStorage.getItem('fh_settings_org');
+const savedYouthSettings = sessionStorage.getItem('fh_settings_youth_tab');
+const savedOrgSettings = sessionStorage.getItem('fh_settings_org_tab');
 
 try {
   const preferredTheme =

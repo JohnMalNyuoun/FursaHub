@@ -3,7 +3,7 @@ import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
 import { getOrgProfile } from '../../services/profileService';
 
-const SETTINGS_KEY = 'fh_settings_org';
+const SETTINGS_KEY = 'fh_settings_org_tab';
 
 const OrgProfile = () => {
   const [profile, setProfile] = useState(null);
@@ -19,7 +19,7 @@ const OrgProfile = () => {
   });
 
   useEffect(() => {
-    const saved = localStorage.getItem(SETTINGS_KEY);
+    const saved = sessionStorage.getItem(SETTINGS_KEY);
     if (!saved) return;
 
     try {
@@ -38,7 +38,7 @@ const OrgProfile = () => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    sessionStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     document.documentElement.setAttribute('data-theme', settings.theme);
   }, [settings]);
 

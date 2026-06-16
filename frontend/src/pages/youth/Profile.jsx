@@ -3,7 +3,7 @@ import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
 import { getYouthProfile } from '../../services/profileService';
 
-const SETTINGS_KEY = 'fh_settings_youth';
+const SETTINGS_KEY = 'fh_settings_youth_tab';
 
 const YouthProfile = () => {
   const [profile, setProfile] = useState(null);
@@ -19,7 +19,7 @@ const YouthProfile = () => {
   });
 
   useEffect(() => {
-    const saved = localStorage.getItem(SETTINGS_KEY);
+    const saved = sessionStorage.getItem(SETTINGS_KEY);
     if (!saved) return;
 
     try {
@@ -38,7 +38,7 @@ const YouthProfile = () => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    sessionStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     document.documentElement.setAttribute('data-theme', settings.theme);
   }, [settings]);
 
