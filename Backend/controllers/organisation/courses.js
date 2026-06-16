@@ -37,6 +37,11 @@ const uploadCourseCover = async (file) => {
   }
 };
 
+const shouldIgnoreCoverUploadFailure = (err) => {
+  if (!err?.message) return false;
+  return err.message.includes('status code - 403') || err.message.includes('Cloudinary is not configured');
+};
+
 // @desc    Post a new course
 // @route   POST /api/org/courses
 // @access  Organisation
@@ -93,7 +98,16 @@ const createCourse = async (req, res) => {
       return error(res, 400, 'Maximum age must be a valid number');
     }
 
-    const coverImage = await uploadCourseCover(req.file);
+    let coverImage = null;
+    try {
+      coverImage = await uploadCourseCover(req.file);
+    } catch (uploadErr) {
+      if (!shouldIgnoreCoverUploadFailure(uploadErr)) {
+        throw uploadErr;
+      }
+      // Allow draft creation even when Cloudinary rejects image upload.
+      coverImage = null;
+    }
 
     const course = await Course.create({
       organisation: req.user.id,
@@ -236,7 +250,14 @@ const updateCourse = async (req, res) => {
       updateData.googleFormLink = googleFormLink || null;
     }
     if (req.file) {
-      updateData.coverImage = await uploadCourseCover(req.file);
+      try {
+        updateData.coverImage = await uploadCourseCover(req.file);
+      } catch (uploadErr) {
+        if (!shouldIgnoreCoverUploadFailure(uploadErr)) {
+          throw uploadErr;
+        }
+        // Keep existing cover image if replacement upload fails.
+      }
     }
 
     const updatedCourse = await Course.findByIdAndUpdate(
