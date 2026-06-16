@@ -1,9 +1,21 @@
 import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
 
 const CourseCard = ({ course }) => {
   const isDeadlinePassed = new Date() > new Date(course.applicationDeadline);
   const isFull = course.filledSlots >= course.totalSlots;
-  const cardImage = (course.coverImage || course.organisation?.logo || '').replace('http://', 'https://');
+  const imageCandidates = useMemo(() => {
+    return [course.coverImage, course.organisation?.logo]
+      .filter(Boolean)
+      .map((url) => url.replace('http://', 'https://'));
+  }, [course.coverImage, course.organisation?.logo]);
+  const [imageIndex, setImageIndex] = useState(0);
+
+  useEffect(() => {
+    setImageIndex(0);
+  }, [course._id, imageCandidates.length]);
+
+  const cardImage = imageCandidates[imageIndex] || '';
 
   const status = isFull ? 'Full' : isDeadlinePassed ? 'Closed' : 'Open';
   const statusStyle = status === 'Open'
@@ -39,6 +51,13 @@ const CourseCard = ({ course }) => {
           <img
             src={cardImage}
             alt={course.title}
+            onError={() => {
+              if (imageIndex < imageCandidates.length - 1) {
+                setImageIndex((current) => current + 1);
+              } else {
+                setImageIndex(imageCandidates.length);
+              }
+            }}
             style={{
               width: 'calc(100% + 40px)',
               height: '180px',

@@ -17,6 +17,7 @@ const CourseDetail = () => {
   const [alreadyApplied, setAlreadyApplied] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+  const [detailImageIndex, setDetailImageIndex] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,6 +49,10 @@ const CourseDetail = () => {
     fetchData();
   }, [id]);
 
+  useEffect(() => {
+    setDetailImageIndex(0);
+  }, [id, course?.coverImage, course?.organisation?.logo]);
+
   const handleAnswerChange = (index, value) => {
     const updated = [...answers];
     updated[index].answer = value;
@@ -75,7 +80,10 @@ const CourseDetail = () => {
   const isDeadlinePassed = new Date() > new Date(course.applicationDeadline);
   const isFull = course.filledSlots >= course.totalSlots;
   const canApply = !alreadyApplied && !isDeadlinePassed && !isFull;
-  const detailImage = (course.coverImage || course.organisation?.logo || '').replace('http://', 'https://');
+  const detailImageCandidates = [course.coverImage, course.organisation?.logo]
+    .filter(Boolean)
+    .map((url) => url.replace('http://', 'https://'));
+  const detailImage = detailImageCandidates[detailImageIndex] || '';
 
   return (
     <div style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
@@ -114,6 +122,13 @@ const CourseDetail = () => {
             <img
               src={detailImage}
               alt={course.title}
+              onError={() => {
+                if (detailImageIndex < detailImageCandidates.length - 1) {
+                  setDetailImageIndex((current) => current + 1);
+                } else {
+                  setDetailImageIndex(detailImageCandidates.length);
+                }
+              }}
               style={{
                 width: '100%',
                 height: '280px',
