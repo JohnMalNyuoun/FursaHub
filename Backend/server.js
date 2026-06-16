@@ -10,7 +10,11 @@ connectDB();
 
 const app = express();
 app.use(cors({
-  origin: ['http://localhost:5174', 'http://localhost:5173', 'http://localhost:5172', 'http://localhost:5171'],
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'https://fursahub.onrender.com'
+  ],
   credentials: true
 }));
 app.use(express.json());
