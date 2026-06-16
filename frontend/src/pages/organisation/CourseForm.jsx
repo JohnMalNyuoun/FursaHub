@@ -63,6 +63,7 @@ const CourseForm = () => {
     try {
       await createCourse({
         ...form,
+        googleFormLink: form.googleFormLink?.trim(),
         totalSlots: parseInt(form.totalSlots),
         applicationQuestions: questions.filter((q) => q.question?.trim())
       });
@@ -368,28 +369,22 @@ const CourseForm = () => {
               onChange={handleChange}
               required
             />
-          </div>
 
-          {/* Google Form Link */}
-          <div style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius)',
-            padding: '24px',
-            marginBottom: '20px'
-          }}>
             <Input
-              label="Document Upload Link (Optional)"
+              label="Google Form Link (Optional)"
+              type="url"
               name="googleFormLink"
               placeholder="https://docs.google.com/forms/..."
               value={form.googleFormLink}
               onChange={handleChange}
             />
+
             <p style={{
               fontSize: '0.82rem',
-              color: 'var(--text-muted)'
+              color: 'var(--text-muted)',
+              marginTop: '-8px'
             }}>
-              If applicants need to upload documents (CV, certificates), paste your Google Form link here.
+              Add the Google Form URL here if applicants should upload CVs, certificates, or extra documents.
             </p>
           </div>
 

@@ -92,6 +92,13 @@ const Icon = ({ name, active = false, size = 24 }) => {
           <path d="M5 12h11" />
         </svg>
       );
+    case 'refresh':
+      return (
+        <svg {...common}>
+          <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+          <path d="M21 3v6h-6" />
+        </svg>
+      );
     default:
       return null;
   }
@@ -109,6 +116,10 @@ const Navbar = () => {
     } else {
       navigate('/login');
     }
+  };
+
+  const handleRefresh = () => {
+    window.location.reload();
   };
 
   const youthLinks = [
@@ -161,6 +172,9 @@ const Navbar = () => {
 
   const currentLabel =
     links.find(l => l.path === location.pathname)?.label || '';
+
+  const leftLinks = links.slice(0, Math.ceil(links.length / 2));
+  const rightLinks = links.slice(Math.ceil(links.length / 2));
 
   return (
     <>
@@ -219,7 +233,61 @@ const Navbar = () => {
           padding: '4px',
           borderRadius: '12px'
         }}>
-          {links.map(link => {
+          {leftLinks.map(link => {
+            const active = isActive(link.path);
+            return (
+              <Link
+                key={link.path}
+                to={link.path}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontSize: '0.88rem',
+                  fontWeight: 700,
+                  color: active ? '#1E3A5F' : '#B8D0E8',
+                  background: active ? '#F5A623' : 'transparent',
+                  borderRadius: '8px',
+                  padding: '8px 16px',
+                  transition: 'all 0.2s ease',
+                  boxShadow: active ? '0 2px 8px rgba(245, 166, 35, 0.3)' : 'none'
+                }}
+              >
+                <Icon name={link.icon} active={active} size={18} />
+                {link.label}
+              </Link>
+            );
+          })}
+
+          <button
+            type="button"
+            onClick={handleRefresh}
+            title="Refresh page"
+            aria-label="Refresh page"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '36px',
+              height: '36px',
+              color: '#F5A623',
+              background: 'rgba(245, 166, 35, 0.12)',
+              border: '1px solid #F5A623',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(245, 166, 35, 0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(245, 166, 35, 0.12)';
+            }}
+          >
+            <Icon name="refresh" size={16} />
+          </button>
+
+          {rightLinks.map(link => {
             const active = isActive(link.path);
             return (
               <Link
