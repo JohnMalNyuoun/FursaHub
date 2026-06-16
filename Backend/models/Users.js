@@ -44,6 +44,23 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['youth', 'admin'],
     default: 'youth'
+  },
+  photo: {
+    type: String,
+    default: null
+  },
+  bio: {
+    type: String,
+    default: ''
+  },
+  notificationsEnabled: {
+    type: Boolean,
+    default: true
+  },
+  theme: {
+    type: String,
+    enum: ['light', 'dark'],
+    default: 'light'
   }
 }, { timestamps: true });
 

@@ -77,9 +77,9 @@ const CourseForm = () => {
     width: '100%',
     padding: '12px 14px',
     fontSize: '0.95rem',
-    color: 'var(--text-primary)',
-    background: 'var(--bg-surface)',
-    border: '1px solid var(--border-color)',
+    color: '#FFFFFF',
+    background: '#152A47',
+    border: '1px solid #2A4A6B',
     borderRadius: 'var(--radius)',
     marginBottom: '16px'
   };
@@ -95,7 +95,7 @@ const CourseForm = () => {
           style={{
             background: 'none',
             border: 'none',
-            color: 'var(--green-primary)',
+            color: '#F5A623',
             fontWeight: '600',
             fontSize: '0.9rem',
             cursor: 'pointer',
@@ -109,14 +109,14 @@ const CourseForm = () => {
         <h1 style={{
           fontSize: '1.5rem',
           fontWeight: '800',
-          color: 'var(--text-primary)',
+          color: '#FFFFFF',
           marginBottom: '8px'
         }}>
           Post a New Course
         </h1>
         <p style={{
           fontSize: '0.9rem',
-          color: 'var(--text-muted)',
+          color: '#7A9BB5',
           marginBottom: '32px'
         }}>
           Fill in the details below. You can save as draft and publish later.
@@ -124,13 +124,13 @@ const CourseForm = () => {
 
         {error && (
           <div style={{
-            background: '#FFF5F5',
-            border: '1px solid #FEB2B2',
+            background: 'rgba(229,62,62,0.1)',
+            border: '1px solid #E53E3E',
             borderRadius: 'var(--radius)',
             padding: '12px',
             marginBottom: '24px',
             fontSize: '0.9rem',
-            color: '#C53030'
+            color: '#FCA5A5'
           }}>
             {error}
           </div>
@@ -400,13 +400,13 @@ const CourseForm = () => {
                 type="button"
                 onClick={addQuestion}
                 style={{
-                  background: 'var(--green-mint)',
-                  color: 'var(--green-deep)',
+                  background: 'rgba(245,166,35,0.15)',
+                  color: '#F5A623',
                   border: 'none',
                   borderRadius: 'var(--radius)',
                   padding: '8px 16px',
                   fontSize: '0.85rem',
-                  fontWeight: '600',
+                  fontWeight: '700',
                   cursor: 'pointer'
                 }}
               >
@@ -417,7 +417,7 @@ const CourseForm = () => {
             {questions.length === 0 ? (
               <p style={{
                 fontSize: '0.85rem',
-                color: 'var(--text-muted)',
+                color: '#7A9BB5',
                 textAlign: 'center',
                 padding: '20px'
               }}>
@@ -426,8 +426,8 @@ const CourseForm = () => {
             ) : (
               questions.map((q, i) => (
                 <div key={i} style={{
-                  background: 'var(--bg-surface)',
-                  border: '1px solid var(--border-color)',
+                  background: '#152A47',
+                  border: '1px solid #2A4A6B',
                   borderRadius: 'var(--radius)',
                   padding: '16px',
                   marginBottom: '12px'
@@ -440,7 +440,7 @@ const CourseForm = () => {
                     <span style={{
                       fontSize: '0.82rem',
                       fontWeight: '600',
-                      color: 'var(--text-muted)'
+                      color: '#7A9BB5'
                     }}>
                       Question {i + 1}
                     </span>
@@ -450,7 +450,7 @@ const CourseForm = () => {
                       style={{
                         background: 'none',
                         border: 'none',
-                        color: '#C53030',
+                        color: '#E53E3E',
                         fontSize: '0.82rem',
                         cursor: 'pointer',
                         fontWeight: '600'
@@ -469,9 +469,9 @@ const CourseForm = () => {
                       width: '100%',
                       padding: '10px 14px',
                       fontSize: '0.9rem',
-                      color: 'var(--text-primary)',
-                      background: 'var(--bg-card)',
-                      border: '1px solid var(--border-color)',
+                      color: '#FFFFFF',
+                      background: '#1A3357',
+                      border: '1px solid #2A4A6B',
                       borderRadius: 'var(--radius)',
                       marginBottom: '10px'
                     }}
@@ -484,9 +484,9 @@ const CourseForm = () => {
                       width: '100%',
                       padding: '10px 14px',
                       fontSize: '0.9rem',
-                      color: 'var(--text-primary)',
-                      background: 'var(--bg-card)',
-                      border: '1px solid var(--border-color)',
+                      color: '#FFFFFF',
+                      background: '#1A3357',
+                      border: '1px solid #2A4A6B',
                       borderRadius: 'var(--radius)'
                     }}
                   >

@@ -10,15 +10,6 @@ import {
 } from '../../services/applicationService';
 import { getOrgCourses } from '../../services/courseService';
 
-const statusColors = {
-  submitted: { bg: '#EBF8FF', color: '#2C5282' },
-  under_review: { bg: '#FFFAF0', color: '#744210' },
-  shortlisted: { bg: '#F0FFF4', color: '#276749' },
-  accepted: { bg: '#F0FFF4', color: '#276749' },
-  rejected: { bg: '#FFF5F5', color: '#C53030' },
-  withdrawn: { bg: '#F7FAFC', color: '#718096' }
-};
-
 const Applications = () => {
   const [applications, setApplications] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -118,15 +109,11 @@ const Applications = () => {
       <Navbar />
 
       {/* Header */}
-      <div style={{
-        background: 'var(--bg-surface)',
-        borderBottom: '1px solid var(--border-color)',
-        padding: '32px 24px'
-      }}>
-        <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+      <div className="fh-section-head">
+        <div>
           <h1 style={{
-            fontSize: '1.6rem',
-            fontWeight: '800',
+            fontSize: '1.5rem',
+            fontWeight: 800,
             color: 'var(--text-primary)',
             marginBottom: '4px'
           }}>
@@ -138,7 +125,7 @@ const Applications = () => {
         </div>
       </div>
 
-      <div style={{ maxWidth: '960px', margin: '0 auto', padding: '32px 24px' }}>
+      <div className="fh-container">
 
         {/* Filters */}
         <div style={{
@@ -209,14 +196,12 @@ const Applications = () => {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {applications.map(app => {
-              const status = statusColors[app.status] || statusColors.submitted;
-
               return (
                 <div key={app._id} style={{
-                  background: 'var(--bg-card)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: 'var(--radius)',
-                  padding: '24px',
+                  background: '#1A3357',
+                  border: '1px solid #2A4A6B',
+                  borderRadius: '16px',
+                  padding: '20px',
                   boxShadow: 'var(--card-shadow)'
                 }}>
                   {/* Top row */}
@@ -232,35 +217,28 @@ const Applications = () => {
                       <h3 style={{
                         fontSize: '1.05rem',
                         fontWeight: '700',
-                        color: 'var(--text-primary)',
+                        color: '#FFFFFF',
                         marginBottom: '2px'
                       }}>
                         {app.youth?.fullName}
                       </h3>
                       <p style={{
                         fontSize: '0.85rem',
-                        color: 'var(--text-muted)'
+                        color: '#7A9BB5'
                       }}>
                         {app.youth?.email} · {app.youth?.communityType?.replace('_', ' ')}
                       </p>
                     </div>
 
-                    <span style={{
-                      padding: '6px 14px',
-                      borderRadius: '20px',
-                      fontSize: '0.78rem',
-                      fontWeight: '700',
-                      background: status.bg,
-                      color: status.color
-                    }}>
-                      {app.status}
+                    <span className={`fh-badge fh-badge-${app.status}`}>
+                      {app.status.replace('_', ' ')}
                     </span>
                   </div>
 
                   {/* Course */}
                   <p style={{
                     fontSize: '0.85rem',
-                    color: 'var(--green-primary)',
+                    color: '#F5A623',
                     fontWeight: '600',
                     marginBottom: '12px'
                   }}>
@@ -270,7 +248,7 @@ const Applications = () => {
                   {/* Answers */}
                   {app.answers && app.answers.length > 0 && (
                     <div style={{
-                      background: 'var(--bg-surface)',
+                      background: '#152A47',
                       borderRadius: 'var(--radius)',
                       padding: '16px',
                       marginBottom: '16px'
@@ -280,7 +258,7 @@ const Applications = () => {
                           <p style={{
                             fontSize: '0.78rem',
                             fontWeight: '700',
-                            color: 'var(--text-muted)',
+                            color: '#7A9BB5',
                             marginBottom: '4px',
                             textTransform: 'uppercase'
                           }}>
@@ -288,7 +266,7 @@ const Applications = () => {
                           </p>
                           <p style={{
                             fontSize: '0.9rem',
-                            color: 'var(--text-primary)'
+                            color: '#FFFFFF'
                           }}>
                             {a.answer || '—'}
                           </p>
@@ -300,13 +278,13 @@ const Applications = () => {
                   {/* Shortlist next step info */}
                   {app.status === 'shortlisted' && app.nextStep?.type && (
                     <div style={{
-                      background: '#F0FFF4',
-                      border: '1px solid #9AE6B4',
+                      background: 'rgba(245,166,35,0.1)',
+                      borderLeft: '3px solid #F5A623',
                       borderRadius: 'var(--radius)',
                       padding: '12px',
                       marginBottom: '16px',
                       fontSize: '0.85rem',
-                      color: '#276749'
+                      color: '#FDF3E0'
                     }}>
                       Next step: {app.nextStep.type} ·{' '}
                       {app.nextStep.location} ·{' '}
@@ -319,7 +297,7 @@ const Applications = () => {
                   {/* Applied date */}
                   <p style={{
                     fontSize: '0.78rem',
-                    color: 'var(--text-muted)',
+                    color: '#7A9BB5',
                     marginBottom: '16px'
                   }}>
                     Applied {new Date(app.createdAt).toLocaleDateString()}
@@ -432,9 +410,9 @@ const Applications = () => {
                   width: '100%',
                   padding: '10px 14px',
                   fontSize: '0.9rem',
-                  color: 'var(--text-primary)',
-                  background: 'var(--bg-surface)',
-                  border: '1px solid var(--border-color)',
+                  color: '#FFFFFF',
+                  background: '#152A47',
+                  border: '1px solid #2A4A6B',
                   borderRadius: 'var(--radius)',
                   marginBottom: '12px'
                 }}
@@ -455,9 +433,9 @@ const Applications = () => {
                   width: '100%',
                   padding: '10px 14px',
                   fontSize: '0.9rem',
-                  color: 'var(--text-primary)',
-                  background: 'var(--bg-surface)',
-                  border: '1px solid var(--border-color)',
+                  color: '#FFFFFF',
+                  background: '#152A47',
+                  border: '1px solid #2A4A6B',
                   borderRadius: 'var(--radius)',
                   marginBottom: '12px'
                 }}
@@ -474,9 +452,9 @@ const Applications = () => {
                   width: '100%',
                   padding: '10px 14px',
                   fontSize: '0.9rem',
-                  color: 'var(--text-primary)',
-                  background: 'var(--bg-surface)',
-                  border: '1px solid var(--border-color)',
+                  color: '#FFFFFF',
+                  background: '#152A47',
+                  border: '1px solid #2A4A6B',
                   borderRadius: 'var(--radius)',
                   marginBottom: '12px'
                 }}
@@ -494,9 +472,9 @@ const Applications = () => {
                   width: '100%',
                   padding: '10px 14px',
                   fontSize: '0.9rem',
-                  color: 'var(--text-primary)',
-                  background: 'var(--bg-surface)',
-                  border: '1px solid var(--border-color)',
+                  color: '#FFFFFF',
+                  background: '#152A47',
+                  border: '1px solid #2A4A6B',
                   borderRadius: 'var(--radius)',
                   resize: 'vertical'
                 }}
@@ -568,9 +546,9 @@ const Applications = () => {
                 width: '100%',
                 padding: '12px 14px',
                 fontSize: '0.9rem',
-                color: 'var(--text-primary)',
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-color)',
+                color: '#FFFFFF',
+                background: '#152A47',
+                border: '1px solid #2A4A6B',
                 borderRadius: 'var(--radius)',
                 resize: 'vertical',
                 marginBottom: '20px'

@@ -47,53 +47,52 @@ const Dashboard = () => {
 
       {/* Header */}
       <div style={{
-        background: 'var(--green-deep)',
-        padding: '40px 24px'
+        background: 'linear-gradient(135deg, #0F2035 0%, #1E3A5F 100%)',
+        padding: '32px 20px 36px'
       }}>
         <div style={{ maxWidth: '960px', margin: '0 auto' }}>
           <h1 style={{
-            fontSize: '1.6rem',
-            fontWeight: '800',
+            fontSize: 'clamp(1.4rem, 5vw, 1.6rem)',
+            fontWeight: 800,
             color: '#FFFFFF',
-            marginBottom: '4px'
+            marginBottom: '6px',
+            letterSpacing: '-0.3px'
           }}>
             Welcome, {user?.name} 👋
           </h1>
-          <p style={{ fontSize: '0.9rem', color: '#A8CFC0' }}>
+          <p style={{ fontSize: '0.92rem', color: '#B8D0E8' }}>
             Manage your courses and applications from here
           </p>
         </div>
       </div>
 
-      <div style={{ maxWidth: '960px', margin: '0 auto', padding: '40px 24px' }}>
+      <div style={{ maxWidth: '960px', margin: '0 auto', padding: '24px 20px 40px' }}>
 
         {/* Stats */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
-          gap: '16px',
-          marginBottom: '40px'
-        }}>
+        <div className="fh-stats-grid fh-stats-6" style={{ marginBottom: '32px' }}>
           {stats.map((stat, i) => (
             <div key={i} style={{
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius)',
-              padding: '20px',
+              background: '#1A3357',
+              border: '1px solid #2A4A6B',
+              borderRadius: '14px',
+              padding: '18px 12px',
               textAlign: 'center',
               boxShadow: 'var(--card-shadow)'
             }}>
               <div style={{
-                fontSize: '2rem',
-                fontWeight: '800',
-                color: 'var(--green-primary)'
+                fontSize: '1.8rem',
+                fontWeight: 800,
+                color: '#F5A623',
+                lineHeight: 1.1,
+                letterSpacing: '-0.5px'
               }}>
                 {stat.value}
               </div>
               <div style={{
-                fontSize: '0.78rem',
-                color: 'var(--text-muted)',
-                marginTop: '4px'
+                fontSize: '0.76rem',
+                color: '#7A9BB5',
+                marginTop: '6px',
+                fontWeight: 600
               }}>
                 {stat.label}
               </div>
@@ -118,7 +117,7 @@ const Dashboard = () => {
             </h2>
             <Link to="/org/courses" style={{
               fontSize: '0.9rem',
-              color: 'var(--green-primary)',
+              color: '#F5A623',
               fontWeight: '600'
             }}>
               View all →
@@ -128,21 +127,21 @@ const Dashboard = () => {
           {courses.length === 0 ? (
             <div style={{
               background: 'var(--bg-card)',
-              border: '1px solid var(--border-color)',
+              border: '1px dashed #2A4A6B',
               borderRadius: 'var(--radius)',
               padding: '40px',
               textAlign: 'center'
             }}>
-              <p style={{ color: 'var(--text-muted)', marginBottom: '16px' }}>
+              <p style={{ color: '#7A9BB5', marginBottom: '16px' }}>
                 You haven't posted any courses yet
               </p>
               <Link to="/org/courses/new">
                 <button style={{
-                  background: 'var(--green-primary)',
-                  color: '#FFFFFF',
+                  background: '#F5A623',
+                  color: '#1E3A5F',
                   padding: '10px 24px',
                   borderRadius: 'var(--radius)',
-                  fontWeight: '600',
+                  fontWeight: '700',
                   border: 'none',
                   cursor: 'pointer'
                 }}>
@@ -184,18 +183,7 @@ const Dashboard = () => {
                       {course.filledSlots}/{course.totalSlots} slots filled
                     </p>
                   </div>
-                  <span style={{
-                    padding: '4px 12px',
-                    borderRadius: '20px',
-                    fontSize: '0.78rem',
-                    fontWeight: '600',
-                    background: course.status === 'published'
-                      ? '#F0FFF4' : course.status === 'closed'
-                      ? '#FFF5F5' : 'var(--bg-section-alt)',
-                    color: course.status === 'published'
-                      ? '#276749' : course.status === 'closed'
-                      ? '#C53030' : 'var(--text-secondary)'
-                  }}>
+                  <span className={`fh-badge fh-badge-${course.status}`}>
                     {course.status}
                   </span>
                 </div>
@@ -221,7 +209,7 @@ const Dashboard = () => {
             </h2>
             <Link to="/org/applications" style={{
               fontSize: '0.9rem',
-              color: 'var(--green-primary)',
+              color: '#F5A623',
               fontWeight: '600'
             }}>
               View all →
@@ -265,19 +253,8 @@ const Dashboard = () => {
                       {app.course?.title}
                     </p>
                   </div>
-                  <span style={{
-                    padding: '4px 12px',
-                    borderRadius: '20px',
-                    fontSize: '0.78rem',
-                    fontWeight: '600',
-                    background: app.status === 'shortlisted' || app.status === 'accepted'
-                      ? '#F0FFF4' : app.status === 'rejected'
-                      ? '#FFF5F5' : '#EBF8FF',
-                    color: app.status === 'shortlisted' || app.status === 'accepted'
-                      ? '#276749' : app.status === 'rejected'
-                      ? '#C53030' : '#2C5282'
-                  }}>
-                    {app.status}
+                  <span className={`fh-badge fh-badge-${app.status}`}>
+                    {app.status.replace('_', ' ')}
                   </span>
                 </div>
               ))}

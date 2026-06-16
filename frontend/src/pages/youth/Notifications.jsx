@@ -66,29 +66,39 @@ const Notifications = () => {
       <Navbar />
 
       {/* Header */}
-      <div style={{
-        background: 'var(--bg-surface)',
-        borderBottom: '1px solid var(--border-color)',
-        padding: '32px 24px'
-      }}>
+      <div className="fh-section-head">
         <div style={{
-          maxWidth: '720px',
-          margin: '0 auto',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          gap: '12px',
+          flexWrap: 'wrap'
         }}>
           <div>
             <h1 style={{
-              fontSize: '1.6rem',
+              fontSize: '1.5rem',
               fontWeight: '800',
-              color: 'var(--text-primary)',
+              color: '#FFFFFF',
               marginBottom: '4px'
             }}>
               Notifications
             </h1>
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-              {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'}
+            <p style={{ fontSize: '0.9rem', color: '#7A9BB5' }}>
+              {unreadCount > 0 ? (
+                <span style={{
+                  display: 'inline-block',
+                  background: '#F5A623',
+                  color: '#1E3A5F',
+                  fontWeight: 800,
+                  padding: '2px 10px',
+                  borderRadius: '999px',
+                  fontSize: '0.78rem',
+                  marginRight: '6px'
+                }}>
+                  {unreadCount}
+                </span>
+              ) : null}
+              {unreadCount > 0 ? 'unread' : 'All caught up'}
             </p>
           </div>
 
@@ -96,7 +106,7 @@ const Notifications = () => {
             <Button
               variant="outline"
               onClick={handleMarkAllAsRead}
-              style={{ fontSize: '0.82rem', padding: '8px 16px' }}
+              style={{ fontSize: '0.82rem', padding: '10px 16px', minHeight: '44px' }}
             >
               Mark all as read
             </Button>
@@ -104,19 +114,18 @@ const Notifications = () => {
         </div>
       </div>
 
-      <div style={{ maxWidth: '720px', margin: '0 auto', padding: '32px 24px' }}>
+      <div className="fh-container" style={{ maxWidth: '720px' }}>
         {notifications.length === 0 ? (
-          <div style={{
-            textAlign: 'center',
-            padding: '64px 24px',
-            color: 'var(--text-muted)'
-          }}>
-            <p style={{ fontSize: '1.1rem' }}>No notifications yet</p>
+          <div className="fh-empty">
+            <div className="fh-empty-icon">🔔</div>
+            <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
+              No notifications yet
+            </p>
           </div>
         ) : (
           <div style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
+            background: '#1A3357',
+            border: '1px solid #2A4A6B',
             borderRadius: 'var(--radius)',
             overflow: 'hidden'
           }}>
@@ -127,9 +136,9 @@ const Notifications = () => {
                 style={{
                   padding: '20px 24px',
                   borderBottom: i < notifications.length - 1
-                    ? '1px solid var(--border-color)' : 'none',
+                    ? '1px solid #2A4A6B' : 'none',
                   background: notification.isRead
-                    ? 'var(--bg-card)' : 'var(--bg-section-alt)',
+                    ? '#1A3357' : '#152A47',
                   cursor: notification.isRead ? 'default' : 'pointer',
                   display: 'flex',
                   gap: '16px',
@@ -150,32 +159,33 @@ const Notifications = () => {
                   }}>
                     <p style={{
                       fontSize: '0.95rem',
-                      fontWeight: notification.isRead ? '500' : '700',
-                      color: 'var(--text-primary)',
+                      fontWeight: notification.isRead ? '500' : '800',
+                      color: notification.isRead ? '#B8D0E8' : '#FFFFFF',
                       marginBottom: '4px'
                     }}>
                       {notification.title}
                     </p>
                     {!notification.isRead && (
                       <span style={{
-                        width: '8px',
-                        height: '8px',
+                        width: '10px',
+                        height: '10px',
                         borderRadius: '50%',
-                        background: 'var(--green-primary)',
+                        background: '#F5A623',
                         flexShrink: 0,
-                        marginTop: '6px'
+                        marginTop: '6px',
+                        boxShadow: '0 0 0 3px rgba(245, 166, 35, 0.2)'
                       }} />
                     )}
                   </div>
                   <p style={{
                     fontSize: '0.85rem',
-                    color: 'var(--text-secondary)',
+                    color: '#7A9BB5',
                     marginBottom: '6px',
                     lineHeight: '1.5'
                   }}>
                     {notification.message}
                   </p>
-                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                  <p style={{ fontSize: '0.78rem', color: '#7A9BB5' }}>
                     {new Date(notification.createdAt).toLocaleString()}
                   </p>
                 </div>

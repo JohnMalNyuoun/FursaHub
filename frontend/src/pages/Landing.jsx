@@ -11,37 +11,39 @@ const Landing = () => {
         zIndex: 100,
         background: 'var(--nav-bg)',
         borderBottom: '1px solid var(--border-color)',
-        padding: '0 32px',
-        height: '64px',
+        padding: '0 20px',
+        height: '60px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between'
       }}>
         <span style={{
           fontSize: '1.4rem',
-          fontWeight: '800',
-          color: 'var(--green-primary)'
+          fontWeight: 900,
+          color: '#F5A623',
+          letterSpacing: '-0.5px'
         }}>
           FursaHub
         </span>
 
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <Link to="/login" style={{
-            fontSize: '0.9rem',
-            fontWeight: '600',
+            fontSize: '0.88rem',
+            fontWeight: 700,
             color: 'var(--text-secondary)',
             textDecoration: 'none'
           }}>
             Sign In
           </Link>
           <Link to="/register" style={{
-            background: 'var(--green-primary)',
-            color: '#FFFFFF',
-            padding: '10px 20px',
-            borderRadius: 'var(--radius)',
-            fontSize: '0.9rem',
-            fontWeight: '700',
-            textDecoration: 'none'
+            background: '#F5A623',
+            color: '#1E3A5F',
+            padding: '10px 18px',
+            borderRadius: '10px',
+            fontSize: '0.88rem',
+            fontWeight: 700,
+            textDecoration: 'none',
+            boxShadow: '0 2px 8px rgba(245,166,35,0.3)'
           }}>
             Get Started
           </Link>
@@ -50,48 +52,50 @@ const Landing = () => {
 
       {/* Hero */}
       <div style={{
-        background: 'var(--green-deep)',
-        padding: '80px 24px',
+        background: 'linear-gradient(160deg, #0F2035 0%, #1E3A5F 100%)',
+        padding: '64px 20px 72px',
         textAlign: 'center'
       }}>
         <div style={{ maxWidth: '640px', margin: '0 auto' }}>
           <div style={{
             display: 'inline-block',
-            background: 'rgba(29, 158, 117, 0.2)',
-            border: '1px solid rgba(29, 158, 117, 0.4)',
+            background: 'rgba(245,166,35,0.2)',
+            border: '1px solid rgba(245,166,35,0.35)',
             borderRadius: '20px',
             padding: '6px 16px',
-            fontSize: '0.8rem',
-            fontWeight: '700',
-            color: '#1D9E75',
+            fontSize: '0.78rem',
+            fontWeight: 800,
+            color: '#FFFFFF',
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
-            marginBottom: '24px'
+            marginBottom: '24px',
+            backdropFilter: 'blur(8px)'
           }}>
             Built for Kakuma Youth
           </div>
 
           <h1 style={{
-            fontSize: 'clamp(2rem, 5vw, 3rem)',
-            fontWeight: '800',
+            fontSize: 'clamp(1.8rem, 6vw, 3rem)',
+            fontWeight: 800,
             color: '#FFFFFF',
-            lineHeight: '1.2',
-            marginBottom: '20px'
+            lineHeight: '1.15',
+            marginBottom: '20px',
+            letterSpacing: '-0.5px'
           }}>
             Your Next Opportunity
             <br />
-            <span style={{ color: 'var(--green-primary)' }}>
+            <span style={{ color: '#F5A623' }}>
               Starts Here
             </span>
           </h1>
 
           <p style={{
-            fontSize: '1.05rem',
-            color: '#A8CFC0',
+            fontSize: 'clamp(0.95rem, 2vw, 1.05rem)',
+            color: '#B8D0E8',
             lineHeight: '1.7',
-            marginBottom: '40px',
+            marginBottom: '36px',
             maxWidth: '520px',
-            margin: '0 auto 40px'
+            margin: '0 auto 36px'
           }}>
             FursaHub connects youth in Kakuma Refugee Camp with courses,
             mentorship, and opportunities posted by NGOs and CBOs —
@@ -100,30 +104,31 @@ const Landing = () => {
 
           <div style={{
             display: 'flex',
-            gap: '16px',
+            gap: '12px',
             justifyContent: 'center',
             flexWrap: 'wrap'
           }}>
             <Link to="/register" style={{
-              background: 'var(--green-primary)',
-              color: '#FFFFFF',
-              padding: '14px 32px',
-              borderRadius: 'var(--radius)',
-              fontSize: '1rem',
-              fontWeight: '700',
-              textDecoration: 'none'
+              background: '#F5A623',
+              color: '#1E3A5F',
+              padding: '14px 28px',
+              borderRadius: '12px',
+              fontSize: '0.98rem',
+              fontWeight: 800,
+              textDecoration: 'none',
+              boxShadow: '0 4px 16px rgba(245,166,35,0.35)'
             }}>
               Find Opportunities
             </Link>
             <Link to="/org/register" style={{
-              background: 'transparent',
+              background: 'rgba(255,255,255,0.1)',
               color: '#FFFFFF',
-              padding: '14px 32px',
-              borderRadius: 'var(--radius)',
-              fontSize: '1rem',
-              fontWeight: '700',
+              padding: '14px 28px',
+              borderRadius: '12px',
+              fontSize: '0.98rem',
+              fontWeight: 700,
               textDecoration: 'none',
-              border: '2px solid rgba(255,255,255,0.3)'
+              border: '2px solid rgba(255,255,255,0.4)'
             }}>
               Post a Course
             </Link>
@@ -165,7 +170,7 @@ const Landing = () => {
 
       {/* How it works */}
       <div style={{
-        background: 'var(--green-deep)',
+        background: 'linear-gradient(135deg, #152A47 0%, #1E3A5F 100%)',
         padding: '72px 24px'
       }}>
         <div style={{ maxWidth: '860px', margin: '0 auto' }}>
@@ -210,7 +215,7 @@ const Landing = () => {
                 <div style={{
                   fontSize: '2.5rem',
                   fontWeight: '800',
-                  color: 'var(--green-primary)',
+                  color: '#F5A623',
                   opacity: 0.6,
                   marginBottom: '12px'
                 }}>
@@ -226,7 +231,7 @@ const Landing = () => {
                 </h3>
                 <p style={{
                   fontSize: '0.88rem',
-                  color: '#A8CFC0',
+                  color: '#B8D0E8',
                   lineHeight: '1.6'
                 }}>
                   {step.desc}
@@ -250,8 +255,8 @@ const Landing = () => {
           <div style={{
             background: 'var(--bg-card)',
             border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius)',
-            padding: '36px',
+            borderRadius: '16px',
+            padding: '28px 24px',
             boxShadow: 'var(--card-shadow)'
           }}>
             <div style={{
@@ -298,7 +303,7 @@ const Landing = () => {
                   gap: '10px',
                   alignItems: 'center'
                 }}>
-                  <span style={{ color: 'var(--green-primary)', fontWeight: '700' }}>✓</span>
+                  <span style={{ color: '#F5A623', fontWeight: '700' }}>✓</span>
                   {item}
                 </li>
               ))}
@@ -306,8 +311,8 @@ const Landing = () => {
             <Link to="/register" style={{
               display: 'block',
               textAlign: 'center',
-              background: 'var(--green-primary)',
-              color: '#FFFFFF',
+              background: '#F5A623',
+              color: '#1E3A5F',
               padding: '12px 24px',
               borderRadius: 'var(--radius)',
               fontSize: '0.95rem',
@@ -320,10 +325,10 @@ const Landing = () => {
 
           {/* Organisations */}
           <div style={{
-            background: 'var(--amber-warm)',
+            background: '#FDF3E0',
             border: '1px solid #E8D5B0',
-            borderRadius: 'var(--radius)',
-            padding: '36px',
+            borderRadius: '16px',
+            padding: '28px 24px',
             boxShadow: 'var(--card-shadow)'
           }}>
             <div style={{
@@ -335,7 +340,7 @@ const Landing = () => {
             <h3 style={{
               fontSize: '1.2rem',
               fontWeight: '800',
-              color: 'var(--green-deep)',
+              color: '#1E3A5F',
               marginBottom: '12px'
             }}>
               For Organisations
@@ -371,7 +376,7 @@ const Landing = () => {
                   alignItems: 'center'
                 }}>
                   <span style={{
-                    color: 'var(--green-deep)',
+                    color: '#1E3A5F',
                     fontWeight: '700'
                   }}>✓</span>
                   {item}
@@ -381,7 +386,7 @@ const Landing = () => {
             <Link to="/org/register" style={{
               display: 'block',
               textAlign: 'center',
-              background: 'var(--green-deep)',
+              background: '#1E3A5F',
               color: '#FFFFFF',
               padding: '12px 24px',
               borderRadius: 'var(--radius)',
@@ -395,9 +400,258 @@ const Landing = () => {
         </div>
       </div>
 
+      {/* Impact Dashboard — Secure Donors */}
+      <div style={{
+        background: 'var(--bg-section-alt)',
+        padding: '80px 24px'
+      }}>
+        <div style={{ maxWidth: '1040px', margin: '0 auto' }}>
+
+          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+            <div style={{
+              display: 'inline-block',
+              background: 'rgba(245,166,35,0.15)',
+              border: '1px solid rgba(245,166,35,0.35)',
+              borderRadius: '20px',
+              padding: '6px 16px',
+              fontSize: '0.78rem',
+              fontWeight: '700',
+              color: '#F5A623',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              marginBottom: '20px'
+            }}>
+              For Organisations
+            </div>
+            <h2 style={{
+              fontSize: 'clamp(1.6rem, 4vw, 2.2rem)',
+              fontWeight: '800',
+              color: 'var(--text-primary)',
+              marginBottom: '16px',
+              lineHeight: '1.25'
+            }}>
+              Turn Impact Into <span style={{ color: '#F5A623' }}>Donor Funding</span>
+            </h2>
+            <p style={{
+              fontSize: '1rem',
+              color: 'var(--text-secondary)',
+              lineHeight: '1.7',
+              maxWidth: '620px',
+              margin: '0 auto'
+            }}>
+              Donors fund what they can measure. FursaHub's impact dashboard captures
+              every outcome — completion rates, employment, business launches, further
+              education — so you walk into your next funding meeting with proof, not promises.
+            </p>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: '24px',
+            alignItems: 'start'
+          }}>
+
+            {/* Mock dashboard preview */}
+            <div style={{
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius)',
+              padding: '24px',
+              boxShadow: 'var(--card-shadow)'
+            }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '20px',
+                paddingBottom: '12px',
+                borderBottom: '1px solid var(--border-color)'
+              }}>
+                <span style={{
+                  fontSize: '0.85rem',
+                  fontWeight: '700',
+                  color: 'var(--text-primary)'
+                }}>
+                  Impact Dashboard
+                </span>
+                <span style={{
+                  fontSize: '0.72rem',
+                  color: '#F5A623',
+                  fontWeight: '700'
+                }}>
+                  ● LIVE
+                </span>
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '12px',
+                marginBottom: '16px'
+              }}>
+                {[
+                  { label: 'Youth Trained', value: '1,247', accent: '#F5A623' },
+                  { label: 'Completion Rate', value: '87%', accent: '#D4891A' },
+                  { label: 'Employed After', value: '412', accent: '#F5A623' },
+                  { label: 'Businesses Started', value: '68', accent: '#D4891A' }
+                ].map((stat, i) => (
+                  <div key={i} style={{
+                    background: 'var(--bg-section-alt)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '8px',
+                    padding: '12px'
+                  }}>
+                    <div style={{
+                      fontSize: '1.4rem',
+                      fontWeight: '800',
+                      color: stat.accent,
+                      lineHeight: '1.1'
+                    }}>
+                      {stat.value}
+                    </div>
+                    <div style={{
+                      fontSize: '0.72rem',
+                      color: 'var(--text-secondary)',
+                      marginTop: '4px'
+                    }}>
+                      {stat.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{
+                fontSize: '0.75rem',
+                fontWeight: '700',
+                color: 'var(--text-secondary)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                marginBottom: '10px'
+              }}>
+                Outcomes by Course
+              </div>
+              {[
+                { name: 'Tailoring Bootcamp', pct: 92 },
+                { name: 'Digital Skills', pct: 78 },
+                { name: 'Solar Technician', pct: 85 }
+              ].map((row, i) => (
+                <div key={i} style={{ marginBottom: '10px' }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    fontSize: '0.78rem',
+                    color: 'var(--text-primary)',
+                    marginBottom: '4px'
+                  }}>
+                    <span>{row.name}</span>
+                    <span style={{ fontWeight: '700' }}>{row.pct}%</span>
+                  </div>
+                  <div style={{
+                    height: '6px',
+                    background: 'var(--bg-section-alt)',
+                    borderRadius: '3px',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{
+                      width: `${row.pct}%`,
+                      height: '100%',
+                      background: '#F5A623'
+                    }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Donor-facing benefits */}
+            <div>
+              <ul style={{
+                listStyle: 'none',
+                padding: 0,
+                margin: 0
+              }}>
+                {[
+                  {
+                    title: 'Export Donor-Ready Reports',
+                    desc: 'One-click impact summaries with real numbers — completion, employment, and outcome data — formatted for proposals and grant reports.'
+                  },
+                  {
+                    title: 'Prove Your ROI',
+                    desc: 'Show donors exactly how every shilling translates into trained youth, jobs created, and lives changed in Kakuma.'
+                  },
+                  {
+                    title: 'Track Long-Term Outcomes',
+                    desc: 'Follow youth beyond course completion — employment, businesses started, further education — the metrics funders actually care about.'
+                  },
+                  {
+                    title: 'Stand Out to Funders',
+                    desc: 'Most organisations submit promises. With FursaHub, you submit verified evidence — and win more funding.'
+                  }
+                ].map((item, i) => (
+                  <li key={i} style={{
+                    display: 'flex',
+                    gap: '14px',
+                    padding: '14px 0',
+                    borderBottom: i === 3 ? 'none' : '1px solid var(--border-color)'
+                  }}>
+                    <div style={{
+                      flexShrink: 0,
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      background: '#F5A623',
+                      color: '#1E3A5F',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.85rem',
+                      fontWeight: '800'
+                    }}>
+                      ✓
+                    </div>
+                    <div>
+                      <h4 style={{
+                        fontSize: '0.95rem',
+                        fontWeight: '700',
+                        color: 'var(--text-primary)',
+                        marginBottom: '4px'
+                      }}>
+                        {item.title}
+                      </h4>
+                      <p style={{
+                        fontSize: '0.85rem',
+                        color: 'var(--text-secondary)',
+                        lineHeight: '1.6',
+                        margin: 0
+                      }}>
+                        {item.desc}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              <Link to="/org/register" style={{
+                display: 'inline-block',
+                marginTop: '28px',
+                background: '#F5A623',
+                color: '#1E3A5F',
+                padding: '14px 32px',
+                borderRadius: 'var(--radius)',
+                fontSize: '0.95rem',
+                fontWeight: '700',
+                textDecoration: 'none'
+              }}>
+                Unlock Your Impact Dashboard
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* CTA Banner */}
       <div style={{
-        background: 'var(--green-primary)',
+        background: 'linear-gradient(135deg, #F5A623, #D4891A)',
         padding: '72px 24px',
         textAlign: 'center'
       }}>
@@ -405,21 +659,21 @@ const Landing = () => {
           <h2 style={{
             fontSize: '1.8rem',
             fontWeight: '800',
-            color: '#FFFFFF',
+            color: '#1E3A5F',
             marginBottom: '16px'
           }}>
             Ready to Find Your Fursa?
           </h2>
           <p style={{
             fontSize: '1rem',
-            color: 'rgba(255,255,255,0.8)',
+            color: 'rgba(30,58,95,0.9)',
             marginBottom: '32px'
           }}>
             Join youth and organisations already using FursaHub in Kakuma.
           </p>
           <Link to="/register" style={{
-            background: '#FFFFFF',
-            color: 'var(--green-primary)',
+            background: '#1E3A5F',
+            color: '#FFFFFF',
             padding: '14px 40px',
             borderRadius: 'var(--radius)',
             fontSize: '1rem',
@@ -442,7 +696,7 @@ const Landing = () => {
           <p style={{
             fontSize: '1.2rem',
             fontWeight: '800',
-            color: 'var(--green-primary)',
+            color: '#F5A623',
             marginBottom: '8px'
           }}>
             FursaHub

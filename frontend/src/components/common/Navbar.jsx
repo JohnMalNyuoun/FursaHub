@@ -1,10 +1,106 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
-import Button from './Button';
+
+const Icon = ({ name, active = false, size = 24 }) => {
+  const fill = active ? 'currentColor' : 'none';
+  const strokeWidth = active ? 2 : 1.8;
+  const common = {
+    width: size,
+    height: size,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    'aria-hidden': true
+  };
+
+  switch (name) {
+    case 'home':
+      return (
+        <svg {...common}>
+          <path d="M3 10.5 12 3l9 7.5V20a1.5 1.5 0 0 1-1.5 1.5h-4V14h-5v7.5h-4A1.5 1.5 0 0 1 5 20Z" fill={fill} />
+        </svg>
+      );
+    case 'book':
+      return (
+        <svg {...common}>
+          <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5H6.5A2.5 2.5 0 0 0 4 21Z" fill={fill} />
+          <path d="M4 5.5V21" />
+        </svg>
+      );
+    case 'clipboard':
+      return (
+        <svg {...common}>
+          <rect x="5" y="4" width="14" height="17" rx="2" fill={fill} />
+          <path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1" />
+          <path d="M9 11h6M9 15h4" stroke={active ? '#1E3A5F' : 'currentColor'} />
+        </svg>
+      );
+    case 'bell':
+      return (
+        <svg {...common}>
+          <path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2.5h-15Z" fill={fill} />
+          <path d="M10 20a2 2 0 0 0 4 0" />
+        </svg>
+      );
+    case 'grid':
+      return (
+        <svg {...common}>
+          <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" fill={fill} />
+          <rect x="13.5" y="3.5" width="7" height="7" rx="1.5" fill={fill} />
+          <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" fill={fill} />
+          <rect x="13.5" y="13.5" width="7" height="7" rx="1.5" fill={fill} />
+        </svg>
+      );
+    case 'users':
+      return (
+        <svg {...common}>
+          <circle cx="9" cy="8" r="3.5" fill={fill} />
+          <path d="M2.5 20c.5-3.5 3.3-5.5 6.5-5.5s6 2 6.5 5.5" fill={fill} />
+          <circle cx="17" cy="9" r="2.5" />
+          <path d="M16 14.5c2.6 0 4.5 1.6 5 4" />
+        </svg>
+      );
+    case 'trending':
+      return (
+        <svg {...common}>
+          <path d="M3 17 9 11l4 4 8-8" />
+          <path d="M14 7h7v7" />
+        </svg>
+      );
+    case 'building':
+      return (
+        <svg {...common}>
+          <rect x="4" y="3" width="16" height="18" rx="1.5" fill={fill} />
+          <path d="M9 8h2M13 8h2M9 12h2M13 12h2M9 16h2M13 16h2" stroke={active ? '#1E3A5F' : 'currentColor'} />
+        </svg>
+      );
+    case 'user':
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="8" r="4" fill={fill} />
+          <path d="M4 21c1-4.5 4.5-7 8-7s7 2.5 8 7" fill={fill} />
+        </svg>
+      );
+    case 'logout':
+      return (
+        <svg {...common}>
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+          <path d="M10 17l-5-5 5-5" />
+          <path d="M5 12h11" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+};
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
@@ -16,23 +112,24 @@ const Navbar = () => {
   };
 
   const youthLinks = [
-    { label: 'Home', path: '/home' },
-    { label: 'Courses', path: '/courses' },
-    { label: 'Applications', path: '/applications' },
-    { label: 'Notifications', path: '/notifications' }
+    { label: 'Home',         path: '/home',          icon: 'home' },
+    { label: 'Courses',      path: '/courses',       icon: 'book' },
+    { label: 'Applications', path: '/applications',  icon: 'clipboard' },
+    { label: 'Alerts',       path: '/notifications', icon: 'bell' }
   ];
 
   const orgLinks = [
-    { label: 'Dashboard', path: '/org/dashboard' },
-    { label: 'Courses', path: '/org/courses' },
-    { label: 'Applications', path: '/org/applications' }
+    { label: 'Dashboard',    path: '/org/dashboard',    icon: 'grid' },
+    { label: 'Courses',      path: '/org/courses',      icon: 'book' },
+    { label: 'Applicants',   path: '/org/applications', icon: 'users' },
+    { label: 'Impact',       path: '/org/impact',       icon: 'trending' }
   ];
 
   const adminLinks = [
-    { label: 'Dashboard', path: '/admin/dashboard' },
-    { label: 'Organisations', path: '/admin/organisations' },
-    { label: 'Courses', path: '/admin/courses' },
-    { label: 'Users', path: '/admin/users' }
+    { label: 'Dashboard', path: '/admin/dashboard',     icon: 'grid' },
+    { label: 'Orgs',      path: '/admin/organisations', icon: 'building' },
+    { label: 'Courses',   path: '/admin/courses',       icon: 'book' },
+    { label: 'Users',     path: '/admin/users',         icon: 'user' }
   ];
 
   const links = user?.role === 'organisation'
@@ -41,64 +138,353 @@ const Navbar = () => {
     ? adminLinks
     : youthLinks;
 
-  return (
-    <nav style={{
-      background: 'var(--nav-bg)',
-      borderBottom: '1px solid var(--border-color)',
-      padding: '0 24px',
-      height: '64px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      position: 'sticky',
-      top: 0,
-      zIndex: 100,
-      boxShadow: 'var(--card-shadow)'
-    }}>
-      {/* Logo */}
-      <Link to={
-        user?.role === 'organisation' ? '/org/dashboard' :
-        user?.role === 'admin' ? '/admin/dashboard' : '/home'
-      }>
-        <span style={{
-          fontSize: '1.4rem',
-          fontWeight: '800',
-          color: 'var(--green-primary)'
-        }}>
-          FursaHub
-        </span>
-      </Link>
+  const homePath =
+    user?.role === 'organisation' ? '/org/dashboard' :
+    user?.role === 'admin' ? '/admin/dashboard' : '/home';
 
-      {/* Links */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '24px'
-      }}>
-        {links.map(link => (
-          <Link
-            key={link.path}
-            to={link.path}
+  const isActive = (path) => location.pathname === path;
+
+  const displayName = user?.fullName || user?.name || '';
+  const initials = displayName
+    ? displayName
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(p => p[0])
+        .join('')
+        .toUpperCase()
+    : 'FH';
+
+  const roleLabel =
+    user?.role === 'organisation' ? 'Organisation' :
+    user?.role === 'admin' ? 'Admin' : 'Youth';
+
+  const currentLabel =
+    links.find(l => l.path === location.pathname)?.label || '';
+
+  return (
+    <>
+      {/* Desktop top navbar */}
+      <nav
+        className="fh-desktop-only"
+        style={{
+          background: '#152A47',
+          backdropFilter: 'saturate(180%) blur(12px)',
+          WebkitBackdropFilter: 'saturate(180%) blur(12px)',
+          borderBottom: '1px solid #2A4A6B',
+          padding: '0 32px',
+          height: '64px',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          position: 'sticky',
+          top: 0,
+          zIndex: 100,
+          boxShadow: '0 1px 4px rgba(0, 0, 0, 0.3)'
+        }}
+      >
+        {/* Logo */}
+        <Link to={homePath} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{
+            width: '34px',
+            height: '34px',
+            borderRadius: '10px',
+            background: '#F5A623',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#1E3A5F',
+            fontWeight: 900,
+            fontSize: '0.95rem',
+            letterSpacing: '-0.5px',
+            boxShadow: '0 2px 8px rgba(245, 166, 35, 0.3)'
+          }}>
+            F
+          </div>
+          <span style={{
+            fontSize: '1.25rem',
+            fontWeight: 900,
+            color: '#F5A623',
+            letterSpacing: '-0.5px'
+          }}>
+            FursaHub
+          </span>
+        </Link>
+
+        {/* Center pill nav */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          background: '#1A3357',
+          padding: '4px',
+          borderRadius: '12px'
+        }}>
+          {links.map(link => {
+            const active = isActive(link.path);
+            return (
+              <Link
+                key={link.path}
+                to={link.path}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontSize: '0.88rem',
+                  fontWeight: 700,
+                  color: active ? '#1E3A5F' : '#B8D0E8',
+                  background: active ? '#F5A623' : 'transparent',
+                  borderRadius: '8px',
+                  padding: '8px 16px',
+                  transition: 'all 0.2s ease',
+                  boxShadow: active ? '0 2px 8px rgba(245, 166, 35, 0.3)' : 'none'
+                }}
+              >
+                <Icon name={link.icon} active={active} size={18} />
+                {link.label}
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* User cluster */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            padding: '6px 14px 6px 6px',
+            background: '#1A3357',
+            borderRadius: '999px',
+            border: '1px solid #2A4A6B'
+          }}>
+            <div style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              background: '#F5A623',
+              color: '#1E3A5F',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 800,
+              fontSize: '0.78rem',
+              letterSpacing: '0.02em'
+            }}>
+              {initials}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
+              <span style={{
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                color: '#FFFFFF',
+                maxWidth: '140px',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}>
+                {displayName || 'Account'}
+              </span>
+              <span style={{
+                fontSize: '0.68rem',
+                fontWeight: 600,
+                color: '#7A9BB5',
+                marginTop: '2px'
+              }}>
+                {roleLabel}
+              </span>
+            </div>
+          </div>
+
+          <button
+            onClick={handleLogout}
+            title="Logout"
             style={{
-              fontSize: '0.9rem',
-              fontWeight: '500',
-              color: 'var(--text-secondary)',
-              transition: 'var(--transition)'
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              border: '1px solid #F5A623',
+              color: '#F5A623',
+              background: 'transparent',
+              borderRadius: '10px',
+              padding: '0 14px',
+              fontWeight: 700,
+              fontSize: '0.82rem',
+              cursor: 'pointer',
+              height: '40px',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(245, 166, 35, 0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
             }}
           >
-            {link.label}
-          </Link>
-        ))}
+            <Icon name="logout" size={16} />
+            Logout
+          </button>
+        </div>
+      </nav>
 
-        <Button
-          variant="outline"
-          onClick={handleLogout}
-          style={{ padding: '8px 16px', fontSize: '0.85rem' }}
-        >
-          Logout
-        </Button>
-      </div>
-    </nav>
+      {/* Mobile top bar */}
+      <nav
+        className="fh-mobile-only"
+        style={{
+          background: '#152A47',
+          backdropFilter: 'saturate(180%) blur(12px)',
+          WebkitBackdropFilter: 'saturate(180%) blur(12px)',
+          borderBottom: '1px solid #2A4A6B',
+          padding: '0 16px',
+          height: '56px',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          position: 'sticky',
+          top: 0,
+          zIndex: 100
+        }}
+      >
+        <Link to={homePath} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{
+            width: '30px',
+            height: '30px',
+            borderRadius: '8px',
+            background: '#F5A623',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#1E3A5F',
+            fontWeight: 900,
+            fontSize: '0.88rem',
+            boxShadow: '0 2px 6px rgba(245, 166, 35, 0.3)'
+          }}>
+            F
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
+            <span style={{
+              fontSize: '1.05rem',
+              fontWeight: 900,
+              color: '#F5A623',
+              letterSpacing: '-0.5px'
+            }}>
+              FursaHub
+            </span>
+            {currentLabel && (
+              <span style={{
+                fontSize: '0.62rem',
+                fontWeight: 700,
+                color: '#F5A623',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                marginTop: '2px'
+              }}>
+                {currentLabel}
+              </span>
+            )}
+          </div>
+        </Link>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{
+            width: '34px',
+            height: '34px',
+            borderRadius: '50%',
+            background: '#F5A623',
+            color: '#1E3A5F',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 800,
+            fontSize: '0.78rem'
+          }}>
+            {initials}
+          </div>
+          <button
+            onClick={handleLogout}
+            aria-label="Logout"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'transparent',
+              color: '#F5A623',
+              border: 'none',
+              padding: '8px',
+              minHeight: '44px',
+              minWidth: '44px',
+              cursor: 'pointer',
+              borderRadius: '8px'
+            }}
+          >
+            <Icon name="logout" size={20} />
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile bottom navigation */}
+      <nav
+        className="fh-mobile-only"
+        style={{
+          background: '#152A47',
+          backdropFilter: 'saturate(180%) blur(12px)',
+          WebkitBackdropFilter: 'saturate(180%) blur(12px)',
+          borderTop: '1px solid #2A4A6B',
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 'var(--bottom-nav-height)',
+          paddingBottom: 'env(safe-area-inset-bottom, 0)',
+          zIndex: 1000,
+          alignItems: 'stretch',
+          justifyContent: 'space-around',
+          boxShadow: '0 -2px 16px rgba(0, 0, 0, 0.3)'
+        }}
+      >
+        {links.map(link => {
+          const active = isActive(link.path);
+          return (
+            <Link
+              key={link.path}
+              to={link.path}
+              style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '3px',
+                minWidth: '44px',
+                padding: '6px 4px',
+                color: active ? '#F5A623' : '#7A9BB5',
+                textDecoration: 'none',
+                transition: 'color 0.2s ease'
+              }}
+            >
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '52px',
+                height: '28px',
+                borderRadius: '14px',
+                background: active ? 'rgba(245, 166, 35, 0.15)' : 'transparent',
+                transition: 'background 0.2s ease'
+              }}>
+                <Icon name={link.icon} active={active} size={22} />
+              </div>
+              <span style={{
+                fontSize: '0.66rem',
+                fontWeight: active ? 800 : 600,
+                letterSpacing: '0.02em'
+              }}>
+                {link.label}
+              </span>
+            </Link>
+          );
+        })}
+      </nav>
+    </>
   );
 };
 

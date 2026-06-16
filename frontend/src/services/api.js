@@ -17,14 +17,24 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle token expiry globally
+// Handle token expiry — but never hijack the login flow
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status;
+    const url = error.config?.url || '';
+    const isAuthEndpoint = url.includes('/auth/');
+    const hadToken = !!error.config?.headers?.Authorization;
+
+    // Only treat 401 as "session expired" when a stored token was actually used
+    // against a protected endpoint. Wrong-password login attempts must NOT
+    // wipe localStorage or trigger a hard redirect.
+    if (status === 401 && hadToken && !isAuthEndpoint) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

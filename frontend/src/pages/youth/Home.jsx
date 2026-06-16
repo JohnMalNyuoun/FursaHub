@@ -39,51 +39,52 @@ const Home = () => {
 
       {/* Hero */}
       <div style={{
-        background: 'var(--green-deep)',
-        padding: '48px 24px',
+        background: 'linear-gradient(135deg, #0F2035 0%, #1E3A5F 100%)',
+        padding: '32px 20px 40px',
         textAlign: 'center'
       }}>
         <h1 style={{
-          fontSize: '1.8rem',
-          fontWeight: '800',
+          fontSize: 'clamp(1.4rem, 5vw, 1.6rem)',
+          fontWeight: 800,
           color: '#FFFFFF',
-          marginBottom: '12px'
+          marginBottom: '8px',
+          letterSpacing: '-0.3px'
         }}>
           Welcome back, {user?.fullName?.split(' ')[0]} 👋
         </h1>
         <p style={{
-          fontSize: '1rem',
-          color: '#A8CFC0',
+          fontSize: '0.92rem',
+          color: '#B8D0E8',
           maxWidth: '480px',
           margin: '0 auto 24px'
         }}>
           Discover courses and opportunities built for youth in Kakuma.
         </p>
-        <Link to="/courses">
-          <button style={{
-            background: 'var(--green-primary)',
-            color: '#FFFFFF',
-            padding: '12px 32px',
-            borderRadius: 'var(--radius)',
-            fontWeight: '700',
-            fontSize: '0.95rem',
-            border: 'none',
-            cursor: 'pointer'
-          }}>
+        <Link to="/courses" style={{ display: 'block', maxWidth: '420px', margin: '0 auto' }}>
+          <button
+            className="fh-mobile-full"
+            style={{
+              background: '#F5A623',
+              color: '#1E3A5F',
+              padding: '14px 32px',
+              minHeight: '44px',
+              borderRadius: '12px',
+              fontWeight: 700,
+              fontSize: '0.95rem',
+              border: 'none',
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(245, 166, 35, 0.3)'
+            }}
+          >
             Explore Courses
           </button>
         </Link>
       </div>
 
-      <div style={{ maxWidth: '960px', margin: '0 auto', padding: '40px 24px' }}>
+      <div className="fh-container">
 
         {/* Stats */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-          gap: '16px',
-          marginBottom: '40px'
-        }}>
+        <div className="fh-stats-grid" style={{ marginBottom: '32px' }}>
           {[
             { label: 'Available Courses', value: courses.length },
             { label: 'My Applications', value: applications.length },
@@ -97,24 +98,27 @@ const Home = () => {
             }
           ].map((stat, i) => (
             <div key={i} style={{
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius)',
-              padding: '20px',
+              background: '#1A3357',
+              border: '1px solid #2A4A6B',
+              borderRadius: '14px',
+              padding: '18px 12px',
               textAlign: 'center',
               boxShadow: 'var(--card-shadow)'
             }}>
               <div style={{
-                fontSize: '2rem',
-                fontWeight: '800',
-                color: 'var(--green-primary)'
+                fontSize: '1.9rem',
+                fontWeight: 800,
+                color: '#F5A623',
+                lineHeight: 1.1,
+                letterSpacing: '-0.5px'
               }}>
                 {stat.value}
               </div>
               <div style={{
-                fontSize: '0.82rem',
-                color: 'var(--text-muted)',
-                marginTop: '4px'
+                fontSize: '0.78rem',
+                color: '#7A9BB5',
+                marginTop: '6px',
+                fontWeight: 600
               }}>
                 {stat.label}
               </div>
@@ -139,7 +143,7 @@ const Home = () => {
             </h2>
             <Link to="/courses" style={{
               fontSize: '0.9rem',
-              color: 'var(--green-primary)',
+              color: '#F5A623',
               fontWeight: '600'
             }}>
               View all →
@@ -147,15 +151,12 @@ const Home = () => {
           </div>
 
           {courses.length === 0 ? (
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-              No courses available yet.
-            </p>
+            <div className="fh-empty">
+              <div className="fh-empty-icon">📚</div>
+              <p style={{ fontSize: '0.95rem' }}>No courses available yet.</p>
+            </div>
           ) : (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-              gap: '16px'
-            }}>
+            <div className="fh-card-grid">
               {courses.map(course => (
                 <CourseCard key={course._id} course={course} />
               ))}
@@ -181,7 +182,7 @@ const Home = () => {
               </h2>
               <Link to="/applications" style={{
                 fontSize: '0.9rem',
-                color: 'var(--green-primary)',
+                color: '#F5A623',
                 fontWeight: '600'
               }}>
                 View all →
@@ -218,19 +219,8 @@ const Home = () => {
                       {app.organisation?.name}
                     </p>
                   </div>
-                  <span style={{
-                    fontSize: '0.78rem',
-                    fontWeight: '600',
-                    padding: '4px 10px',
-                    borderRadius: '20px',
-                    background: app.status === 'shortlisted' || app.status === 'accepted'
-                      ? '#F0FFF4' : app.status === 'rejected'
-                      ? '#FFF5F5' : 'var(--bg-section-alt)',
-                    color: app.status === 'shortlisted' || app.status === 'accepted'
-                      ? '#276749' : app.status === 'rejected'
-                      ? '#C53030' : 'var(--text-secondary)'
-                  }}>
-                    {app.status}
+                  <span className={`fh-badge fh-badge-${app.status}`}>
+                    {app.status.replace('_', ' ')}
                   </span>
                 </div>
               ))}

@@ -63,6 +63,14 @@ const organisationSchema = new mongoose.Schema({
   role: {
     type: String,
     default: 'organisation'
+  },
+  logo: {
+    type: String,
+    default: null
+  },
+  notificationsEnabled: {
+    type: Boolean,
+    default: true
   }
 }, { timestamps: true });
 

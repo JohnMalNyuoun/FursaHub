@@ -1,4 +1,10 @@
 {
+  "scripts": {
+    "install:all": "npm --prefix Backend install && npm --prefix frontend install",
+    "build": "npm --prefix frontend run build",
+    "start": "node Backend/server.js",
+    "postinstall": "npm --prefix Backend install && npm --prefix frontend install && npm --prefix frontend run build"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.10.0",

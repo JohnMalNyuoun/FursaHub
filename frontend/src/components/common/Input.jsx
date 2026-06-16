@@ -1,13 +1,15 @@
-const Input = ({ label, error, ...props }) => {
+const Input = ({ label, error, style = {}, ...props }) => {
   return (
     <div style={{ marginBottom: '16px' }}>
       {label && (
         <label style={{
           display: 'block',
-          fontSize: '0.85rem',
-          fontWeight: '600',
+          fontSize: '0.82rem',
+          fontWeight: 700,
           color: 'var(--text-secondary)',
-          marginBottom: '6px'
+          marginBottom: '6px',
+          textTransform: 'uppercase',
+          letterSpacing: '0.04em'
         }}>
           {label}
         </label>
@@ -15,21 +17,36 @@ const Input = ({ label, error, ...props }) => {
       <input
         style={{
           width: '100%',
-          padding: '12px 14px',
+          padding: '13px 16px',
           fontSize: '0.95rem',
           color: 'var(--text-primary)',
-          background: 'var(--bg-surface)',
-          border: `1px solid ${error ? '#e53e3e' : 'var(--border-color)'}`,
-          borderRadius: 'var(--radius)',
-          transition: 'var(--transition)',
+          background: 'var(--bg-section-alt)',
+          border: `1.5px solid ${error ? '#E53E3E' : 'var(--border-color)'}`,
+          borderRadius: '10px',
+          transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+          outline: 'none',
+          boxShadow: error ? '0 0 0 3px rgba(229, 62, 62, 0.1)' : 'none',
+          ...style,
+        }}
+        onFocus={(e) => {
+          if (!error) {
+            e.target.style.borderColor = '#F5A623';
+            e.target.style.boxShadow = '0 0 0 3px rgba(245, 166, 35, 0.15)';
+          }
+        }}
+        onBlur={(e) => {
+          if (!error) {
+            e.target.style.borderColor = 'var(--border-color)';
+            e.target.style.boxShadow = 'none';
+          }
         }}
         {...props}
       />
       {error && (
         <span style={{
-          fontSize: '0.8rem',
-          color: '#e53e3e',
-          marginTop: '4px',
+          fontSize: '0.78rem',
+          color: '#E53E3E',
+          marginTop: '5px',
           display: 'block'
         }}>
           {error}

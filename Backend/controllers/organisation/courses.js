@@ -28,6 +28,15 @@ const createCourse = async (req, res) => {
       return error(res, 400, 'Please provide all required fields');
     }
 
+    // Require at least one non-empty eligibility question at creation time
+    const hasValidQuestions = Array.isArray(applicationQuestions)
+      && applicationQuestions.length > 0
+      && applicationQuestions.some((q) => q && typeof q.question === 'string' && q.question.trim().length > 0);
+
+    if (!hasValidQuestions) {
+      return error(res, 400, 'Please add at least one application question before posting');
+    }
+
     const course = await Course.create({
       organisation: req.user.id,
       title,
@@ -43,7 +52,7 @@ const createCourse = async (req, res) => {
       endDate,
       applicationDeadline,
       totalSlots,
-      applicationQuestions: applicationQuestions || []
+      applicationQuestions
     });
 
     return success(res, 201, 'Course created successfully', course);
@@ -136,6 +145,16 @@ const publishCourse = async (req, res) => {
 
     if (course.status === 'published') {
       return error(res, 400, 'Course is already published');
+    }
+
+    const hasValidQuestions = Array.isArray(course.applicationQuestions)
+      && course.applicationQuestions.length > 0
+      && course.applicationQuestions.some(
+        (q) => q && typeof q.question === 'string' && q.question.trim().length > 0
+      );
+
+    if (!hasValidQuestions) {
+      return error(res, 400, 'Please add at least one application question before publishing');
     }
 
     course.status = 'published';

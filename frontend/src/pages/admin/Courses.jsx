@@ -46,15 +46,11 @@ const Courses = () => {
     <div style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
       <Navbar />
 
-      <div style={{
-        background: 'var(--bg-surface)',
-        borderBottom: '1px solid var(--border-color)',
-        padding: '32px 24px'
-      }}>
-        <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+      <div className="fh-section-head">
+        <div>
           <h1 style={{
-            fontSize: '1.6rem',
-            fontWeight: '800',
+            fontSize: '1.5rem',
+            fontWeight: 800,
             color: 'var(--text-primary)',
             marginBottom: '4px'
           }}>
@@ -66,7 +62,7 @@ const Courses = () => {
         </div>
       </div>
 
-      <div style={{ maxWidth: '960px', margin: '0 auto', padding: '32px 24px' }}>
+      <div className="fh-container">
 
         {/* Filter */}
         <div style={{ marginBottom: '24px' }}>
@@ -103,10 +99,10 @@ const Courses = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {courses.map(course => (
               <div key={course._id} style={{
-                background: 'var(--bg-card)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 'var(--radius)',
-                padding: '24px',
+                background: '#1A3357',
+                border: '1px solid #2A4A6B',
+                borderRadius: '16px',
+                padding: '20px',
                 boxShadow: 'var(--card-shadow)'
               }}>
                 <div style={{
@@ -121,32 +117,21 @@ const Courses = () => {
                     <h3 style={{
                       fontSize: '1.05rem',
                       fontWeight: '700',
-                      color: 'var(--text-primary)',
+                      color: '#FFFFFF',
                       marginBottom: '2px'
                     }}>
                       {course.title}
                     </h3>
                     <p style={{
                       fontSize: '0.82rem',
-                      color: 'var(--green-primary)',
+                      color: '#F5A623',
                       fontWeight: '600'
                     }}>
                       {course.organisation?.name}
                     </p>
                   </div>
 
-                  <span style={{
-                    padding: '4px 12px',
-                    borderRadius: '20px',
-                    fontSize: '0.78rem',
-                    fontWeight: '700',
-                    background: course.status === 'published' ? '#F0FFF4'
-                      : course.status === 'cancelled' ? '#FFF5F5'
-                      : 'var(--bg-section-alt)',
-                    color: course.status === 'published' ? '#276749'
-                      : course.status === 'cancelled' ? '#C53030'
-                      : 'var(--text-secondary)'
-                  }}>
+                  <span className={`fh-badge fh-badge-${course.status}`}>
                     {course.status}
                   </span>
                 </div>

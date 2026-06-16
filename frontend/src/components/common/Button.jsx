@@ -3,44 +3,51 @@ const Button = ({
   variant = 'primary',
   loading = false,
   fullWidth = false,
+  style = {},
   ...props
 }) => {
   const base = {
-    padding: '12px 24px',
-    fontSize: '0.95rem',
-    fontWeight: '600',
-    borderRadius: 'var(--radius)',
-    transition: 'var(--transition)',
+    fontFamily: 'inherit',
+    fontWeight: 700,
+    borderRadius: '10px',
+    transition: 'all 0.15s ease',
+    letterSpacing: '0.01em',
+    minHeight: '44px',
     width: fullWidth ? '100%' : 'auto',
-    opacity: loading ? 0.7 : 1,
+    opacity: loading ? 0.75 : 1,
     cursor: loading ? 'not-allowed' : 'pointer',
+    border: 'none',
+    fontSize: '0.95rem',
   };
 
   const variants = {
     primary: {
-      background: 'var(--green-primary)',
-      color: '#FFFFFF',
-      border: 'none',
+      background: '#F5A623',
+      color: '#1E3A5F',
+      padding: '13px 24px',
+      boxShadow: '0 2px 8px rgba(245, 166, 35, 0.3)',
     },
     outline: {
       background: 'transparent',
-      color: 'var(--green-primary)',
-      border: '2px solid var(--green-primary)',
+      border: '2px solid #F5A623',
+      color: '#F5A623',
+      padding: '11px 24px',
     },
     danger: {
-      background: '#e53e3e',
+      background: '#E53E3E',
       color: '#FFFFFF',
-      border: 'none',
+      padding: '13px 24px',
+      boxShadow: '0 2px 8px rgba(229, 62, 62, 0.2)',
     }
   };
 
   return (
     <button
-      style={{ ...base, ...variants[variant] }}
+      style={{ ...base, ...variants[variant], ...style }}
       disabled={loading}
       {...props}
     >
-      {loading ? 'Please wait...' : children}
+      {loading ? '· · ·' : children}
     </button>
   );
 };

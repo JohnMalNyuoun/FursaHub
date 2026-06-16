@@ -2,24 +2,28 @@ const Loader = () => {
   return (
     <div style={{
       display: 'flex',
+      flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      height: '100vh',
-      background: 'var(--bg-base)'
+      minHeight: '60vh',
+      background: '#0F2035'
     }}>
       <div style={{
-        width: '40px',
-        height: '40px',
-        border: '4px solid var(--border-color)',
-        borderTop: '4px solid var(--green-primary)',
+        width: '36px',
+        height: '36px',
+        border: '3px solid #2A4A6B',
+        borderTopColor: '#F5A623',
         borderRadius: '50%',
-        animation: 'spin 0.8s linear infinite'
+        animation: 'fh-spin 0.7s linear infinite'
       }} />
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
+      <p style={{
+        marginTop: '16px',
+        fontSize: '0.82rem',
+        color: '#7A9BB5',
+        fontWeight: 600
+      }}>
+        Loading...
+      </p>
     </div>
   );
 };

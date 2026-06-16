@@ -75,43 +75,39 @@ const Courses = () => {
       <Navbar />
 
       {/* Header */}
-      <div style={{
-        background: 'var(--bg-surface)',
-        borderBottom: '1px solid var(--border-color)',
-        padding: '32px 24px'
-      }}>
+      <div className="fh-section-head">
         <div style={{
-          maxWidth: '960px',
-          margin: '0 auto',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '12px'
         }}>
           <div>
             <h1 style={{
-              fontSize: '1.6rem',
-              fontWeight: '800',
-              color: 'var(--text-primary)',
+              fontSize: '1.5rem',
+              fontWeight: 800,
+              color: '#FFFFFF',
               marginBottom: '4px'
             }}>
               Your Courses
             </h1>
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+            <p style={{ fontSize: '0.9rem', color: '#7A9BB5' }}>
               Manage all your posted courses
             </p>
           </div>
-          <Link to="/org/courses/new">
-            <Button>+ Post New Course</Button>
+          <Link to="/org/courses/new" className="fh-mobile-full" style={{ display: 'inline-block' }}>
+            <Button className="fh-mobile-full">+ Post New Course</Button>
           </Link>
         </div>
       </div>
 
-      <div style={{ maxWidth: '960px', margin: '0 auto', padding: '32px 24px' }}>
+      <div className="fh-container">
         {courses.length === 0 ? (
           <div style={{
             textAlign: 'center',
             padding: '64px 24px',
-            color: 'var(--text-muted)'
+            color: '#7A9BB5'
           }}>
             <p style={{ fontSize: '1.1rem', marginBottom: '16px' }}>
               No courses posted yet
@@ -124,10 +120,10 @@ const Courses = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {courses.map(course => (
               <div key={course._id} style={{
-                background: 'var(--bg-card)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 'var(--radius)',
-                padding: '24px',
+                background: '#1A3357',
+                border: '1px solid #2A4A6B',
+                borderRadius: '16px',
+                padding: '20px',
                 boxShadow: 'var(--card-shadow)'
               }}>
                 <div style={{
@@ -142,32 +138,20 @@ const Courses = () => {
                     <h3 style={{
                       fontSize: '1.05rem',
                       fontWeight: '700',
-                      color: 'var(--text-primary)',
+                      color: '#FFFFFF',
                       marginBottom: '4px'
                     }}>
                       {course.title}
                     </h3>
                     <p style={{
                       fontSize: '0.82rem',
-                      color: 'var(--text-muted)'
+                      color: '#7A9BB5'
                     }}>
                       {course.category} · {course.deliveryMode.replace('_', ' ')} · {course.location}
                     </p>
                   </div>
 
-                  <span style={{
-                    padding: '4px 12px',
-                    borderRadius: '20px',
-                    fontSize: '0.78rem',
-                    fontWeight: '600',
-                    background: course.status === 'published'
-                      ? '#F0FFF4' : course.status === 'closed'
-                      ? '#FFF5F5' : course.status === 'cancelled'
-                      ? '#FFF5F5' : 'var(--bg-section-alt)',
-                    color: course.status === 'published'
-                      ? '#276749' : course.status === 'closed' || course.status === 'cancelled'
-                      ? '#C53030' : 'var(--text-secondary)'
-                  }}>
+                  <span className={`fh-badge fh-badge-${course.status}`}>
                     {course.status}
                   </span>
                 </div>
@@ -178,10 +162,10 @@ const Courses = () => {
                   gap: '24px',
                   marginBottom: '20px'
                 }}>
-                  <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                  <span style={{ fontSize: '0.82rem', color: '#7A9BB5' }}>
                     👥 {course.filledSlots}/{course.totalSlots} slots filled
                   </span>
-                  <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                  <span style={{ fontSize: '0.82rem', color: '#7A9BB5' }}>
                     📅 Deadline: {new Date(course.applicationDeadline).toLocaleDateString()}
                   </span>
                 </div>

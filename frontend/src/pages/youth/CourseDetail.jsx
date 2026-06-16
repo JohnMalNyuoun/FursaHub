@@ -88,7 +88,7 @@ const CourseDetail = () => {
           style={{
             background: 'none',
             border: 'none',
-            color: 'var(--green-primary)',
+            color: '#F5A623',
             fontWeight: '600',
             fontSize: '0.9rem',
             cursor: 'pointer',
@@ -101,8 +101,8 @@ const CourseDetail = () => {
 
         {/* Header */}
         <div style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border-color)',
+          background: '#1A3357',
+          border: '1px solid #2A4A6B',
           borderRadius: 'var(--radius)',
           padding: '32px',
           marginBottom: '24px',
@@ -115,8 +115,8 @@ const CourseDetail = () => {
             fontSize: '0.75rem',
             fontWeight: '700',
             textTransform: 'uppercase',
-            background: 'var(--green-mint)',
-            color: 'var(--green-deep)',
+            background: 'rgba(245,166,35,0.15)',
+            color: '#F5A623',
             marginBottom: '16px'
           }}>
             {course.category}
@@ -125,7 +125,7 @@ const CourseDetail = () => {
           <h1 style={{
             fontSize: '1.5rem',
             fontWeight: '800',
-            color: 'var(--text-primary)',
+            color: '#FFFFFF',
             marginBottom: '8px'
           }}>
             {course.title}
@@ -133,7 +133,7 @@ const CourseDetail = () => {
 
           <p style={{
             fontSize: '0.95rem',
-            color: 'var(--green-primary)',
+            color: '#F5A623',
             fontWeight: '600',
             marginBottom: '20px'
           }}>
@@ -142,7 +142,7 @@ const CourseDetail = () => {
 
           <p style={{
             fontSize: '0.95rem',
-            color: 'var(--text-secondary)',
+            color: '#B8D0E8',
             lineHeight: '1.7',
             marginBottom: '24px'
           }}>
@@ -155,7 +155,7 @@ const CourseDetail = () => {
             gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
             gap: '12px',
             padding: '20px',
-            background: 'var(--bg-surface)',
+            background: '#152A47',
             borderRadius: 'var(--radius)'
           }}>
             {[
@@ -173,14 +173,14 @@ const CourseDetail = () => {
                   fontSize: '0.75rem',
                   fontWeight: '700',
                   textTransform: 'uppercase',
-                  color: 'var(--text-muted)',
+                  color: '#7A9BB5',
                   marginBottom: '2px'
                 }}>
                   {item.label}
                 </p>
                 <p style={{
                   fontSize: '0.9rem',
-                  color: 'var(--text-primary)',
+                  color: '#FFFFFF',
                   fontWeight: '500',
                   textTransform: 'capitalize'
                 }}>
@@ -193,8 +193,8 @@ const CourseDetail = () => {
 
         {/* Application Section */}
         <div style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border-color)',
+          background: '#1A3357',
+          border: '1px solid #2A4A6B',
           borderRadius: 'var(--radius)',
           padding: '32px',
           boxShadow: 'var(--card-shadow)'
@@ -202,7 +202,7 @@ const CourseDetail = () => {
           <h2 style={{
             fontSize: '1.1rem',
             fontWeight: '700',
-            color: 'var(--text-primary)',
+            color: '#FFFFFF',
             marginBottom: '20px'
           }}>
             Apply for this course
@@ -211,12 +211,12 @@ const CourseDetail = () => {
           {/* Status messages */}
           {alreadyApplied && !success && (
             <div style={{
-              background: '#EBF8FF',
-              border: '1px solid #BEE3F8',
+              background: 'rgba(245,166,35,0.1)',
+              border: '1px solid #F5A623',
               borderRadius: 'var(--radius)',
               padding: '12px',
               fontSize: '0.9rem',
-              color: '#2C5282',
+              color: '#FDF3E0',
               marginBottom: '16px'
             }}>
               You have already applied for this course.
@@ -225,12 +225,12 @@ const CourseDetail = () => {
 
           {success && (
             <div style={{
-              background: '#F0FFF4',
-              border: '1px solid #9AE6B4',
+              background: 'rgba(245,166,35,0.15)',
+              border: '1px solid #F5A623',
               borderRadius: 'var(--radius)',
               padding: '12px',
               fontSize: '0.9rem',
-              color: '#276749',
+              color: '#F5A623',
               marginBottom: '16px'
             }}>
               {success}
@@ -239,12 +239,12 @@ const CourseDetail = () => {
 
           {error && (
             <div style={{
-              background: '#FFF5F5',
-              border: '1px solid #FEB2B2',
+              background: 'rgba(229,62,62,0.1)',
+              border: '1px solid #E53E3E',
               borderRadius: 'var(--radius)',
               padding: '12px',
               fontSize: '0.9rem',
-              color: '#C53030',
+              color: '#FCA5A5',
               marginBottom: '16px'
             }}>
               {error}
@@ -253,12 +253,12 @@ const CourseDetail = () => {
 
           {isDeadlinePassed && (
             <div style={{
-              background: '#FFFAF0',
-              border: '1px solid #FAD08A',
+              background: 'rgba(229,62,62,0.1)',
+              border: '1px solid #E53E3E',
               borderRadius: 'var(--radius)',
               padding: '12px',
               fontSize: '0.9rem',
-              color: '#744210',
+              color: '#FCA5A5',
               marginBottom: '16px'
             }}>
               Application deadline has passed.
@@ -267,12 +267,12 @@ const CourseDetail = () => {
 
           {isFull && (
             <div style={{
-              background: '#FFF5F5',
-              border: '1px solid #FEB2B2',
+              background: 'rgba(229,62,62,0.1)',
+              border: '1px solid #E53E3E',
               borderRadius: 'var(--radius)',
               padding: '12px',
               fontSize: '0.9rem',
-              color: '#C53030',
+              color: '#FCA5A5',
               marginBottom: '16px'
             }}>
               This course is full.
@@ -288,7 +288,7 @@ const CourseDetail = () => {
                     display: 'block',
                     fontSize: '0.85rem',
                     fontWeight: '600',
-                    color: 'var(--text-secondary)',
+                    color: '#B8D0E8',
                     marginBottom: '6px'
                   }}>
                     {q.question}
@@ -306,9 +306,9 @@ const CourseDetail = () => {
                         width: '100%',
                         padding: '12px 14px',
                         fontSize: '0.95rem',
-                        color: 'var(--text-primary)',
-                        background: 'var(--bg-surface)',
-                        border: '1px solid var(--border-color)',
+                        color: '#FFFFFF',
+                        background: '#152A47',
+                        border: '1px solid #2A4A6B',
                         borderRadius: 'var(--radius)',
                         resize: 'vertical'
                       }}
@@ -321,9 +321,9 @@ const CourseDetail = () => {
                         width: '100%',
                         padding: '12px 14px',
                         fontSize: '0.95rem',
-                        color: 'var(--text-primary)',
-                        background: 'var(--bg-surface)',
-                        border: '1px solid var(--border-color)',
+                        color: '#FFFFFF',
+                        background: '#152A47',
+                        border: '1px solid #2A4A6B',
                         borderRadius: 'var(--radius)',
                       }}
                     >
@@ -339,9 +339,9 @@ const CourseDetail = () => {
                         width: '100%',
                         padding: '12px 14px',
                         fontSize: '0.95rem',
-                        color: 'var(--text-primary)',
-                        background: 'var(--bg-surface)',
-                        border: '1px solid var(--border-color)',
+                        color: '#FFFFFF',
+                        background: '#152A47',
+                        border: '1px solid #2A4A6B',
                         borderRadius: 'var(--radius)',
                       }}
                     >
@@ -359,9 +359,9 @@ const CourseDetail = () => {
                         width: '100%',
                         padding: '12px 14px',
                         fontSize: '0.95rem',
-                        color: 'var(--text-primary)',
-                        background: 'var(--bg-surface)',
-                        border: '1px solid var(--border-color)',
+                        color: '#FFFFFF',
+                        background: '#152A47',
+                        border: '1px solid #2A4A6B',
                         borderRadius: 'var(--radius)',
                       }}
                     />

@@ -26,6 +26,9 @@ import AdminOrganisations from './pages/admin/Organisations';
 import AdminCourses from './pages/admin/Courses';
 import AdminUsers from './pages/admin/Users';
 import Landing from './pages/Landing';
+import Impact from './pages/organisation/Impact';
+import CourseOutcomes from './pages/organisation/CourseOutcomes';
+import OutcomeForm from './pages/youth/OutcomeForm';
 // Route guards 
 const YouthRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -49,6 +52,7 @@ function App () {
   return (
     <Routes>
       {/* Public */}
+
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<YouthLogin />} />
       <Route path="/register" element={<YouthRegister />} />
@@ -73,6 +77,13 @@ function App () {
       <Route path="/admin/organisations" element={<AdminRoute><AdminOrganisations /></AdminRoute>} />
       <Route path="/admin/courses" element={<AdminRoute><AdminCourses /></AdminRoute>} />
       <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+
+      {/* Organisation impact */}
+<Route path="/org/impact" element={<OrgRoute><Impact /></OrgRoute>} />
+<Route path="/org/courses/:id/outcomes" element={<OrgRoute><CourseOutcomes /></OrgRoute>} />
+
+{/* Youth outcome form */}
+<Route path="/outcomes" element={<YouthRoute><OutcomeForm /></YouthRoute>} />
     </Routes>
   );
 }

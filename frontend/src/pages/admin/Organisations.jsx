@@ -74,15 +74,11 @@ const Organisations = () => {
     <div style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
       <Navbar />
 
-      <div style={{
-        background: 'var(--bg-surface)',
-        borderBottom: '1px solid var(--border-color)',
-        padding: '32px 24px'
-      }}>
-        <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+      <div className="fh-section-head">
+        <div>
           <h1 style={{
-            fontSize: '1.6rem',
-            fontWeight: '800',
+            fontSize: '1.5rem',
+            fontWeight: 800,
             color: 'var(--text-primary)',
             marginBottom: '4px'
           }}>
@@ -94,7 +90,7 @@ const Organisations = () => {
         </div>
       </div>
 
-      <div style={{ maxWidth: '960px', margin: '0 auto', padding: '32px 24px' }}>
+      <div className="fh-container">
 
         {/* Filter */}
         <div style={{ marginBottom: '24px' }}>
@@ -131,10 +127,11 @@ const Organisations = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {organisations.map(org => (
               <div key={org._id} style={{
-                background: 'var(--bg-card)',
-                border: `1px solid ${org.status === 'pending' ? '#FAD08A' : 'var(--border-color)'}`,
-                borderRadius: 'var(--radius)',
-                padding: '24px',
+                background: '#1A3357',
+                border: '1px solid #2A4A6B',
+                borderLeft: org.status === 'pending' ? '3px solid #F5A623' : '1px solid #2A4A6B',
+                borderRadius: '16px',
+                padding: '20px',
                 boxShadow: 'var(--card-shadow)'
               }}>
                 <div style={{
@@ -149,38 +146,27 @@ const Organisations = () => {
                     <h3 style={{
                       fontSize: '1.05rem',
                       fontWeight: '700',
-                      color: 'var(--text-primary)',
+                      color: '#FFFFFF',
                       marginBottom: '2px'
                     }}>
                       {org.name}
                     </h3>
                     <p style={{
                       fontSize: '0.82rem',
-                      color: 'var(--text-muted)'
+                      color: '#7A9BB5'
                     }}>
                       {org.type} · {org.location}
                     </p>
                   </div>
 
-                  <span style={{
-                    padding: '4px 12px',
-                    borderRadius: '20px',
-                    fontSize: '0.78rem',
-                    fontWeight: '700',
-                    background: org.status === 'approved' ? '#F0FFF4'
-                      : org.status === 'pending' ? '#FFFAF0'
-                      : '#FFF5F5',
-                    color: org.status === 'approved' ? '#276749'
-                      : org.status === 'pending' ? '#744210'
-                      : '#C53030'
-                  }}>
+                  <span className={`fh-badge fh-badge-${org.status}`}>
                     {org.status}
                   </span>
                 </div>
 
                 <p style={{
                   fontSize: '0.85rem',
-                  color: 'var(--text-secondary)',
+                  color: '#B8D0E8',
                   marginBottom: '12px',
                   lineHeight: '1.6'
                 }}>
@@ -193,13 +179,13 @@ const Organisations = () => {
                   flexWrap: 'wrap',
                   marginBottom: '16px'
                 }}>
-                  <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                  <span style={{ fontSize: '0.82rem', color: '#7A9BB5' }}>
                     📧 {org.email}
                   </span>
-                  <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                  <span style={{ fontSize: '0.82rem', color: '#7A9BB5' }}>
                     📞 {org.phoneNumber}
                   </span>
-                  <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                  <span style={{ fontSize: '0.82rem', color: '#7A9BB5' }}>
                     📅 Registered {new Date(org.createdAt).toLocaleDateString()}
                   </span>
                 </div>
@@ -286,9 +272,9 @@ const Organisations = () => {
                 width: '100%',
                 padding: '12px 14px',
                 fontSize: '0.9rem',
-                color: 'var(--text-primary)',
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-color)',
+                color: '#FFFFFF',
+                background: '#152A47',
+                border: '1px solid #2A4A6B',
                 borderRadius: 'var(--radius)',
                 resize: 'vertical',
                 marginBottom: '20px'

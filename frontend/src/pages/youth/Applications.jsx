@@ -4,13 +4,13 @@ import Loader from '../../components/common/Loader';
 import Button from '../../components/common/Button';
 import { getMyApplications, withdrawApplication } from '../../services/applicationService';
 
-const statusColors = {
-  submitted: { bg: '#EBF8FF', color: '#2C5282', label: 'Submitted' },
-  under_review: { bg: '#FFFAF0', color: '#744210', label: 'Under Review' },
-  shortlisted: { bg: '#F0FFF4', color: '#276749', label: 'Shortlisted' },
-  accepted: { bg: '#F0FFF4', color: '#276749', label: 'Accepted' },
-  rejected: { bg: '#FFF5F5', color: '#C53030', label: 'Rejected' },
-  withdrawn: { bg: '#F7FAFC', color: '#718096', label: 'Withdrawn' }
+const statusLabels = {
+  submitted: 'Submitted',
+  under_review: 'Under Review',
+  shortlisted: 'Shortlisted',
+  accepted: 'Accepted',
+  rejected: 'Rejected',
+  withdrawn: 'Withdrawn'
 };
 
 const Applications = () => {
@@ -53,35 +53,28 @@ const Applications = () => {
       <Navbar />
 
       {/* Header */}
-      <div style={{
-        background: 'var(--bg-surface)',
-        borderBottom: '1px solid var(--border-color)',
-        padding: '32px 24px'
-      }}>
-        <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+      <div className="fh-section-head">
+        <div>
           <h1 style={{
-            fontSize: '1.6rem',
+            fontSize: '1.5rem',
             fontWeight: '800',
-            color: 'var(--text-primary)',
-            marginBottom: '8px'
+            color: '#FFFFFF',
+            marginBottom: '6px'
           }}>
             My Applications
           </h1>
-          <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+          <p style={{ fontSize: '0.9rem', color: '#7A9BB5' }}>
             Track the status of all your course applications
           </p>
         </div>
       </div>
 
-      <div style={{ maxWidth: '960px', margin: '0 auto', padding: '32px 24px' }}>
+      <div className="fh-container">
 
         {applications.length === 0 ? (
-          <div style={{
-            textAlign: 'center',
-            padding: '64px 24px',
-            color: 'var(--text-muted)'
-          }}>
-            <p style={{ fontSize: '1.1rem', marginBottom: '8px' }}>
+          <div className="fh-empty">
+            <div className="fh-empty-icon">📝</div>
+            <p style={{ fontSize: '1rem', marginBottom: '6px', color: 'var(--text-secondary)', fontWeight: '600' }}>
               No applications yet
             </p>
             <p style={{ fontSize: '0.9rem' }}>
@@ -91,14 +84,14 @@ const Applications = () => {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {applications.map(app => {
-              const status = statusColors[app.status] || statusColors.submitted;
+              const label = statusLabels[app.status] || 'Submitted';
 
               return (
                 <div key={app._id} style={{
-                  background: 'var(--bg-card)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: 'var(--radius)',
-                  padding: '24px',
+                  background: '#1A3357',
+                  border: '1px solid #2A4A6B',
+                  borderRadius: '16px',
+                  padding: '20px',
                   boxShadow: 'var(--card-shadow)'
                 }}>
                   <div style={{
@@ -113,29 +106,22 @@ const Applications = () => {
                       <h3 style={{
                         fontSize: '1.05rem',
                         fontWeight: '700',
-                        color: 'var(--text-primary)',
+                        color: '#FFFFFF',
                         marginBottom: '4px'
                       }}>
                         {app.course?.title}
                       </h3>
                       <p style={{
                         fontSize: '0.85rem',
-                        color: 'var(--green-primary)',
+                        color: '#F5A623',
                         fontWeight: '600'
                       }}>
                         {app.organisation?.name}
                       </p>
                     </div>
 
-                    <span style={{
-                      padding: '6px 14px',
-                      borderRadius: '20px',
-                      fontSize: '0.8rem',
-                      fontWeight: '700',
-                      background: status.bg,
-                      color: status.color
-                    }}>
-                      {status.label}
+                    <span className={`fh-badge fh-badge-${app.status}`}>
+                      {label}
                     </span>
                   </div>
 
@@ -146,13 +132,13 @@ const Applications = () => {
                     gap: '16px',
                     marginBottom: '16px'
                   }}>
-                    <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                    <span style={{ fontSize: '0.82rem', color: '#7A9BB5' }}>
                       📍 {app.course?.location}
                     </span>
-                    <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                    <span style={{ fontSize: '0.82rem', color: '#7A9BB5' }}>
                       🎓 {app.course?.deliveryMode?.replace('_', ' ')}
                     </span>
-                    <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                    <span style={{ fontSize: '0.82rem', color: '#7A9BB5' }}>
                       📅 Applied {new Date(app.createdAt).toLocaleDateString()}
                     </span>
                   </div>
@@ -160,8 +146,8 @@ const Applications = () => {
                   {/* Shortlist next step */}
                   {app.status === 'shortlisted' && app.nextStep?.type && (
                     <div style={{
-                      background: '#F0FFF4',
-                      border: '1px solid #9AE6B4',
+                      background: 'rgba(245,166,35,0.1)',
+                      borderLeft: '3px solid #F5A623',
                       borderRadius: 'var(--radius)',
                       padding: '12px 16px',
                       marginBottom: '16px'
@@ -169,21 +155,21 @@ const Applications = () => {
                       <p style={{
                         fontSize: '0.85rem',
                         fontWeight: '700',
-                        color: '#276749',
+                        color: '#F5A623',
                         marginBottom: '4px'
                       }}>
                         🎉 You have been shortlisted!
                       </p>
-                      <p style={{ fontSize: '0.82rem', color: '#276749' }}>
+                      <p style={{ fontSize: '0.82rem', color: '#FDF3E0' }}>
                         Next step: {app.nextStep.type === 'in_person' ? 'In-person interview' : 'Online interview'}
                       </p>
                       {app.nextStep.location && (
-                        <p style={{ fontSize: '0.82rem', color: '#276749' }}>
+                        <p style={{ fontSize: '0.82rem', color: '#FDF3E0' }}>
                           📍 {app.nextStep.location}
                         </p>
                       )}
                       {app.nextStep.scheduledAt && (
-                        <p style={{ fontSize: '0.82rem', color: '#276749' }}>
+                        <p style={{ fontSize: '0.82rem', color: '#FDF3E0' }}>
                           🕐 {new Date(app.nextStep.scheduledAt).toLocaleString()}
                         </p>
                       )}
@@ -193,13 +179,13 @@ const Applications = () => {
                   {/* Rejection reason */}
                   {app.status === 'rejected' && app.rejectionReason && (
                     <div style={{
-                      background: '#FFF5F5',
-                      border: '1px solid #FEB2B2',
+                      background: 'rgba(229,62,62,0.1)',
+                      borderLeft: '3px solid #E53E3E',
                       borderRadius: 'var(--radius)',
                       padding: '12px 16px',
                       marginBottom: '16px'
                     }}>
-                      <p style={{ fontSize: '0.82rem', color: '#C53030' }}>
+                      <p style={{ fontSize: '0.82rem', color: '#FCA5A5' }}>
                         Reason: {app.rejectionReason}
                       </p>
                     </div>
@@ -211,7 +197,8 @@ const Applications = () => {
                       variant="outline"
                       loading={withdrawing === app._id}
                       onClick={() => handleWithdraw(app._id)}
-                      style={{ fontSize: '0.82rem', padding: '8px 16px' }}
+                      className="fh-mobile-full"
+                      style={{ fontSize: '0.85rem', padding: '10px 18px', minHeight: '44px' }}
                     >
                       Withdraw Application
                     </Button>

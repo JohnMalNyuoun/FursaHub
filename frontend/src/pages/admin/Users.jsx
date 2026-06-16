@@ -58,15 +58,11 @@ const Users = () => {
     <div style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
       <Navbar />
 
-      <div style={{
-        background: 'var(--bg-surface)',
-        borderBottom: '1px solid var(--border-color)',
-        padding: '32px 24px'
-      }}>
-        <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+      <div className="fh-section-head">
+        <div>
           <h1 style={{
-            fontSize: '1.6rem',
-            fontWeight: '800',
+            fontSize: '1.5rem',
+            fontWeight: 800,
             color: 'var(--text-primary)',
             marginBottom: '4px'
           }}>
@@ -78,7 +74,7 @@ const Users = () => {
         </div>
       </div>
 
-      <div style={{ maxWidth: '960px', margin: '0 auto', padding: '32px 24px' }}>
+      <div className="fh-container">
 
         {/* Filter */}
         <div style={{ marginBottom: '24px' }}>
@@ -146,14 +142,7 @@ const Users = () => {
                   alignItems: 'center',
                   gap: '12px'
                 }}>
-                  <span style={{
-                    padding: '4px 10px',
-                    borderRadius: '20px',
-                    fontSize: '0.75rem',
-                    fontWeight: '600',
-                    background: user.isActive ? '#F0FFF4' : '#FFF5F5',
-                    color: user.isActive ? '#276749' : '#C53030'
-                  }}>
+                  <span className={`fh-badge fh-badge-${user.isActive ? 'active' : 'inactive'}`}>
                     {user.isActive ? 'Active' : 'Inactive'}
                   </span>
 

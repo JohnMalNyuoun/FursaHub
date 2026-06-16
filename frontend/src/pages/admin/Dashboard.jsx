@@ -39,57 +39,55 @@ const Dashboard = () => {
 
       {/* Header */}
       <div style={{
-        background: 'var(--green-deep)',
-        padding: '40px 24px'
+        background: 'linear-gradient(135deg, #0F2035 0%, #1E3A5F 100%)',
+        padding: '32px 20px 36px'
       }}>
         <div style={{ maxWidth: '960px', margin: '0 auto' }}>
           <h1 style={{
-            fontSize: '1.6rem',
-            fontWeight: '800',
+            fontSize: 'clamp(1.4rem, 5vw, 1.6rem)',
+            fontWeight: 800,
             color: '#FFFFFF',
-            marginBottom: '4px'
+            marginBottom: '6px',
+            letterSpacing: '-0.3px'
           }}>
             Admin Dashboard
           </h1>
-          <p style={{ fontSize: '0.9rem', color: '#A8CFC0' }}>
+          <p style={{ fontSize: '0.92rem', color: '#B8D0E8' }}>
             Platform overview and management
           </p>
         </div>
       </div>
 
-      <div style={{ maxWidth: '960px', margin: '0 auto', padding: '40px 24px' }}>
+      <div className="fh-container">
 
         {/* Stats */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-          gap: '16px',
-          marginBottom: '40px'
-        }}>
+        <div className="fh-stats-grid fh-stats-6" style={{ marginBottom: '32px' }}>
           {statCards.map((stat, i) => (
             <Link key={i} to={stat.link} style={{ textDecoration: 'none' }}>
               <div style={{
-                background: 'var(--bg-card)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 'var(--radius)',
-                padding: '24px',
+                background: '#1A3357',
+                border: stat.label === 'Pending Approval' && stats?.pendingOrganisations > 0
+                  ? '1px solid #F5A623' : '1px solid #2A4A6B',
+                borderRadius: '14px',
+                padding: '20px 12px',
                 textAlign: 'center',
                 boxShadow: 'var(--card-shadow)',
                 transition: 'var(--transition)',
                 cursor: 'pointer'
               }}>
                 <div style={{
-                  fontSize: '2.2rem',
-                  fontWeight: '800',
-                  color: stat.label === 'Pending Approval' && stats?.pendingOrganisations > 0
-                    ? '#D69E2E' : 'var(--green-primary)'
+                  fontSize: '2rem',
+                  fontWeight: 800,
+                  letterSpacing: '-0.5px',
+                  color: '#F5A623'
                 }}>
                   {stat.value}
                 </div>
                 <div style={{
-                  fontSize: '0.78rem',
-                  color: 'var(--text-muted)',
-                  marginTop: '6px'
+                  fontSize: '0.76rem',
+                  color: '#7A9BB5',
+                  marginTop: '6px',
+                  fontWeight: 600
                 }}>
                   {stat.label}
                 </div>
@@ -136,27 +134,27 @@ const Dashboard = () => {
             ].map((action, i) => (
               <Link key={i} to={action.link} style={{ textDecoration: 'none' }}>
                 <div style={{
-                  background: 'var(--bg-card)',
-                  border: `1px solid ${action.urgent ? '#FAD08A' : 'var(--border-color)'}`,
+                  border: `1px solid ${action.urgent ? '#F5A623' : '#2A4A6B'}`,
                   borderRadius: 'var(--radius)',
                   padding: '20px',
                   cursor: 'pointer',
                   transition: 'var(--transition)',
-                  background: action.urgent ? '#FFFAF0' : 'var(--bg-card)'
+                  background: action.urgent ? 'rgba(245,166,35,0.08)' : '#1A3357'
                 }}>
                   <h3 style={{
                     fontSize: '0.95rem',
                     fontWeight: '700',
-                    color: 'var(--text-primary)',
+                    color: '#FFFFFF',
                     marginBottom: '6px'
                   }}>
                     {action.title}
                     {action.urgent && (
                       <span style={{
                         marginLeft: '8px',
-                        background: '#D69E2E',
-                        color: '#FFFFFF',
+                        background: '#F5A623',
+                        color: '#1E3A5F',
                         fontSize: '0.7rem',
+                        fontWeight: 800,
                         padding: '2px 8px',
                         borderRadius: '20px'
                       }}>
@@ -166,7 +164,7 @@ const Dashboard = () => {
                   </h3>
                   <p style={{
                     fontSize: '0.82rem',
-                    color: 'var(--text-muted)'
+                    color: '#7A9BB5'
                   }}>
                     {action.desc}
                   </p>

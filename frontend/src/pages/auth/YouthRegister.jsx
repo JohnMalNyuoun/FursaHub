@@ -42,31 +42,33 @@ const YouthRegister = () => {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'var(--bg-base)',
+      background: 'linear-gradient(160deg, #0F2035 0%, #1E3A5F 100%)',
       display: 'flex',
-      alignItems: 'center',
+      alignItems: 'flex-start',
       justifyContent: 'center',
-      padding: '24px'
+      padding: '24px 16px'
     }}>
       <div style={{
         width: '100%',
-        maxWidth: '420px',
-        background: 'var(--bg-card)',
-        border: '1px solid var(--border-color)',
-        borderRadius: 'var(--radius)',
-        padding: '40px 32px',
-        boxShadow: 'var(--card-shadow)'
+        maxWidth: '400px',
+        background: '#1A3357',
+        border: '1px solid #2A4A6B',
+        borderRadius: '20px',
+        padding: '32px 20px',
+        boxShadow: '0 8px 40px rgba(0, 0, 0, 0.4)',
+        marginTop: '24px'
       }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <h1 style={{
-            fontSize: '1.8rem',
-            fontWeight: '800',
-            color: 'var(--green-primary)'
+            fontSize: '2rem',
+            fontWeight: 900,
+            color: '#F5A623',
+            letterSpacing: '-0.5px'
           }}>
             FursaHub
           </h1>
           <p style={{
-            fontSize: '0.9rem',
+            fontSize: '0.85rem',
             color: 'var(--text-muted)',
             marginTop: '4px'
           }}>
@@ -75,8 +77,8 @@ const YouthRegister = () => {
         </div>
 
         <h2 style={{
-          fontSize: '1.2rem',
-          fontWeight: '700',
+          fontSize: '1.15rem',
+          fontWeight: 800,
           color: 'var(--text-primary)',
           marginBottom: '24px'
         }}>
@@ -85,13 +87,13 @@ const YouthRegister = () => {
 
         {error && (
           <div style={{
-            background: '#fff5f5',
-            border: '1px solid #feb2b2',
-            borderRadius: 'var(--radius)',
-            padding: '12px',
+            background: '#2D1515',
+            borderLeft: '4px solid #E53E3E',
+            borderRadius: '8px',
+            padding: '12px 16px',
             marginBottom: '16px',
-            fontSize: '0.9rem',
-            color: '#c53030'
+            fontSize: '0.88rem',
+            color: '#FCA5A5'
           }}>
             {error}
           </div>
@@ -129,10 +131,12 @@ const YouthRegister = () => {
           <div style={{ marginBottom: '16px' }}>
             <label style={{
               display: 'block',
-              fontSize: '0.85rem',
-              fontWeight: '600',
+              fontSize: '0.82rem',
+              fontWeight: 700,
               color: 'var(--text-secondary)',
-              marginBottom: '6px'
+              marginBottom: '6px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em'
             }}>
               Community Type
             </label>
@@ -143,12 +147,12 @@ const YouthRegister = () => {
               required
               style={{
                 width: '100%',
-                padding: '12px 14px',
+                padding: '13px 16px',
                 fontSize: '0.95rem',
-                color: 'var(--text-primary)',
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 'var(--radius)',
+                color: '#FFFFFF',
+                background: '#152A47',
+                border: '1.5px solid #2A4A6B',
+                borderRadius: '10px',
               }}
             >
               <option value="">Select community type</option>
@@ -172,14 +176,14 @@ const YouthRegister = () => {
 
         <p style={{
           textAlign: 'center',
-          marginTop: '24px',
-          fontSize: '0.9rem',
+          marginTop: '20px',
+          fontSize: '0.88rem',
           color: 'var(--text-muted)'
         }}>
           Already have an account?{' '}
           <Link to="/login" style={{
-            color: 'var(--green-primary)',
-            fontWeight: '600'
+            color: '#F5A623',
+            fontWeight: 700
           }}>
             Sign in
           </Link>
