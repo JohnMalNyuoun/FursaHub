@@ -21,20 +21,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const status = error.response?.status;
-    const url = error.config?.url || '';
-    const isAuthEndpoint = url.includes('/auth/');
-    const hadToken = !!error.config?.headers?.Authorization;
-
-    // Only treat 401 as "session expired" when a stored token was actually used
-    // against a protected endpoint. Wrong-password login attempts must NOT
-    // wipe localStorage or trigger a hard redirect.
-    if (status === 401 && hadToken && !isAuthEndpoint) {
+    if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
-      }
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }

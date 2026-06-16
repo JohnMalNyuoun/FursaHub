@@ -33,20 +33,26 @@ import OutcomeForm from './pages/youth/OutcomeForm';
 const YouthRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return null;
-  return user?.role === 'youth' ? children : <Navigate to="/login" />;
+  if (!user) return <Navigate to="/login" />;
+  if (user.role !== 'youth') return <Navigate to="/login" />;
+  return children;
 };
 
 const OrgRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return null;
-  return user?.role === 'organisation' ? children : <Navigate to="/org/login" />;
+  if (!user) return <Navigate to="/org/login" />;
+  if (user.role !== 'organisation') return <Navigate to="/org/login" />;
+  return children;
 };
 
 
 const AdminRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return null;
-  return user?.role === 'admin' ? children : <Navigate to="/login" />;
+  if (!user) return <Navigate to="/login" />;
+  if (user.role !== 'admin') return <Navigate to="/login" />;
+  return children;
 };
 function App () {
   return (
