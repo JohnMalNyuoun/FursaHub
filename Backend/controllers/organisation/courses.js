@@ -18,15 +18,19 @@ const parseQuestionsPayload = (questions) => {
 const uploadCourseCover = async (file) => {
   if (!file) return null;
 
-  const uploadResult = await cloudinary.uploader.upload(
-    `data:${file.mimetype};base64,${file.buffer.toString('base64')}`,
-    {
-      folder: 'fursahub/course-covers',
-      transformation: [{ width: 1200, height: 675, crop: 'fill' }]
-    }
-  );
+  try {
+    const uploadResult = await cloudinary.uploader.upload(
+      `data:${file.mimetype};base64,${file.buffer.toString('base64')}`,
+      {
+        folder: 'fursahub/course-covers',
+        transformation: [{ width: 1200, height: 675, crop: 'fill' }]
+      }
+    );
 
-  return uploadResult.secure_url;
+    return uploadResult.secure_url;
+  } catch (err) {
+    throw new Error('Cover image upload failed. Please try a different image.');
+  }
 };
 
 // @desc    Post a new course
@@ -52,6 +56,9 @@ const createCourse = async (req, res) => {
       googleFormLink
     } = req.body;
     const parsedQuestions = parseQuestionsPayload(applicationQuestions);
+    const parsedTotalSlots = Number(totalSlots);
+    const parsedAgeMin = ageMin === undefined || ageMin === '' ? undefined : Number(ageMin);
+    const parsedAgeMax = ageMax === undefined || ageMax === '' ? undefined : Number(ageMax);
 
     if (parsedQuestions === null) {
       return error(res, 400, 'Invalid application questions payload');
@@ -70,6 +77,18 @@ const createCourse = async (req, res) => {
       return error(res, 400, 'Please add at least one application question before posting');
     }
 
+    if (!Number.isFinite(parsedTotalSlots) || parsedTotalSlots <= 0) {
+      return error(res, 400, 'Total slots must be a valid number greater than 0');
+    }
+
+    if (parsedAgeMin !== undefined && !Number.isFinite(parsedAgeMin)) {
+      return error(res, 400, 'Minimum age must be a valid number');
+    }
+
+    if (parsedAgeMax !== undefined && !Number.isFinite(parsedAgeMax)) {
+      return error(res, 400, 'Maximum age must be a valid number');
+    }
+
     const coverImage = await uploadCourseCover(req.file);
 
     const course = await Course.create({
@@ -78,15 +97,15 @@ const createCourse = async (req, res) => {
       description,
       category,
       targetAudience,
-      ageMin,
-      ageMax,
+      ageMin: parsedAgeMin,
+      ageMax: parsedAgeMax,
       gender,
       location,
       deliveryMode,
       startDate,
       endDate,
       applicationDeadline,
-      totalSlots,
+      totalSlots: parsedTotalSlots,
       applicationQuestions: parsedQuestions,
       googleFormLink: googleFormLink || null,
       coverImage
@@ -160,9 +179,24 @@ const updateCourse = async (req, res) => {
     const parsedQuestions = applicationQuestions === undefined
       ? undefined
       : parseQuestionsPayload(applicationQuestions);
+    const parsedTotalSlots = totalSlots === undefined ? undefined : Number(totalSlots);
+    const parsedAgeMin = ageMin === undefined || ageMin === '' ? undefined : Number(ageMin);
+    const parsedAgeMax = ageMax === undefined || ageMax === '' ? undefined : Number(ageMax);
 
     if (parsedQuestions === null) {
       return error(res, 400, 'Invalid application questions payload');
+    }
+
+    if (parsedTotalSlots !== undefined && (!Number.isFinite(parsedTotalSlots) || parsedTotalSlots <= 0)) {
+      return error(res, 400, 'Total slots must be a valid number greater than 0');
+    }
+
+    if (ageMin !== undefined && parsedAgeMin !== undefined && !Number.isFinite(parsedAgeMin)) {
+      return error(res, 400, 'Minimum age must be a valid number');
+    }
+
+    if (ageMax !== undefined && parsedAgeMax !== undefined && !Number.isFinite(parsedAgeMax)) {
+      return error(res, 400, 'Maximum age must be a valid number');
     }
 
     const course = await Course.findOne({
@@ -184,15 +218,15 @@ const updateCourse = async (req, res) => {
     if (description !== undefined) updateData.description = description;
     if (category !== undefined) updateData.category = category;
     if (targetAudience !== undefined) updateData.targetAudience = targetAudience;
-    if (ageMin !== undefined) updateData.ageMin = ageMin;
-    if (ageMax !== undefined) updateData.ageMax = ageMax;
+    if (ageMin !== undefined) updateData.ageMin = parsedAgeMin;
+    if (ageMax !== undefined) updateData.ageMax = parsedAgeMax;
     if (gender !== undefined) updateData.gender = gender;
     if (location !== undefined) updateData.location = location;
     if (deliveryMode !== undefined) updateData.deliveryMode = deliveryMode;
     if (startDate !== undefined) updateData.startDate = startDate;
     if (endDate !== undefined) updateData.endDate = endDate;
     if (applicationDeadline !== undefined) updateData.applicationDeadline = applicationDeadline;
-    if (totalSlots !== undefined) updateData.totalSlots = totalSlots;
+    if (parsedTotalSlots !== undefined) updateData.totalSlots = parsedTotalSlots;
     if (parsedQuestions !== undefined) updateData.applicationQuestions = parsedQuestions;
     if (googleFormLink !== undefined) {
       updateData.googleFormLink = googleFormLink || null;
