@@ -1,5 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
+import { useLanguage } from '../../hooks/useLanguage';
 
 const Icon = ({ name, active = false, size = 24 }) => {
   const fill = active ? 'currentColor' : 'none';
@@ -108,6 +109,7 @@ const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
 
   const handleLogout = () => {
     logout();
@@ -123,24 +125,24 @@ const Navbar = () => {
   };
 
   const youthLinks = [
-    { label: 'Home',         path: '/home',          icon: 'home' },
-    { label: 'Courses',      path: '/courses',       icon: 'book' },
-    { label: 'Applications', path: '/applications',  icon: 'clipboard' },
-    { label: 'Alerts',       path: '/notifications', icon: 'bell' }
+    { label: t('nav.home'),         path: '/home',          icon: 'home' },
+    { label: t('nav.courses'),      path: '/courses',       icon: 'book' },
+    { label: t('nav.applications'), path: '/applications',  icon: 'clipboard' },
+    { label: t('nav.notifications'), path: '/notifications', icon: 'bell' }
   ];
 
   const orgLinks = [
-    { label: 'Dashboard',    path: '/org/dashboard',    icon: 'grid' },
-    { label: 'Courses',      path: '/org/courses',      icon: 'book' },
-    { label: 'Applicants',   path: '/org/applications', icon: 'users' },
-    { label: 'Impact',       path: '/org/impact',       icon: 'trending' }
+    { label: t('nav.dashboard'),    path: '/org/dashboard',    icon: 'grid' },
+    { label: t('nav.courses'),      path: '/org/courses',      icon: 'book' },
+    { label: t('nav.applications'),   path: '/org/applications', icon: 'users' },
+    { label: t('profile.helpSupport'),       path: '/org/impact',       icon: 'trending' }
   ];
 
   const adminLinks = [
-    { label: 'Dashboard', path: '/admin/dashboard',     icon: 'grid' },
-    { label: 'Orgs',      path: '/admin/organisations', icon: 'building' },
-    { label: 'Courses',   path: '/admin/courses',       icon: 'book' },
-    { label: 'Users',     path: '/admin/users',         icon: 'user' }
+    { label: t('nav.dashboard'), path: '/admin/dashboard',     icon: 'grid' },
+    { label: t('nav.profile'),      path: '/admin/organisations', icon: 'building' },
+    { label: t('nav.courses'),   path: '/admin/courses',       icon: 'book' },
+    { label: t('nav.profile'),     path: '/admin/users',         icon: 'user' }
   ];
 
   const links = user?.role === 'organisation'
@@ -397,7 +399,7 @@ const Navbar = () => {
             }}
           >
             <Icon name="logout" size={16} />
-            Logout
+            {t('common.logout')}
           </button>
         </div>
       </nav>

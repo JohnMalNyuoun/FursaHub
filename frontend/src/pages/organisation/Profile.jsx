@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
 import { getOrgProfile, updateOrgLanguage } from '../../services/profileService';
+import { useLanguage } from '../../hooks/useLanguage';
 
 const SETTINGS_KEY = 'fh_settings_org_tab';
 
@@ -9,9 +10,10 @@ const OrgProfile = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { language, setLanguage, t } = useLanguage();
   const [settings, setSettings] = useState({
     theme: 'dark',
-    language: 'en',
+    language: language,
     privacy: {
       profileVisible: true,
       activityVisible: true
@@ -49,6 +51,7 @@ const OrgProfile = () => {
         setProfile(res.data);
         if (res.data?.language) {
           setSettings((current) => ({ ...current, language: res.data.language }));
+          setLanguage(res.data.language);
         }
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to load profile');
@@ -58,7 +61,7 @@ const OrgProfile = () => {
     };
 
     fetchProfile();
-  }, []);
+  }, [setLanguage]);
 
   if (loading) return <Loader />;
 
@@ -79,10 +82,10 @@ const OrgProfile = () => {
       <div className="fh-section-head">
         <div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#FFFFFF', marginBottom: '6px' }}>
-            Organisation Profile
+            {t('profile.title')}
           </h1>
           <p style={{ fontSize: '0.9rem', color: '#7A9BB5' }}>
-            View your organisation details
+            {t('profile.personalInfo')}
           </p>
         </div>
       </div>
@@ -173,12 +176,12 @@ const OrgProfile = () => {
               background: '#152A47'
             }}>
               <h3 style={{ fontSize: '1.05rem', color: '#FFFFFF', marginBottom: '14px' }}>
-                Settings
+                {t('profile.settings')}
               </h3>
 
               <div style={{ display: 'grid', gap: '12px', marginBottom: '20px' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '170px 1fr', gap: '12px', alignItems: 'center' }}>
-                  <span style={{ color: '#7A9BB5', fontWeight: 700 }}>Dark / Light Mode</span>
+                  <span style={{ color: '#7A9BB5', fontWeight: 700 }}>{t('profile.theme')}</span>
                   <select
                     value={settings.theme}
                     onChange={(e) => setSettings((current) => ({ ...current, theme: e.target.value }))}
@@ -191,20 +194,21 @@ const OrgProfile = () => {
                       borderRadius: '10px'
                     }}
                   >
-                    <option value="dark">Dark</option>
-                    <option value="light">Light</option>
+                    <option value="dark">{t('profile.darkMode')}</option>
+                    <option value="light">{t('profile.lightMode')}</option>
                   </select>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '170px 1fr', gap: '12px', alignItems: 'center' }}>
-                  <span style={{ color: '#7A9BB5', fontWeight: 700 }}>Language</span>
+                  <span style={{ color: '#7A9BB5', fontWeight: 700 }}>{t('profile.language')}</span>
                   <select
                     value={settings.language}
                     onChange={async (e) => {
-                      const language = e.target.value;
-                      setSettings((current) => ({ ...current, language }));
+                      const lang = e.target.value;
+                      setSettings((current) => ({ ...current, language: lang }));
+                      setLanguage(lang);
                       try {
-                        await updateOrgLanguage(language);
+                        await updateOrgLanguage(lang);
                       } catch (err) {
                         console.error(err);
                       }
@@ -220,13 +224,13 @@ const OrgProfile = () => {
                   >
                     <option value="en">English</option>
                     <option value="sw">Swahili</option>
-                    <option value="fr">French</option>
-                    <option value="ar">Arabic</option>
+                    <option value="fr">Français</option>
+                    <option value="ar">العربية</option>
                   </select>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '170px 1fr', gap: '12px', alignItems: 'start' }}>
-                  <span style={{ color: '#7A9BB5', fontWeight: 700 }}>Privacy Preferences</span>
+                  <span style={{ color: '#7A9BB5', fontWeight: 700 }}>{t('profile.privacy')}</span>
                   <div style={{ display: 'grid', gap: '8px' }}>
                     <label style={{ color: '#FFFFFF', fontSize: '0.9rem', display: 'flex', gap: '8px', alignItems: 'center' }}>
                       <input
@@ -234,7 +238,7 @@ const OrgProfile = () => {
                         checked={settings.privacy.profileVisible}
                         onChange={(e) => updatePrivacy('profileVisible', e.target.checked)}
                       />
-                      Allow organisation profile visibility
+                      {t('profile.profileVisibility')}
                     </label>
                     <label style={{ color: '#FFFFFF', fontSize: '0.9rem', display: 'flex', gap: '8px', alignItems: 'center' }}>
                       <input
@@ -242,20 +246,20 @@ const OrgProfile = () => {
                         checked={settings.privacy.activityVisible}
                         onChange={(e) => updatePrivacy('activityVisible', e.target.checked)}
                       />
-                      Allow course activity visibility
+                      {t('profile.activityVisibility')}
                     </label>
                   </div>
                 </div>
               </div>
 
               <h3 style={{ fontSize: '1.05rem', color: '#FFFFFF', marginBottom: '12px' }}>
-                Help and Support
+                {t('profile.helpSupport')}
               </h3>
               <div style={{ display: 'grid', gap: '10px' }}>
                 <details style={{ background: '#1A3357', border: '1px solid #2A4A6B', borderRadius: '10px', padding: '10px 12px' }}>
-                  <summary style={{ color: '#FFFFFF', fontWeight: 700, cursor: 'pointer' }}>Frequently Asked Questions (FAQs)</summary>
+                  <summary style={{ color: '#FFFFFF', fontWeight: 700, cursor: 'pointer' }}>{t('profile.faqs')}</summary>
                   <p style={{ color: '#B8D0E8', fontSize: '0.88rem', marginTop: '8px' }}>
-                    See setup, posting, and applicant management FAQs in the help center.
+                    Visit the help center for account, applications, and notifications FAQs.
                   </p>
                 </details>
 
@@ -272,7 +276,7 @@ const OrgProfile = () => {
                       textDecoration: 'none'
                     }}
                   >
-                    Contact Support
+                    {t('profile.contactUs')}
                   </a>
 
                   <a
@@ -289,7 +293,7 @@ const OrgProfile = () => {
                       textDecoration: 'none'
                     }}
                   >
-                    User Guides and Tutorials
+                    {t('profile.tutorials')}
                   </a>
                 </div>
               </div>
