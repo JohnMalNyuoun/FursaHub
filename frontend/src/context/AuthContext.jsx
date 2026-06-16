@@ -8,14 +8,29 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
+    // Prefer tab-scoped session storage so different tabs can use different accounts.
+    // Fall back to legacy localStorage once, then migrate and clear it.
+    let storedToken = sessionStorage.getItem('token');
+    let storedUser = sessionStorage.getItem('user');
+
+    if (!storedToken || !storedUser) {
+      storedToken = localStorage.getItem('token');
+      storedUser = localStorage.getItem('user');
+      if (storedToken && storedUser) {
+        sessionStorage.setItem('token', storedToken);
+        sessionStorage.setItem('user', storedUser);
+      }
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
 
     if (storedToken && storedUser) {
       try {
         setToken(storedToken);
         setUser(JSON.parse(storedUser));
       } catch (err) {
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('user');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
       }
@@ -27,13 +42,17 @@ export const AuthProvider = ({ children }) => {
   const login = (userData, userToken) => {
     setUser(userData);
     setToken(userToken);
-    localStorage.setItem('token', userToken);
-    localStorage.setItem('user', JSON.stringify(userData));
+    sessionStorage.setItem('token', userToken);
+    sessionStorage.setItem('user', JSON.stringify(userData));
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
   };
