@@ -152,6 +152,9 @@ const Navbar = () => {
   const homePath =
     user?.role === 'organisation' ? '/org/dashboard' :
     user?.role === 'admin' ? '/admin/dashboard' : '/home';
+  const profilePath =
+    user?.role === 'organisation' ? '/org/profile' :
+    user?.role === 'admin' ? '/admin/dashboard' : '/profile';
 
   const isActive = (path) => location.pathname === path;
 
@@ -323,8 +326,12 @@ const Navbar = () => {
             padding: '6px 14px 6px 6px',
             background: '#1A3357',
             borderRadius: '999px',
-            border: '1px solid #2A4A6B'
-          }}>
+            border: '1px solid #2A4A6B',
+            cursor: 'pointer'
+          }}
+          onClick={() => navigate(profilePath)}
+          title="View profile"
+          >
             <div style={{
               width: '32px',
               height: '32px',
@@ -463,8 +470,12 @@ const Navbar = () => {
             alignItems: 'center',
             justifyContent: 'center',
             fontWeight: 800,
-            fontSize: '0.78rem'
-          }}>
+            fontSize: '0.78rem',
+            cursor: 'pointer'
+          }}
+          onClick={() => navigate(profilePath)}
+          title="View profile"
+          >
             {initials}
           </div>
           <button

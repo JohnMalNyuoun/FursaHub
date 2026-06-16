@@ -13,12 +13,14 @@ import YouthCourses from './pages/youth/Courses';
 import CourseDetail from './pages/youth/CourseDetail';
 import YouthApplications from './pages/youth/Applications';
 import YouthNotifications from './pages/youth/Notifications';
+import YouthProfile from './pages/youth/Profile';
 
 // Organisation pages
 import OrgDashboard from './pages/organisation/Dashboard';
 import OrgCourses from './pages/organisation/Courses';
 import OrgCourseForm from './pages/organisation/CourseForm';
 import OrgApplications from './pages/organisation/Applications';
+import OrgProfile from './pages/organisation/Profile';
 
 // Admin pages
 import AdminDashboard from './pages/admin/Dashboard';
@@ -72,12 +74,14 @@ function App () {
       <Route path="/courses/:id" element={<YouthRoute><CourseDetail /></YouthRoute>} />
       <Route path="/applications" element={<YouthRoute><YouthApplications /></YouthRoute>} />
       <Route path="/notifications" element={<YouthRoute><YouthNotifications /></YouthRoute>} />
+      <Route path="/profile" element={<YouthRoute><YouthProfile /></YouthRoute>} />
 
       {/* Organisation */}
       <Route path="/org/dashboard" element={<OrgRoute><OrgDashboard /></OrgRoute>} />
       <Route path="/org/courses" element={<OrgRoute><OrgCourses /></OrgRoute>} />
       <Route path="/org/courses/new" element={<OrgRoute><OrgCourseForm /></OrgRoute>} />
       <Route path="/org/applications" element={<OrgRoute><OrgApplications /></OrgRoute>} />
+      <Route path="/org/profile" element={<OrgRoute><OrgProfile /></OrgRoute>} />
 
       {/* Admin */}
       <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
