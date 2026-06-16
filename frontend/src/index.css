@@ -69,6 +69,59 @@
   --footer-text: #2e4d68;
 }
 
+/* Strong light-mode overrides to make the contrast with dark mode very clear. */
+:root[data-theme='light'] body,
+:root[data-theme='light'] .fh-page {
+  background: #f4f8fc !important;
+  color: #10263d !important;
+}
+
+:root[data-theme='light'] .fh-section-head,
+:root[data-theme='light'] .fh-hero,
+:root[data-theme='light'] nav,
+:root[data-theme='light'] .fh-empty,
+:root[data-theme='light'] .fh-filter-pill,
+:root[data-theme='light'] .fh-badge {
+  background: #ffffff !important;
+  color: #10263d !important;
+  border-color: #d4e3ef !important;
+}
+
+:root[data-theme='light'] input,
+:root[data-theme='light'] select,
+:root[data-theme='light'] textarea,
+:root[data-theme='light'] button {
+  border-color: #cddcea !important;
+}
+
+:root[data-theme='light'] input,
+:root[data-theme='light'] select,
+:root[data-theme='light'] textarea {
+  background: #ffffff !important;
+  color: #10263d !important;
+}
+
+/* Override common hardcoded dark inline styles used across pages. */
+:root[data-theme='light'] [style*="#1A3357"],
+:root[data-theme='light'] [style*="#152A47"],
+:root[data-theme='light'] [style*="#0F2035"],
+:root[data-theme='light'] [style*="#1E3A5F"] {
+  background: #ffffff !important;
+}
+
+:root[data-theme='light'] [style*="#2A4A6B"] {
+  border-color: #d4e3ef !important;
+}
+
+:root[data-theme='light'] [style*="#FFFFFF"] {
+  color: #10263d !important;
+}
+
+:root[data-theme='light'] [style*="#B8D0E8"],
+:root[data-theme='light'] [style*="#7A9BB5"] {
+  color: #4c687f !important;
+}
+
 * {
   margin: 0;
   padding: 0;
