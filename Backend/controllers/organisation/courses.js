@@ -18,6 +18,10 @@ const parseQuestionsPayload = (questions) => {
 const uploadCourseCover = async (file) => {
   if (!file) return null;
 
+  if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+    throw new Error('Cloudinary is not configured on the server. Missing CLOUDINARY_* environment variables.');
+  }
+
   try {
     const uploadResult = await cloudinary.uploader.upload(
       `data:${file.mimetype};base64,${file.buffer.toString('base64')}`,
@@ -29,7 +33,7 @@ const uploadCourseCover = async (file) => {
 
     return uploadResult.secure_url;
   } catch (err) {
-    throw new Error('Cover image upload failed. Please try a different image.');
+    throw new Error(`Cover image upload failed: ${err.message}`);
   }
 };
 
