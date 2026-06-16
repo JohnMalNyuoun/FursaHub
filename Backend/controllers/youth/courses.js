@@ -21,7 +21,7 @@ const getAllCourses = async (req, res) => {
     }
 
     const courses = await Course.find(filter)
-      .populate('organisation', 'name type location')
+      .populate('organisation', 'name type location logo')
       .sort({ createdAt: -1 });
 
     return success(res, 200, 'Courses fetched', courses);
@@ -39,7 +39,7 @@ const getCourse = async (req, res) => {
     const course = await Course.findOne({
       _id: req.params.id,
       status: 'published'
-    }).populate('organisation', 'name type location phoneNumber email');
+    }).populate('organisation', 'name type location phoneNumber email logo');
 
     if (!course) {
       return error(res, 404, 'Course not found');

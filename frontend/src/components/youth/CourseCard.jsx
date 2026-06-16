@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 const CourseCard = ({ course }) => {
   const isDeadlinePassed = new Date() > new Date(course.applicationDeadline);
   const isFull = course.filledSlots >= course.totalSlots;
+  const cardImage = (course.coverImage || course.organisation?.logo || '').replace('http://', 'https://');
 
   const status = isFull ? 'Full' : isDeadlinePassed ? 'Closed' : 'Open';
   const statusStyle = status === 'Open'
@@ -34,9 +35,9 @@ const CourseCard = ({ course }) => {
           e.currentTarget.style.boxShadow = '0 2px 12px rgba(0, 0, 0, 0.3)';
         }}
       >
-        {course.coverImage && (
+        {cardImage ? (
           <img
-            src={course.coverImage}
+            src={cardImage}
             alt={course.title}
             style={{
               width: 'calc(100% + 40px)',
@@ -47,6 +48,22 @@ const CourseCard = ({ course }) => {
               borderBottom: '1px solid #2A4A6B'
             }}
           />
+        ) : (
+          <div style={{
+            width: 'calc(100% + 40px)',
+            height: '180px',
+            margin: '-20px -20px 16px',
+            borderBottom: '1px solid #2A4A6B',
+            background: 'linear-gradient(135deg, #122845 0%, #1E3A5F 60%, #2B527E 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#B8D0E8',
+            fontSize: '0.9rem',
+            fontWeight: '700'
+          }}>
+            Course Cover
+          </div>
         )}
 
         {/* Category badge */}

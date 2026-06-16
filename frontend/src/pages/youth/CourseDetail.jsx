@@ -75,6 +75,7 @@ const CourseDetail = () => {
   const isDeadlinePassed = new Date() > new Date(course.applicationDeadline);
   const isFull = course.filledSlots >= course.totalSlots;
   const canApply = !alreadyApplied && !isDeadlinePassed && !isFull;
+  const detailImage = (course.coverImage || course.organisation?.logo || '').replace('http://', 'https://');
 
   return (
     <div style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
@@ -104,14 +105,14 @@ const CourseDetail = () => {
           background: '#1A3357',
           border: '1px solid #2A4A6B',
           borderRadius: 'var(--radius)',
-          padding: course.coverImage ? '0 0 32px' : '32px',
+          padding: detailImage ? '0 0 32px' : '32px',
           marginBottom: '24px',
           overflow: 'hidden',
           boxShadow: 'var(--card-shadow)'
         }}>
-          {course.coverImage && (
+          {detailImage ? (
             <img
-              src={course.coverImage}
+              src={detailImage}
               alt={course.title}
               style={{
                 width: '100%',
@@ -122,9 +123,25 @@ const CourseDetail = () => {
                 marginBottom: '24px'
               }}
             />
+          ) : (
+            <div style={{
+              width: '100%',
+              height: '220px',
+              borderBottom: '1px solid #2A4A6B',
+              marginBottom: '24px',
+              background: 'linear-gradient(135deg, #122845 0%, #1E3A5F 60%, #2B527E 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#B8D0E8',
+              fontSize: '1rem',
+              fontWeight: '800'
+            }}>
+              Course Cover
+            </div>
           )}
 
-          <div style={{ padding: course.coverImage ? '0 32px' : 0 }}>
+          <div style={{ padding: detailImage ? '0 32px' : 0 }}>
           <div style={{
             display: 'inline-block',
             padding: '4px 12px',
