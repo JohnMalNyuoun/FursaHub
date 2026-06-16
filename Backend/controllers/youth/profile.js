@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const User = require('../../models/Users');
 const { success, error } = require('../../utils/apiResponse');
+const cloudinary = require('../../config/cloudinary');
 
 // @desc    Get youth profile
 // @route   GET /api/youth/profile
@@ -59,10 +60,18 @@ const updatePhoto = async (req, res) => {
   try {
     if (!req.file) return error(res, 400, 'No photo uploaded');
 
+    const uploadResult = await cloudinary.uploader.upload(
+      `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`,
+      {
+        folder: 'fursahub/profiles',
+        transformation: [{ width: 400, height: 400, crop: 'fill' }]
+      }
+    );
+
     const user = await User.findById(req.user.id);
     if (!user) return error(res, 404, 'User not found');
 
-    user.photo = req.file.path;
+    user.photo = uploadResult.secure_url;
     await user.save();
 
     return success(res, 200, 'Photo updated', { photo: user.photo });

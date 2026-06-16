@@ -1,26 +1,21 @@
 const multer = require('multer');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const cloudinary = require('../config/cloudinary');
 
-const profileStorage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: 'fursahub/profiles',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-    transformation: [{ width: 400, height: 400, crop: 'fill' }]
+const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+const fileFilter = (req, file, cb) => {
+  if (allowedMimeTypes.includes(file.mimetype)) {
+    return cb(null, true);
   }
-});
+  return cb(new Error('Only JPG, PNG, and WEBP images are allowed'));
+};
 
-const logoStorage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: 'fursahub/logos',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-    transformation: [{ width: 400, height: 400, crop: 'fill' }]
-  }
-});
+const commonConfig = {
+  storage: multer.memoryStorage(),
+  fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 }
+};
 
-const uploadProfile = multer({ storage: profileStorage });
-const uploadLogo = multer({ storage: logoStorage });
+const uploadProfile = multer(commonConfig);
+const uploadLogo = multer(commonConfig);
 
 module.exports = { uploadProfile, uploadLogo };

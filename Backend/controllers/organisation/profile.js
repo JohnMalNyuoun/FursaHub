@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const Organisation = require('../../models/Organisation');
 const { success, error } = require('../../utils/apiResponse');
+const cloudinary = require('../../config/cloudinary');
 
 // @desc    Get org profile
 // @route   GET /api/org/profile
@@ -58,10 +59,18 @@ const updateLogo = async (req, res) => {
   try {
     if (!req.file) return error(res, 400, 'No logo uploaded');
 
+    const uploadResult = await cloudinary.uploader.upload(
+      `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`,
+      {
+        folder: 'fursahub/logos',
+        transformation: [{ width: 400, height: 400, crop: 'fill' }]
+      }
+    );
+
     const org = await Organisation.findById(req.user.id);
     if (!org) return error(res, 404, 'Organisation not found');
 
-    org.logo = req.file.path;
+    org.logo = uploadResult.secure_url;
     await org.save();
 
     return success(res, 200, 'Logo updated', { logo: org.logo });
