@@ -17,5 +17,6 @@ const commonConfig = {
 
 const uploadProfile = multer(commonConfig);
 const uploadLogo = multer(commonConfig);
+const uploadCourseImage = multer(commonConfig);
 
-module.exports = { uploadProfile, uploadLogo };
+module.exports = { uploadProfile, uploadLogo, uploadCourseImage };

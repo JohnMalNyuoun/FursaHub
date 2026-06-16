@@ -1,5 +1,33 @@
 const Course = require('../../models/course');
+const cloudinary = require('../../config/cloudinary');
 const { success, error } = require('../../utils/apiResponse');
+
+const parseQuestionsPayload = (questions) => {
+  if (Array.isArray(questions)) return questions;
+  if (questions === undefined || questions === null || questions === '') return [];
+  if (typeof questions !== 'string') return null;
+
+  try {
+    const parsed = JSON.parse(questions);
+    return Array.isArray(parsed) ? parsed : null;
+  } catch (err) {
+    return null;
+  }
+};
+
+const uploadCourseCover = async (file) => {
+  if (!file) return null;
+
+  const uploadResult = await cloudinary.uploader.upload(
+    `data:${file.mimetype};base64,${file.buffer.toString('base64')}`,
+    {
+      folder: 'fursahub/course-covers',
+      transformation: [{ width: 1200, height: 675, crop: 'fill' }]
+    }
+  );
+
+  return uploadResult.secure_url;
+};
 
 // @desc    Post a new course
 // @route   POST /api/org/courses
@@ -23,6 +51,11 @@ const createCourse = async (req, res) => {
       applicationQuestions,
       googleFormLink
     } = req.body;
+    const parsedQuestions = parseQuestionsPayload(applicationQuestions);
+
+    if (parsedQuestions === null) {
+      return error(res, 400, 'Invalid application questions payload');
+    }
 
     // Check required fields
     if (!title || !description || !category || !targetAudience || !location || !deliveryMode || !startDate || !endDate || !applicationDeadline || !totalSlots) {
@@ -30,13 +63,14 @@ const createCourse = async (req, res) => {
     }
 
     // Require at least one non-empty eligibility question at creation time
-    const hasValidQuestions = Array.isArray(applicationQuestions)
-      && applicationQuestions.length > 0
-      && applicationQuestions.some((q) => q && typeof q.question === 'string' && q.question.trim().length > 0);
+    const hasValidQuestions = parsedQuestions.length > 0
+      && parsedQuestions.some((q) => q && typeof q.question === 'string' && q.question.trim().length > 0);
 
     if (!hasValidQuestions) {
       return error(res, 400, 'Please add at least one application question before posting');
     }
+
+    const coverImage = await uploadCourseCover(req.file);
 
     const course = await Course.create({
       organisation: req.user.id,
@@ -53,8 +87,9 @@ const createCourse = async (req, res) => {
       endDate,
       applicationDeadline,
       totalSlots,
-      applicationQuestions: applicationQuestions || [],
-      googleFormLink: googleFormLink || null
+      applicationQuestions: parsedQuestions,
+      googleFormLink: googleFormLink || null,
+      coverImage
     });
 
     return success(res, 201, 'Course created successfully', course);
@@ -122,6 +157,13 @@ const updateCourse = async (req, res) => {
       applicationQuestions,
       googleFormLink
     } = req.body;
+    const parsedQuestions = applicationQuestions === undefined
+      ? undefined
+      : parseQuestionsPayload(applicationQuestions);
+
+    if (parsedQuestions === null) {
+      return error(res, 400, 'Invalid application questions payload');
+    }
 
     const course = await Course.findOne({
       _id: req.params.id,
@@ -151,9 +193,12 @@ const updateCourse = async (req, res) => {
     if (endDate !== undefined) updateData.endDate = endDate;
     if (applicationDeadline !== undefined) updateData.applicationDeadline = applicationDeadline;
     if (totalSlots !== undefined) updateData.totalSlots = totalSlots;
-    if (applicationQuestions !== undefined) updateData.applicationQuestions = applicationQuestions;
+    if (parsedQuestions !== undefined) updateData.applicationQuestions = parsedQuestions;
     if (googleFormLink !== undefined) {
       updateData.googleFormLink = googleFormLink || null;
+    }
+    if (req.file) {
+      updateData.coverImage = await uploadCourseCover(req.file);
     }
 
     const updatedCourse = await Course.findByIdAndUpdate(

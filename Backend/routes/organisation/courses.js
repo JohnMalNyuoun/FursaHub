@@ -11,11 +11,12 @@ const {
 } = require('../../controllers/organisation/courses');
 const { protect } = require('../../middleware/auth');
 const { isOrganisation } = require('../../middleware/isOrganisation');
+const { uploadCourseImage } = require('../../middleware/upload');
 
-router.post('/', protect, isOrganisation, createCourse);
+router.post('/', protect, isOrganisation, uploadCourseImage.single('coverImage'), createCourse);
 router.get('/', protect, isOrganisation, getOrgCourses);
 router.get('/:id', protect, isOrganisation, getOrgCourse);
-router.put('/:id', protect, isOrganisation, updateCourse);
+router.put('/:id', protect, isOrganisation, uploadCourseImage.single('coverImage'), updateCourse);
 router.put('/:id/publish', protect, isOrganisation, publishCourse);
 router.put('/:id/close', protect, isOrganisation, closeCourse);
 router.delete('/:id', protect, isOrganisation, deleteCourse);

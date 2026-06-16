@@ -123,9 +123,26 @@ const Courses = () => {
                 background: '#1A3357',
                 border: '1px solid #2A4A6B',
                 borderRadius: '16px',
-                padding: '20px',
+                padding: course.coverImage ? '0 0 20px' : '20px',
+                overflow: 'hidden',
                 boxShadow: 'var(--card-shadow)'
               }}>
+                {course.coverImage && (
+                  <img
+                    src={course.coverImage}
+                    alt={course.title}
+                    style={{
+                      width: '100%',
+                      height: '180px',
+                      objectFit: 'cover',
+                      display: 'block',
+                      borderBottom: '1px solid #2A4A6B',
+                      marginBottom: '20px'
+                    }}
+                  />
+                )}
+
+                <div style={{ padding: course.coverImage ? '0 20px' : 0 }}>
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -201,6 +218,7 @@ const Courses = () => {
                       Close Course
                     </Button>
                   )}
+                </div>
                 </div>
               </div>
             ))}

@@ -2,14 +2,22 @@ import axios from 'axios';
 import { API_URL } from '../utils/constants';
 
 const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  baseURL: API_URL
 });
 
 // Attach token to every request automatically
 api.interceptors.request.use((config) => {
+  if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+    if (config.headers?.['Content-Type']) {
+      delete config.headers['Content-Type'];
+    }
+  } else {
+    config.headers = config.headers || {};
+    if (!config.headers['Content-Type']) {
+      config.headers['Content-Type'] = 'application/json';
+    }
+  }
+
   const token = sessionStorage.getItem('token') || localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/common/Navbar';
 import Input from '../../components/common/Input';
@@ -25,15 +25,65 @@ const CourseForm = () => {
     endDate: '',
     applicationDeadline: '',
     totalSlots: '',
-    googleFormLink: ''
+    googleFormLink: '',
+    coverImage: null
   });
 
   const [questions, setQuestions] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [coverPreview, setCoverPreview] = useState('');
+
+  useEffect(() => {
+    return () => {
+      if (coverPreview.startsWith('blob:')) {
+        URL.revokeObjectURL(coverPreview);
+      }
+    };
+  }, [coverPreview]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value, files, type } = e.target;
+
+    if (type === 'file') {
+      const nextFile = files?.[0] || null;
+
+      setForm((current) => ({ ...current, [name]: nextFile }));
+      setCoverPreview((current) => {
+        if (current.startsWith('blob:')) {
+          URL.revokeObjectURL(current);
+        }
+        return nextFile ? URL.createObjectURL(nextFile) : '';
+      });
+      return;
+    }
+
+    setForm({ ...form, [name]: value });
+  };
+
+  const buildPayload = () => {
+    const payload = new FormData();
+    const cleanedQuestions = questions.filter((q) => q.question?.trim());
+    const fields = {
+      ...form,
+      totalSlots: String(parseInt(form.totalSlots, 10)),
+      googleFormLink: form.googleFormLink?.trim() || ''
+    };
+
+    Object.entries(fields).forEach(([key, value]) => {
+      if (key === 'coverImage') return;
+      if (value !== '' && value !== null && value !== undefined) {
+        payload.append(key, value);
+      }
+    });
+
+    payload.append('applicationQuestions', JSON.stringify(cleanedQuestions));
+
+    if (form.coverImage) {
+      payload.append('coverImage', form.coverImage);
+    }
+
+    return payload;
   };
 
   const addQuestion = () => {
@@ -61,12 +111,7 @@ const CourseForm = () => {
     setLoading(true);
 
     try {
-      await createCourse({
-        ...form,
-        googleFormLink: form.googleFormLink?.trim(),
-        totalSlots: parseInt(form.totalSlots),
-        applicationQuestions: questions.filter((q) => q.question?.trim())
-      });
+      await createCourse(buildPayload());
       navigate('/org/courses');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create course');
@@ -218,6 +263,55 @@ const CourseForm = () => {
                 <option key={c.value} value={c.value}>{c.label}</option>
               ))}
             </select>
+
+            <div style={{ marginTop: '4px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '0.85rem',
+                fontWeight: '600',
+                color: 'var(--text-secondary)',
+                marginBottom: '6px'
+              }}>
+                Course Cover Image (Optional)
+              </label>
+              <input
+                type="file"
+                name="coverImage"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={handleChange}
+                style={{
+                  width: '100%',
+                  padding: '12px 14px',
+                  fontSize: '0.95rem',
+                  color: 'var(--text-primary)',
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius)',
+                  marginBottom: coverPreview ? '12px' : '8px'
+                }}
+              />
+              <p style={{
+                fontSize: '0.82rem',
+                color: 'var(--text-muted)',
+                marginBottom: coverPreview ? '12px' : '0'
+              }}>
+                Upload a JPG, PNG, or WEBP image. It will be stored in Cloudinary and shown on the course.
+              </p>
+
+              {coverPreview && (
+                <img
+                  src={coverPreview}
+                  alt="Course cover preview"
+                  style={{
+                    width: '100%',
+                    maxHeight: '220px',
+                    objectFit: 'cover',
+                    borderRadius: 'var(--radius)',
+                    border: '1px solid var(--border-color)'
+                  }}
+                />
+              )}
+            </div>
           </div>
 
           {/* Targeting */}

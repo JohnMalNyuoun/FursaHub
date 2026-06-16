@@ -34,6 +34,21 @@ const CourseCard = ({ course }) => {
           e.currentTarget.style.boxShadow = '0 2px 12px rgba(0, 0, 0, 0.3)';
         }}
       >
+        {course.coverImage && (
+          <img
+            src={course.coverImage}
+            alt={course.title}
+            style={{
+              width: 'calc(100% + 40px)',
+              height: '180px',
+              objectFit: 'cover',
+              margin: '-20px -20px 16px',
+              display: 'block',
+              borderBottom: '1px solid #2A4A6B'
+            }}
+          />
+        )}
+
         {/* Category badge */}
         <div style={{
           display: 'inline-flex',
