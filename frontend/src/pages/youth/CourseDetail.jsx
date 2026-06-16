@@ -189,6 +189,57 @@ const CourseDetail = () => {
               </div>
             ))}
           </div>
+
+          {/* Google Form link */}
+          {course.googleFormLink && (
+            <div style={{
+              marginTop: '16px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '12px',
+              padding: '14px 16px',
+              borderRadius: 'var(--radius)',
+              border: '1px solid #2A4A6B',
+              background: '#152A47'
+            }}>
+              <div>
+                <p style={{
+                  fontSize: '0.85rem',
+                  fontWeight: '800',
+                  color: '#F5A623',
+                  marginBottom: '2px'
+                }}>
+                  📎 Document Upload Required
+                </p>
+                <p style={{
+                  fontSize: '0.82rem',
+                  color: '#B8D0E8'
+                }}>
+                  Upload your supporting documents via Google Form
+                </p>
+              </div>
+
+              <a
+                href={course.googleFormLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  background: '#F5A623',
+                  color: '#1E3A5F',
+                  padding: '10px 20px',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: '0.85rem',
+                  fontWeight: '800',
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                Upload Documents →
+              </a>
+            </div>
+          )}
         </div>
 
         {/* Application Section */}
@@ -350,6 +401,36 @@ const CourseDetail = () => {
                         <option key={j} value={opt}>{opt}</option>
                       ))}
                     </select>
+                  ) : q.fieldType === 'number' ? (
+                    <input
+                      type="number"
+                      value={answers[i]?.answer || ''}
+                      onChange={(e) => handleAnswerChange(i, e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '12px 14px',
+                        fontSize: '0.95rem',
+                        color: '#FFFFFF',
+                        background: '#152A47',
+                        border: '1px solid #2A4A6B',
+                        borderRadius: 'var(--radius)',
+                      }}
+                    />
+                  ) : q.fieldType === 'date' ? (
+                    <input
+                      type="date"
+                      value={answers[i]?.answer || ''}
+                      onChange={(e) => handleAnswerChange(i, e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '12px 14px',
+                        fontSize: '0.95rem',
+                        color: '#FFFFFF',
+                        background: '#152A47',
+                        border: '1px solid #2A4A6B',
+                        borderRadius: 'var(--radius)',
+                      }}
+                    />
                   ) : (
                     <input
                       type="text"

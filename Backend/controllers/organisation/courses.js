@@ -20,7 +20,8 @@ const createCourse = async (req, res) => {
       endDate,
       applicationDeadline,
       totalSlots,
-      applicationQuestions
+      applicationQuestions,
+      googleFormLink
     } = req.body;
 
     // Check required fields
@@ -52,7 +53,8 @@ const createCourse = async (req, res) => {
       endDate,
       applicationDeadline,
       totalSlots,
-      applicationQuestions
+      applicationQuestions: applicationQuestions || [],
+      googleFormLink: googleFormLink || null
     });
 
     return success(res, 201, 'Course created successfully', course);
@@ -103,6 +105,24 @@ const getOrgCourse = async (req, res) => {
 // @access  Organisation
 const updateCourse = async (req, res) => {
   try {
+    const {
+      title,
+      description,
+      category,
+      targetAudience,
+      ageMin,
+      ageMax,
+      gender,
+      location,
+      deliveryMode,
+      startDate,
+      endDate,
+      applicationDeadline,
+      totalSlots,
+      applicationQuestions,
+      googleFormLink
+    } = req.body;
+
     const course = await Course.findOne({
       _id: req.params.id,
       organisation: req.user.id
@@ -116,9 +136,29 @@ const updateCourse = async (req, res) => {
       return error(res, 400, 'Cannot edit a published course. Close it first.');
     }
 
+    const updateData = {};
+
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (category !== undefined) updateData.category = category;
+    if (targetAudience !== undefined) updateData.targetAudience = targetAudience;
+    if (ageMin !== undefined) updateData.ageMin = ageMin;
+    if (ageMax !== undefined) updateData.ageMax = ageMax;
+    if (gender !== undefined) updateData.gender = gender;
+    if (location !== undefined) updateData.location = location;
+    if (deliveryMode !== undefined) updateData.deliveryMode = deliveryMode;
+    if (startDate !== undefined) updateData.startDate = startDate;
+    if (endDate !== undefined) updateData.endDate = endDate;
+    if (applicationDeadline !== undefined) updateData.applicationDeadline = applicationDeadline;
+    if (totalSlots !== undefined) updateData.totalSlots = totalSlots;
+    if (applicationQuestions !== undefined) updateData.applicationQuestions = applicationQuestions;
+    if (googleFormLink !== undefined) {
+      updateData.googleFormLink = googleFormLink || null;
+    }
+
     const updatedCourse = await Course.findByIdAndUpdate(
       req.params.id,
-      { $set: req.body },
+      { $set: updateData },
       { new: true, runValidators: true }
     );
 

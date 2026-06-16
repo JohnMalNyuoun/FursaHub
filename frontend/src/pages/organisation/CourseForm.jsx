@@ -25,6 +25,7 @@ const CourseForm = () => {
     endDate: '',
     applicationDeadline: '',
     totalSlots: '',
+    googleFormLink: ''
   });
 
   const [questions, setQuestions] = useState([]);
@@ -63,7 +64,7 @@ const CourseForm = () => {
       await createCourse({
         ...form,
         totalSlots: parseInt(form.totalSlots),
-        applicationQuestions: questions
+        applicationQuestions: questions.filter((q) => q.question?.trim())
       });
       navigate('/org/courses');
     } catch (err) {
@@ -369,6 +370,29 @@ const CourseForm = () => {
             />
           </div>
 
+          {/* Google Form Link */}
+          <div style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 'var(--radius)',
+            padding: '24px',
+            marginBottom: '20px'
+          }}>
+            <Input
+              label="Document Upload Link (Optional)"
+              name="googleFormLink"
+              placeholder="https://docs.google.com/forms/..."
+              value={form.googleFormLink}
+              onChange={handleChange}
+            />
+            <p style={{
+              fontSize: '0.82rem',
+              color: 'var(--text-muted)'
+            }}>
+              If applicants need to upload documents (CV, certificates), paste your Google Form link here.
+            </p>
+          </div>
+
           {/* Application Questions */}
           <div style={{
             background: 'var(--bg-card)',
@@ -393,7 +417,7 @@ const CourseForm = () => {
                   Application Questions
                 </h2>
                 <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                  Add questions youth must answer when applying
+                  {questions.length} question{questions.length !== 1 ? 's' : ''} added
                 </p>
               </div>
               <button
@@ -415,88 +439,193 @@ const CourseForm = () => {
             </div>
 
             {questions.length === 0 ? (
-              <p style={{
-                fontSize: '0.85rem',
-                color: '#7A9BB5',
+              <div style={{
                 textAlign: 'center',
-                padding: '20px'
+                padding: '24px',
+                border: '1px dashed #2A4A6B',
+                borderRadius: 'var(--radius)'
               }}>
-                No questions added yet. Click "Add Question" to add one.
-              </p>
-            ) : (
-              questions.map((q, i) => (
-                <div key={i} style={{
-                  background: '#152A47',
-                  border: '1px solid #2A4A6B',
-                  borderRadius: 'var(--radius)',
-                  padding: '16px',
-                  marginBottom: '12px'
+                <p style={{
+                  fontSize: '0.85rem',
+                  color: '#7A9BB5',
+                  marginBottom: '14px'
                 }}>
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
+                  No questions added yet
+                </p>
+                <button
+                  type="button"
+                  onClick={addQuestion}
+                  style={{
+                    background: 'rgba(245,166,35,0.15)',
+                    color: '#F5A623',
+                    border: 'none',
+                    borderRadius: 'var(--radius)',
+                    padding: '9px 14px',
+                    fontSize: '0.84rem',
+                    fontWeight: '700',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Add Your First Question
+                </button>
+              </div>
+            ) : (
+              <>
+                {questions.map((q, i) => (
+                  <div key={i} style={{
+                    background: '#152A47',
+                    border: '1px solid #2A4A6B',
+                    borderRadius: 'var(--radius)',
+                    padding: '16px',
                     marginBottom: '12px'
                   }}>
-                    <span style={{
-                      fontSize: '0.82rem',
-                      fontWeight: '600',
-                      color: '#7A9BB5'
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      marginBottom: '12px'
                     }}>
-                      Question {i + 1}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => removeQuestion(i)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: '#E53E3E',
+                      <span style={{
                         fontSize: '0.82rem',
-                        cursor: 'pointer',
-                        fontWeight: '600'
+                        fontWeight: '700',
+                        color: '#7A9BB5'
+                      }}>
+                        Question {i + 1}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeQuestion(i)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#E53E3E',
+                          fontSize: '0.82rem',
+                          cursor: 'pointer',
+                          fontWeight: '700'
+                        }}
+                      >
+                        Remove
+                      </button>
+                    </div>
+
+                    <input
+                      type="text"
+                      placeholder="Type your question here"
+                      value={q.question}
+                      onChange={(e) => updateQuestion(i, 'question', e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '11px 14px',
+                        fontSize: '0.9rem',
+                        color: 'var(--text-primary)',
+                        background: 'var(--bg-card)',
+                        border: '1.5px solid var(--border-color)',
+                        borderRadius: 'var(--radius-sm)',
+                        marginBottom: '10px'
                       }}
-                    >
-                      Remove
-                    </button>
+                    />
+
+                    <div style={{ marginBottom: q.fieldType === 'select' ? '10px' : '12px' }}>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.8rem',
+                        fontWeight: '600',
+                        color: '#7A9BB5',
+                        marginBottom: '6px'
+                      }}>
+                        Answer Type
+                      </label>
+                      <select
+                        value={q.fieldType}
+                        onChange={(e) => updateQuestion(i, 'fieldType', e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '11px 14px',
+                          fontSize: '0.9rem',
+                          color: 'var(--text-primary)',
+                          background: 'var(--bg-card)',
+                          border: '1.5px solid var(--border-color)',
+                          borderRadius: 'var(--radius-sm)'
+                        }}
+                      >
+                        <option value="textarea">Long text answer</option>
+                        <option value="text">Short text answer</option>
+                        <option value="yes_no">Yes / No</option>
+                        <option value="select">Multiple choice</option>
+                        <option value="number">Number</option>
+                        <option value="date">Date</option>
+                      </select>
+                    </div>
+
+                    {q.fieldType === 'select' && (
+                      <div style={{ marginBottom: '10px' }}>
+                        <label style={{
+                          display: 'block',
+                          fontSize: '0.8rem',
+                          fontWeight: '600',
+                          color: '#7A9BB5',
+                          marginBottom: '6px'
+                        }}>
+                          Options (one per line)
+                        </label>
+                        <textarea
+                          placeholder={'Option 1\nOption 2\nOption 3'}
+                          value={(q.options || []).join('\n')}
+                          onChange={(e) => updateQuestion(
+                            i,
+                            'options',
+                            e.target.value.split('\n').filter(o => o.trim())
+                          )}
+                          rows={4}
+                          style={{
+                            width: '100%',
+                            padding: '11px 14px',
+                            fontSize: '0.9rem',
+                            color: 'var(--text-primary)',
+                            background: 'var(--bg-card)',
+                            border: '1.5px solid var(--border-color)',
+                            borderRadius: 'var(--radius-sm)',
+                            resize: 'vertical'
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    <label style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      fontSize: '0.84rem',
+                      color: '#B8D0E8',
+                      cursor: 'pointer'
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={q.isRequired}
+                        onChange={(e) => updateQuestion(i, 'isRequired', e.target.checked)}
+                        style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                      />
+                      Required question
+                    </label>
                   </div>
+                ))}
 
-                  <input
-                    type="text"
-                    placeholder="Enter your question"
-                    value={q.question}
-                    onChange={(e) => updateQuestion(i, 'question', e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '10px 14px',
-                      fontSize: '0.9rem',
-                      color: '#FFFFFF',
-                      background: '#1A3357',
-                      border: '1px solid #2A4A6B',
-                      borderRadius: 'var(--radius)',
-                      marginBottom: '10px'
-                    }}
-                  />
-
-                  <select
-                    value={q.fieldType}
-                    onChange={(e) => updateQuestion(i, 'fieldType', e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '10px 14px',
-                      fontSize: '0.9rem',
-                      color: '#FFFFFF',
-                      background: '#1A3357',
-                      border: '1px solid #2A4A6B',
-                      borderRadius: 'var(--radius)'
-                    }}
-                  >
-                    <option value="textarea">Long text</option>
-                    <option value="text">Short text</option>
-                    <option value="yes_no">Yes / No</option>
-                    <option value="select">Multiple choice</option>
-                  </select>
-                </div>
-              ))
+                <button
+                  type="button"
+                  onClick={addQuestion}
+                  style={{
+                    background: 'rgba(245,166,35,0.15)',
+                    color: '#F5A623',
+                    border: 'none',
+                    borderRadius: 'var(--radius)',
+                    padding: '9px 14px',
+                    fontSize: '0.84rem',
+                    fontWeight: '700',
+                    cursor: 'pointer'
+                  }}
+                >
+                  + Add Another Question
+                </button>
+              </>
             )}
           </div>
 

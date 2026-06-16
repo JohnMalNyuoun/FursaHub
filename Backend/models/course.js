@@ -71,13 +71,18 @@ const courseSchema = new mongoose.Schema({
       question: { type: String, required: true },
       fieldType: {
         type: String,
-        enum: ['text', 'textarea', 'select', 'yes_no'],
+        enum: ['text', 'textarea', 'select', 'yes_no', 'number', 'date'],
         default: 'textarea'
       },
       options: [String],
       isRequired: { type: Boolean, default: true }
     }
   ],
+
+  googleFormLink: {
+    type: String,
+    default: null
+  },
 
   // Media
   coverImage: { type: String },
@@ -97,7 +102,7 @@ const courseSchema = new mongoose.Schema({
     question: { type: String, required: true },
     fieldType: {
       type: String,
-      enum: ['text', 'textarea', 'select', 'yes_no'],
+      enum: ['text', 'textarea', 'select', 'yes_no', 'number', 'date'],
       default: 'textarea'
     },
     options: [String],
