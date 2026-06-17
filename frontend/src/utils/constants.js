@@ -1,4 +1,4 @@
-export const API_URL = 'https://fursahub.onrender.com/api';
+export const API_URL = '/api';
 
 export const COMMUNITY_TYPES = [
   { value: 'refugee', label: 'Refugee' },

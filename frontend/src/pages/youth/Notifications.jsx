@@ -7,6 +7,7 @@ import {
   markAsRead,
   markAllAsRead
 } from '../../services/notificationService';
+import { useNotifications } from '../../context/NotificationContext';
 
 const notificationIcons = {
   application_submitted: '📝',
@@ -21,6 +22,7 @@ const notificationIcons = {
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { resetUnreadCount } = useNotifications();
 
   const fetchNotifications = async () => {
     try {
@@ -35,6 +37,7 @@ const Notifications = () => {
 
   useEffect(() => {
     fetchNotifications();
+    resetUnreadCount();
   }, []);
 
   const handleMarkAsRead = async (id) => {

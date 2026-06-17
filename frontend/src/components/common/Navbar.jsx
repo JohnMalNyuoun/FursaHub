@@ -1,6 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import { useLanguage } from '../../hooks/useLanguage';
+import { useNotifications } from '../../context/NotificationContext';
 
 const Icon = ({ name, active = false, size = 24 }) => {
   const fill = active ? 'currentColor' : 'none';
@@ -107,6 +108,7 @@ const Icon = ({ name, active = false, size = 24 }) => {
 
 const Navbar = () => {
   const { user, logout } = useAuth();
+  const { unreadCount } = useNotifications();
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useLanguage();
@@ -240,6 +242,7 @@ const Navbar = () => {
         }}>
           {leftLinks.map(link => {
             const active = isActive(link.path);
+            const isNotificationsLink = link.path === '/notifications';
             return (
               <Link
                 key={link.path}
@@ -260,6 +263,25 @@ const Navbar = () => {
               >
                 <Icon name={link.icon} active={active} size={18} />
                 {link.label}
+                {isNotificationsLink && unreadCount > 0 && (
+                  <span
+                    style={{
+                      marginLeft: '6px',
+                      minWidth: '18px',
+                      height: '18px',
+                      padding: '0 6px',
+                      borderRadius: '999px',
+                      background: '#DC2626',
+                      color: '#FFFFFF',
+                      fontSize: '0.68rem',
+                      fontWeight: 800,
+                      lineHeight: '18px',
+                      textAlign: 'center'
+                    }}
+                  >
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -294,6 +316,7 @@ const Navbar = () => {
 
           {rightLinks.map(link => {
             const active = isActive(link.path);
+            const isNotificationsLink = link.path === '/notifications';
             return (
               <Link
                 key={link.path}
@@ -314,6 +337,25 @@ const Navbar = () => {
               >
                 <Icon name={link.icon} active={active} size={18} />
                 {link.label}
+                {isNotificationsLink && unreadCount > 0 && (
+                  <span
+                    style={{
+                      marginLeft: '6px',
+                      minWidth: '18px',
+                      height: '18px',
+                      padding: '0 6px',
+                      borderRadius: '999px',
+                      background: '#DC2626',
+                      color: '#FFFFFF',
+                      fontSize: '0.68rem',
+                      fontWeight: 800,
+                      lineHeight: '18px',
+                      textAlign: 'center'
+                    }}
+                  >
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -524,6 +566,7 @@ const Navbar = () => {
       >
         {links.map(link => {
           const active = isActive(link.path);
+          const isNotificationsLink = link.path === '/notifications';
           return (
             <Link
               key={link.path}
@@ -552,7 +595,30 @@ const Navbar = () => {
                 background: active ? 'rgba(245, 166, 35, 0.15)' : 'transparent',
                 transition: 'background 0.2s ease'
               }}>
-                <Icon name={link.icon} active={active} size={22} />
+                <div style={{ position: 'relative', width: '22px', height: '22px' }}>
+                  <Icon name={link.icon} active={active} size={22} />
+                  {isNotificationsLink && unreadCount > 0 && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '-7px',
+                        right: '-10px',
+                        minWidth: '16px',
+                        height: '16px',
+                        padding: '0 4px',
+                        borderRadius: '999px',
+                        background: '#DC2626',
+                        color: '#FFFFFF',
+                        fontSize: '0.62rem',
+                        fontWeight: 800,
+                        lineHeight: '16px',
+                        textAlign: 'center'
+                      }}
+                    >
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </div>
               </div>
               <span style={{
                 fontSize: '0.66rem',

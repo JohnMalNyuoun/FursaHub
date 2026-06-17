@@ -15,6 +15,11 @@ export const markAllAsRead = async () => {
   return response.data;
 };
 
+export const getUnreadCount = async () => {
+  const response = await api.get('/youth/notifications/unread-count');
+  return response.data;
+};
+
 export const getOrgNotifications = async () => {
   const response = await api.get('/org/notifications');
   return response.data;

@@ -3,21 +3,28 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
+const compression = require('compression');
 const connectDB = require('./config/db');
 const jwt =require('jsonwebtoken');
-dotenv.config();
+const requestLogger = require('./middleware/requestLogger');
+
+// Load environment variables from Backend/.env
+dotenv.config({ path: path.join(__dirname, '.env') });
 connectDB();
 
 const app = express();
 app.use(cors({
   origin: [
+    'http://localhost:5000',
     'http://localhost:5173',
     'http://localhost:5174',
     'https://fursahub.onrender.com'
   ],
   credentials: true
 }));
+app.use(compression());
 app.use(express.json());
+app.use(requestLogger);
 
 // Auth routes
 app.use('/api/auth/youth', require('./routes/auth/youthAuth'));
@@ -42,6 +49,10 @@ app.use('/api/admin/courses', require('./routes/admin/courses'));
 app.use('/api/admin/users', require('./routes/admin/users'));
 app.use('/api/org/impact', require('./routes/organisation/impact'));
 app.use('/api/youth/outcomes', require('./routes/youth/outcomes'));
+
+// Time Log routes
+app.use('/api/timelog', require('./routes/timeLog'));
+
 app.get('/api', (req, res) => {
   res.json({ message: 'FursaHub API Running' });
 });
@@ -56,9 +67,24 @@ app.get('/api/debug/token', (req, res) => {
   }
 });
 
+// Catch unexpected route errors and keep server alive with visible terminal logs
+app.use((err, req, res, next) => {
+  console.error('UNHANDLED ROUTE ERROR:', err && err.stack ? err.stack : err);
+  if (res.headersSent) return next(err);
+  return res.status(500).json({
+    success: false,
+    message: 'Internal server error'
+  });
+});
+
 // Serve built frontend on the same port (single-port deployment)
 const distPath = path.join(__dirname, '..', 'frontend', 'dist');
 if (fs.existsSync(distPath)) {
+  app.use('/assets', express.static(path.join(distPath, 'assets'), {
+    maxAge: '1y',
+    immutable: true
+  }));
+
   app.use(express.static(distPath));
 
   // SPA fallback: any non-API GET returns index.html so React Router handles it.
@@ -80,4 +106,12 @@ if (fs.existsSync(distPath)) {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`FursaHub running on port ${PORT}`);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION:', err && err.stack ? err.stack : err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('UNHANDLED REJECTION:', reason);
 });
