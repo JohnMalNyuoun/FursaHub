@@ -17,6 +17,13 @@ const userSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  username: {
+    type: String,
+    unique: true,
+    sparse: true,
+    lowercase: true,
+    trim: true
+  },
   communityType: {
     type: String,
     enum: ['refugee', 'host_community'],
@@ -66,6 +73,17 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['en', 'sw', 'fr', 'ar'],
     default: 'en'
+  },
+  pendingEmail: {
+    type: String,
+    lowercase: true,
+    trim: true
+  },
+  emailChangeToken: {
+    type: String
+  },
+  emailChangeExpires: {
+    type: Date
   }
 }, { timestamps: true });
 

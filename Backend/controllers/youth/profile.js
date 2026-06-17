@@ -1,7 +1,9 @@
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const User = require('../../models/Users');
 const { success, error } = require('../../utils/apiResponse');
 const cloudinary = require('../../config/cloudinary');
+const { sendEmail, hasEmailConfig } = require('../../services/emailService');
 
 // @desc    Get youth profile
 // @route   GET /api/youth/profile
@@ -21,10 +23,23 @@ const getProfile = async (req, res) => {
 // @access  Youth
 const updateProfile = async (req, res) => {
   try {
-    const { fullName, age, gender, phoneNumber, bio } = req.body;
+    const { fullName, username, age, gender, phoneNumber, bio } = req.body;
 
     const user = await User.findById(req.user.id);
     if (!user) return error(res, 404, 'User not found');
+
+    if (username !== undefined) {
+      const normalized = username.toLowerCase().trim();
+      if (normalized.length < 3) {
+        return error(res, 400, 'Username must be at least 3 characters');
+      }
+
+      const existing = await User.findOne({ username: normalized, _id: { $ne: req.user.id } });
+      if (existing) {
+        return error(res, 400, 'Username is already taken');
+      }
+      user.username = normalized;
+    }
 
     if (fullName) user.fullName = fullName;
     if (age) user.age = age;
@@ -37,6 +52,7 @@ const updateProfile = async (req, res) => {
     return success(res, 200, 'Profile updated', {
       id: user._id,
       fullName: user.fullName,
+      username: user.username,
       email: user.email,
       age: user.age,
       gender: user.gender,
@@ -86,10 +102,14 @@ const updatePhoto = async (req, res) => {
 // @access  Youth
 const changePassword = async (req, res) => {
   try {
-    const { currentPassword, newPassword } = req.body;
+    const { currentPassword, newPassword, confirmNewPassword } = req.body;
 
     if (!currentPassword || !newPassword) {
       return error(res, 400, 'Please provide current and new password');
+    }
+
+    if (confirmNewPassword !== undefined && newPassword !== confirmNewPassword) {
+      return error(res, 400, 'New password and confirmation do not match');
     }
 
     if (newPassword.length < 6) {
@@ -108,6 +128,101 @@ const changePassword = async (req, res) => {
 
     return success(res, 200, 'Password changed successfully');
   } catch (err) {
+    return error(res, 500, err.message);
+  }
+};
+
+// @desc    Request email change verification
+// @route   PUT /api/youth/profile/email/request-change
+// @access  Youth
+const requestEmailChange = async (req, res) => {
+  try {
+    const { newEmail } = req.body;
+
+    if (!newEmail) {
+      return error(res, 400, 'Please provide a new email');
+    }
+
+    const normalized = newEmail.toLowerCase().trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(normalized)) {
+      return error(res, 400, 'Invalid email format');
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) return error(res, 404, 'User not found');
+
+    if (user.email === normalized) {
+      return error(res, 400, 'New email cannot be the same as current email');
+    }
+
+    const emailTaken = await User.findOne({ email: normalized, _id: { $ne: req.user.id } });
+    if (emailTaken) {
+      return error(res, 400, 'Email already in use');
+    }
+
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+    user.pendingEmail = normalized;
+    user.emailChangeToken = tokenHash;
+    user.emailChangeExpires = new Date(Date.now() + 60 * 60 * 1000);
+    await user.save();
+
+    const appUrl = process.env.FRONTEND_URL || 'http://localhost:5000';
+    const verificationUrl = `${appUrl}/profile?verifyEmailToken=${rawToken}`;
+
+    await sendEmail({
+      to: normalized,
+      subject: 'Verify your new email - FursaHub',
+      text: `Verify your new email by opening this link: ${verificationUrl}`,
+      html: `<p>Verify your new email by clicking the link below:</p><p><a href="${verificationUrl}">${verificationUrl}</a></p><p>This link expires in 1 hour.</p>`
+    });
+
+    return success(res, 200, 'Verification link sent to your new email', {
+      email: normalized,
+      emailDeliveryConfigured: hasEmailConfig()
+    });
+  } catch (err) {
+    return error(res, 500, err.message);
+  }
+};
+
+// @desc    Verify pending email change
+// @route   PUT /api/youth/profile/email/verify
+// @access  Youth
+const verifyEmailChange = async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      return error(res, 400, 'Verification token is required');
+    }
+
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    const user = await User.findOne({
+      _id: req.user.id,
+      emailChangeToken: tokenHash,
+      emailChangeExpires: { $gt: new Date() }
+    });
+
+    if (!user || !user.pendingEmail) {
+      return error(res, 400, 'Invalid or expired verification token');
+    }
+
+    user.email = user.pendingEmail;
+    user.pendingEmail = undefined;
+    user.emailChangeToken = undefined;
+    user.emailChangeExpires = undefined;
+    user.isVerified = true;
+    await user.save();
+
+    return success(res, 200, 'Email updated successfully', { email: user.email });
+  } catch (err) {
+    if (err.code === 11000) {
+      return error(res, 400, 'Email already in use');
+    }
     return error(res, 500, err.message);
   }
 };
@@ -184,6 +299,8 @@ module.exports = {
   updateProfile,
   updatePhoto,
   changePassword,
+  requestEmailChange,
+  verifyEmailChange,
   updateNotifications,
   updateTheme,
   updateLanguage
