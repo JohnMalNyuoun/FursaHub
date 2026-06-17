@@ -60,6 +60,13 @@ const applyForCourse = async (req, res) => {
       answers: answers || []
     });
 
+    application.timeline = [{
+      status: 'submitted',
+      timestamp: new Date(),
+      message: 'You submitted your application'
+    }];
+    await application.save();
+
     // Increment filled slots
     course.filledSlots += 1;
     await course.save();

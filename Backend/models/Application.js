@@ -58,6 +58,13 @@ const applicationSchema = new mongoose.Schema({
   reviewedAt: {
     type: Date
   },
+  timeline: [
+    {
+      status: { type: String },
+      timestamp: { type: Date, default: Date.now },
+      message: { type: String }
+    }
+  ],
   // Completion tracking
 completionStatus: {
   type: String,

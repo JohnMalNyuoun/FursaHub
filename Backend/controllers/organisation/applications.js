@@ -73,6 +73,13 @@ const shortlistApplicant = async (req, res) => {
 
     await application.save();
 
+    application.timeline.push({
+      status: 'shortlisted',
+      timestamp: new Date(),
+      message: 'You have been shortlisted for interview'
+    });
+    await application.save();
+
     await notify({
       recipient: application.youth,
       recipientModel: 'User',
@@ -108,6 +115,13 @@ const acceptApplicant = async (req, res) => {
     application.reviewedBy = req.user.id;
     application.reviewedAt = new Date();
 
+    await application.save();
+
+    application.timeline.push({
+      status: 'accepted',
+      timestamp: new Date(),
+      message: 'Congratulations! Your application has been accepted'
+    });
     await application.save();
 
     await notify({
@@ -148,6 +162,13 @@ const rejectApplicant = async (req, res) => {
     application.reviewedBy = req.user.id;
     application.reviewedAt = new Date();
 
+    await application.save();
+
+    application.timeline.push({
+      status: 'rejected',
+      timestamp: new Date(),
+      message: 'Your application was not successful this time. Keep trying!'
+    });
     await application.save();
 
     await notify({
