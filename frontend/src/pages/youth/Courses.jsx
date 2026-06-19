@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
@@ -37,6 +37,14 @@ const Courses = () => {
   };
 
   useEffect(() => { fetchCourses(); }, [filters]);
+
+  const profileImageSrc = useMemo(() => {
+    if (!user?.photo) return '';
+    const version = user?.updatedAt ? encodeURIComponent(user.updatedAt) : '';
+    if (!version) return user.photo;
+    const separator = user.photo.includes('?') ? '&' : '?';
+    return `${user.photo}${separator}v=${version}`;
+  }, [user?.photo, user?.updatedAt]);
 
   const handleFilter = (e) => setFilters(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -102,9 +110,9 @@ const Courses = () => {
             title="Open profile"
             style={{ display: 'inline-flex', textDecoration: 'none' }}
           >
-            {user?.photo ? (
+            {profileImageSrc ? (
               <img
-                src={user.photo}
+                src={profileImageSrc}
                 alt={user?.fullName || user?.username || 'Profile'}
                 style={{
                   width: '44px',

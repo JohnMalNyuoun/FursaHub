@@ -110,13 +110,9 @@ const CourseDetail = () => {
 
         {/* Header */}
         <div style={{
-          background: '#1A3357',
-          border: '1px solid #2A4A6B',
-          borderRadius: 'var(--radius)',
-          padding: detailImage ? '0 0 32px' : '32px',
+          padding: detailImage ? '0 0 24px' : '0 0 24px',
           marginBottom: '24px',
-          overflow: 'hidden',
-          boxShadow: 'var(--card-shadow)'
+          borderBottom: '1px solid #2A4A6B'
         }}>
           {detailImage ? (
             <img
@@ -209,9 +205,9 @@ const CourseDetail = () => {
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
             gap: '12px',
-            padding: '20px',
-            background: '#152A47',
-            borderRadius: 'var(--radius)'
+            padding: '16px 0',
+            borderTop: '1px solid #2A4A6B',
+            borderBottom: '1px solid #2A4A6B'
           }}>
             {[
               { label: 'Location', value: course.location },
@@ -254,10 +250,8 @@ const CourseDetail = () => {
               alignItems: 'center',
               flexWrap: 'wrap',
               gap: '12px',
-              padding: '14px 16px',
-              borderRadius: 'var(--radius)',
-              border: '1px solid #2A4A6B',
-              background: '#152A47'
+              padding: '14px 0',
+              borderBottom: '1px solid #2A4A6B'
             }}>
               <div>
                 <p style={{
@@ -300,11 +294,7 @@ const CourseDetail = () => {
 
         {/* Application Section */}
         <div style={{
-          background: '#1A3357',
-          border: '1px solid #2A4A6B',
-          borderRadius: 'var(--radius)',
-          padding: '32px',
-          boxShadow: 'var(--card-shadow)'
+          padding: '8px 0 0'
         }}>
           <h2 style={{
             fontSize: '1.1rem',
@@ -421,23 +411,27 @@ const CourseDetail = () => {
                       }}
                     />
                   ) : q.fieldType === 'yes_no' ? (
-                    <select
-                      value={answers[i]?.answer || ''}
-                      onChange={(e) => handleAnswerChange(i, e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '12px 14px',
-                        fontSize: '0.95rem',
-                        color: '#FFFFFF',
-                        background: '#152A47',
-                        border: '1px solid #2A4A6B',
-                        borderRadius: 'var(--radius)',
-                      }}
-                    >
-                      <option value="">Select</option>
-                      <option value="yes">Yes</option>
-                      <option value="no">No</option>
-                    </select>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '18px', flexWrap: 'wrap' }}>
+                      <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={(answers[i]?.answer || '').toLowerCase() === 'yes'}
+                          onChange={(e) => handleAnswerChange(i, e.target.checked ? 'yes' : '')}
+                          style={{ width: '16px', height: '16px', accentColor: '#F5A623', cursor: 'pointer' }}
+                        />
+                        <span style={{ color: '#B8D0E8', fontSize: '0.85rem', fontWeight: '600' }}>Yes</span>
+                      </label>
+
+                      <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={(answers[i]?.answer || '').toLowerCase() === 'no'}
+                          onChange={(e) => handleAnswerChange(i, e.target.checked ? 'no' : '')}
+                          style={{ width: '16px', height: '16px', accentColor: '#F5A623', cursor: 'pointer' }}
+                        />
+                        <span style={{ color: '#B8D0E8', fontSize: '0.85rem', fontWeight: '600' }}>No</span>
+                      </label>
+                    </div>
                   ) : q.fieldType === 'select' ? (
                     <select
                       value={answers[i]?.answer || ''}

@@ -5,6 +5,7 @@ import Loader from '../../components/common/Loader';
 import { getYouthProfile, updateYouthProfile, updateYouthPhoto } from '../../services/profileService';
 import * as followService from '../../services/followService';
 import { COURSE_CATEGORIES } from '../../utils/constants';
+import useAuth from '../../hooks/useAuth';
 
 const CLOUDINARY_CLOUD_NAME = 'dkxjwhxne';
 const CLOUDINARY_PROFILE_PRESET = 'Fursahub-profile';
@@ -23,6 +24,7 @@ const editInputStyle = {
 
 const YouthProfile = () => {
   const navigate = useNavigate();
+  const { updateUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -42,6 +44,12 @@ const YouthProfile = () => {
     try {
       const res = await getYouthProfile();
       setProfile(res.data);
+      updateUser({
+        fullName: res.data.fullName,
+        username: res.data.username,
+        photo: res.data.photo,
+        updatedAt: res.data.updatedAt || new Date().toISOString()
+      });
       setEditForm({
         username: res.data.username || '',
         bio: res.data.bio || '',
@@ -109,8 +117,10 @@ const YouthProfile = () => {
     if (!data?.secure_url) data = await uploadWithPreset(CLOUDINARY_PROFILE_PRESET_FALLBACK);
     if (!data?.secure_url) throw new Error('Failed to upload profile image');
 
+    const now = new Date().toISOString();
     await updateYouthPhoto({ photoUrl: data.secure_url });
-    setProfile((prev) => ({ ...prev, photo: data.secure_url, updatedAt: new Date().toISOString() }));
+    setProfile((prev) => ({ ...prev, photo: data.secure_url, updatedAt: now }));
+    updateUser({ photo: data.secure_url, updatedAt: now });
   };
 
   const handleProfilePhotoChange = async (e) => {
@@ -153,7 +163,14 @@ const YouthProfile = () => {
       };
 
       const res = await updateYouthProfile(payload);
-      setProfile((prev) => ({ ...prev, ...res.data, updatedAt: new Date().toISOString() }));
+      const now = new Date().toISOString();
+      setProfile((prev) => ({ ...prev, ...res.data, updatedAt: now }));
+      updateUser({
+        fullName: res.data.fullName,
+        username: res.data.username,
+        photo: res.data.photo,
+        updatedAt: now
+      });
       setSaveNotice('Profile updated successfully.');
       setTimeout(() => setSaveNotice(''), 3000);
       setEditMode(false);
