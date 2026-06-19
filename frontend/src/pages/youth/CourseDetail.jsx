@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
 import Button from '../../components/common/Button';
@@ -186,7 +186,13 @@ const CourseDetail = () => {
             fontWeight: '600',
             marginBottom: '20px'
           }}>
-            {course.organisation?.name} · {course.organisation?.type}
+            <Link
+              to={`/profiles/organisation/${course.organisation?._id}`}
+              style={{ color: '#F5A623', textDecoration: 'underline' }}
+            >
+              {course.organisation?.name}
+            </Link>{' '}
+            · {course.organisation?.type}
           </p>
 
           <p style={{

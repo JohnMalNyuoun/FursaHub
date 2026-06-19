@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
 import { getOrgCourses } from '../../services/courseService';
@@ -8,9 +8,13 @@ import useAuth from '../../hooks/useAuth';
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [courseFilter, setCourseFilter] = useState('all');
+  const [applicationFilter, setApplicationFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,235 +37,445 @@ const Dashboard = () => {
   if (loading) return <Loader />;
 
   const stats = [
-    { label: 'Total Courses', value: courses.length },
-    { label: 'Published', value: courses.filter(c => c.status === 'published').length },
-    { label: 'Total Applications', value: applications.length },
-    { label: 'Shortlisted', value: applications.filter(a => a.status === 'shortlisted').length },
-    { label: 'Accepted', value: applications.filter(a => a.status === 'accepted').length },
-    { label: 'Pending Review', value: applications.filter(a => a.status === 'submitted').length }
+    { label: 'Total Courses', value: courses.length, key: 'total_courses', color: '#2F6B3E' },
+    { label: 'Published', value: courses.filter(c => c.status === 'published').length, key: 'published', color: '#4F8F5B' },
+    { label: 'Total Applications', value: applications.length, key: 'total_apps', color: '#6CA96D' },
+    { label: 'Shortlisted', value: applications.filter(a => a.status === 'shortlisted').length, key: 'shortlisted', color: '#7BAA7D' },
+    { label: 'Accepted', value: applications.filter(a => a.status === 'accepted').length, key: 'accepted', color: '#2F6B3E' },
+    { label: 'Pending Review', value: applications.filter(a => a.status === 'submitted').length, key: 'pending', color: '#A7CFA8' }
   ];
 
+  const filteredCourses = courses.filter((course) => {
+    const matchesSearch = course.title?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = courseFilter === 'all' || course.status === courseFilter;
+    return matchesSearch && matchesFilter;
+  });
+
+  const filteredApplications = applications.filter((application) => {
+    const matchesSearch = application.youth?.fullName?.toLowerCase().includes(searchTerm.toLowerCase())
+      || application.course?.title?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = applicationFilter === 'all' || application.status === applicationFilter;
+    return matchesSearch && matchesFilter;
+  });
+
+  const funnelStages = [
+    { label: 'Published Courses', value: stats[1].value, color: '#2F6B3E', hint: 'Active course supply' },
+    { label: 'Total Applications', value: stats[2].value, color: '#4F8F5B', hint: 'Youth engagement' },
+    { label: 'Shortlisted', value: stats[3].value, color: '#7BAA7D', hint: 'In review stage' },
+    { label: 'Accepted', value: stats[4].value, color: '#A7CFA8', hint: 'Final outcomes' }
+  ];
+
+
+
   return (
-    <div style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
+    <div style={{ background: 'linear-gradient(180deg, #F6FBF7 0%, #FFFFFF 30%, #F4FAF5 100%)', minHeight: '100vh' }}>
       <Navbar />
 
       {/* Header */}
       <div style={{
-        background: 'linear-gradient(135deg, #0F2035 0%, #1E3A5F 100%)',
-        padding: '32px 20px 36px'
+        background: 'linear-gradient(135deg, #1E5D34 0%, #2F6B3E 100%)',
+        padding: '36px 20px 40px',
+        boxShadow: '0 10px 30px rgba(47, 107, 62, 0.14)'
       }}>
-        <div style={{ maxWidth: '960px', margin: '0 auto' }}>
-          <h1 style={{
-            fontSize: 'clamp(1.4rem, 5vw, 1.6rem)',
-            fontWeight: 800,
-            color: '#FFFFFF',
-            marginBottom: '6px',
-            letterSpacing: '-0.3px'
-          }}>
-            Welcome, {user?.name} 👋
-          </h1>
-          <p style={{ fontSize: '0.92rem', color: '#B8D0E8' }}>
-            Manage your courses and applications from here
-          </p>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '20px', flexWrap: 'wrap' }}>
+          <div>
+            <p style={{ margin: '0 0 8px 0', color: '#DDF2E0', fontSize: '0.82rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              Organisation Dashboard
+            </p>
+            <h1 style={{
+              fontSize: 'clamp(1.6rem, 5vw, 2.1rem)',
+              fontWeight: 800,
+              color: '#FFFFFF',
+              marginBottom: '6px',
+              letterSpacing: '-0.3px'
+            }}>
+              Welcome, {user?.name} 👋
+            </h1>
+            <p style={{ fontSize: '0.95rem', color: '#EAF7EB', margin: 0 }}>
+              Manage your courses and review youth applications from one clean workspace.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/org/analytics')}
+            style={{
+              background: '#FFFFFF',
+              color: '#1E5D34',
+              border: 'none',
+              borderRadius: '999px',
+              padding: '12px 18px',
+              fontWeight: 800,
+              cursor: 'pointer',
+              boxShadow: '0 8px 20px rgba(0,0,0,0.12)'
+            }}
+          >
+            Open Course Analytics
+          </button>
         </div>
       </div>
 
-      <div style={{ maxWidth: '960px', margin: '0 auto', padding: '24px 20px 40px' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px 20px 40px' }}>
 
-        {/* Stats */}
-        <div className="fh-stats-grid fh-stats-6" style={{ marginBottom: '32px' }}>
-          {stats.map((stat, i) => (
-            <div key={i} style={{
-              background: '#1A3357',
-              border: '1px solid #2A4A6B',
-              borderRadius: '14px',
-              padding: '18px 12px',
-              textAlign: 'center',
-              boxShadow: 'var(--card-shadow)'
+        {/* Summary Cards */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '16px',
+          marginBottom: '20px'
+        }}>
+          {[
+            { title: 'Registration Metric', value: stats[0].value, note: 'Total courses created', color: '#2F6B3E' },
+            { title: 'Operational Status', value: stats[1].value, note: 'Published and active', color: '#4F8F5B' },
+            { title: 'Outcome/Performance', value: stats[4].value, note: 'Accepted youth outcomes', color: '#7BAA7D' }
+          ].map((card, index) => (
+            <div key={index} style={{
+              background: '#FFFFFF',
+              border: '1px solid #DDEBDD',
+              borderRadius: '18px',
+              padding: '20px',
+              boxShadow: '0 10px 24px rgba(22, 68, 32, 0.06)'
             }}>
-              <div style={{
-                fontSize: '1.8rem',
-                fontWeight: 800,
-                color: '#F5A623',
-                lineHeight: 1.1,
-                letterSpacing: '-0.5px'
-              }}>
-                {stat.value}
+              <p style={{ margin: '0 0 10px 0', fontSize: '0.78rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: card.color }}>
+                {card.title}
+              </p>
+              <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#17361F', lineHeight: 1, marginBottom: '8px' }}>
+                {card.value}
               </div>
-              <div style={{
-                fontSize: '0.76rem',
-                color: '#7A9BB5',
-                marginTop: '6px',
-                fontWeight: 600
-              }}>
-                {stat.label}
-              </div>
+              <p style={{ margin: 0, color: '#5E7564', fontSize: '0.9rem' }}>
+                {card.note}
+              </p>
             </div>
           ))}
         </div>
 
-        {/* Recent Courses */}
-        <div style={{ marginBottom: '40px' }}>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '20px'
-          }}>
-            <h2 style={{
-              fontSize: '1.2rem',
-              fontWeight: '700',
-              color: 'var(--text-primary)'
+        {/* Controls Ribbon */}
+        <div style={{
+          background: '#FFFFFF',
+          border: '1px solid #DDEBDD',
+          borderRadius: '18px',
+          padding: '16px',
+          marginBottom: '24px',
+          boxShadow: '0 10px 24px rgba(22, 68, 32, 0.05)',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: '12px',
+          alignItems: 'center'
+        }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#2F6B3E', marginBottom: '6px' }}>
+              Search
+            </label>
+            <input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search courses or youth"
+              style={{
+                width: '100%',
+                padding: '12px 14px',
+                borderRadius: '12px',
+                border: '1px solid #CFE3D1',
+                outline: 'none',
+                background: '#FBFFFC'
+              }}
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#2F6B3E', marginBottom: '6px' }}>
+              Course Status
+            </label>
+            <select
+              value={courseFilter}
+              onChange={(e) => setCourseFilter(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px 14px',
+                borderRadius: '12px',
+                border: '1px solid #CFE3D1',
+                outline: 'none',
+                background: '#FBFFFC'
+              }}
+            >
+              <option value="all">All courses</option>
+              <option value="published">Published</option>
+              <option value="draft">Draft</option>
+            </select>
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#2F6B3E', marginBottom: '6px' }}>
+              Application Status
+            </label>
+            <select
+              value={applicationFilter}
+              onChange={(e) => setApplicationFilter(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px 14px',
+                borderRadius: '12px',
+                border: '1px solid #CFE3D1',
+                outline: 'none',
+                background: '#FBFFFC'
+              }}
+            >
+              <option value="all">All applications</option>
+              <option value="submitted">Pending review</option>
+              <option value="shortlisted">Shortlisted</option>
+              <option value="accepted">Accepted</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Workspace */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1.1fr 0.9fr',
+          gap: '24px',
+          alignItems: 'start'
+        }}>
+          <div style={{ display: 'grid', gap: '24px' }}>
+            <div style={{
+              background: '#FFFFFF',
+              border: '1px solid #DDEBDD',
+              borderRadius: '18px',
+              padding: '24px',
+              boxShadow: '0 10px 24px rgba(22, 68, 32, 0.05)'
             }}>
-              Your Courses
-            </h2>
-            <Link to="/org/courses" style={{
-              fontSize: '0.9rem',
-              color: '#F5A623',
-              fontWeight: '600'
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', marginBottom: '18px' }}>
+                <div>
+                  <p style={{ margin: '0 0 6px 0', color: '#2F6B3E', fontSize: '0.78rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                    Main Component
+                  </p>
+                  <h2 style={{ margin: 0, color: '#17361F', fontSize: '1.15rem', fontWeight: 800 }}>
+                    Course Funnel
+                  </h2>
+                </div>
+                <button
+                  onClick={() => navigate('/org/analytics')}
+                  style={{
+                    background: '#2F6B3E',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: '999px',
+                    padding: '10px 14px',
+                    fontWeight: 800,
+                    cursor: 'pointer'
+                  }}
+                >
+                  View analytics
+                </button>
+              </div>
+
+              <div style={{ display: 'grid', gap: '14px' }}>
+                {funnelStages.map((stage, index) => (
+                  <div key={stage.label} style={{
+                    position: 'relative',
+                    background: index === 0 ? '#F3FBF4' : '#FBFFFC',
+                    border: '1px solid #D8E8D9',
+                    borderRadius: '14px',
+                    padding: '16px 18px'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      gap: '12px',
+                      marginBottom: '10px'
+                    }}>
+                      <div>
+                        <div style={{ color: '#17361F', fontWeight: 800, fontSize: '0.98rem' }}>{stage.label}</div>
+                        <div style={{ color: '#6B8170', fontSize: '0.8rem' }}>{stage.hint}</div>
+                      </div>
+                      <div style={{ color: stage.color, fontSize: '1.5rem', fontWeight: 900 }}>{stage.value}</div>
+                    </div>
+                    <div style={{ height: '10px', borderRadius: '999px', background: '#E5F0E6', overflow: 'hidden' }}>
+                      <div style={{ width: `${Math.max((stage.value / Math.max(stats[2].value, 1)) * 100, 12)}%`, height: '100%', background: `linear-gradient(90deg, ${stage.color}, #9BC79E)`, borderRadius: '999px' }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{
+              background: '#FFFFFF',
+              border: '1px solid #DDEBDD',
+              borderRadius: '18px',
+              padding: '24px',
+              boxShadow: '0 10px 24px rgba(22, 68, 32, 0.05)'
             }}>
-              View all →
-            </Link>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+                <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#17361F' }}>
+                  Your Courses
+                </h2>
+                <Link to="/org/courses" style={{ color: '#2F6B3E', fontWeight: 700, textDecoration: 'none' }}>
+                  View all →
+                </Link>
+              </div>
+
+              {filteredCourses.length === 0 ? (
+                <div style={{
+                  background: '#F7FBF7',
+                  border: '1px dashed #CFE3D1',
+                  borderRadius: '14px',
+                  padding: '32px',
+                  textAlign: 'center'
+                }}>
+                  <p style={{ color: '#6B8170', marginBottom: '16px' }}>
+                    You haven't posted any matching courses yet
+                  </p>
+                  <Link to="/org/courses/new">
+                    <button style={{
+                      background: '#2F6B3E',
+                      color: '#FFFFFF',
+                      padding: '10px 22px',
+                      borderRadius: '999px',
+                      fontWeight: '700',
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}>
+                      Post Your First Course
+                    </button>
+                  </Link>
+                </div>
+              ) : (
+                <div style={{ border: '1px solid #E1EEE2', borderRadius: '14px', overflow: 'hidden' }}>
+                  {filteredCourses.slice(0, 5).map((course, i) => (
+                    <div key={course._id} style={{
+                      padding: '16px 18px',
+                      borderBottom: i < Math.min(filteredCourses.length, 5) - 1 ? '1px solid #E9F2EA' : 'none',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      gap: '12px',
+                      flexWrap: 'wrap'
+                    }}>
+                      <div>
+                        <p style={{ fontWeight: 700, color: '#17361F', fontSize: '0.95rem', marginBottom: '2px' }}>
+                          {course.title}
+                        </p>
+                        <p style={{ fontSize: '0.8rem', color: '#6B8170', margin: 0 }}>
+                          {course.filledSlots}/{course.totalSlots} slots filled
+                        </p>
+                      </div>
+                      <span style={{
+                        padding: '6px 10px',
+                        borderRadius: '999px',
+                        background: course.status === 'published' ? '#E7F5E9' : '#F3F6F3',
+                        color: course.status === 'published' ? '#2F6B3E' : '#5F7264',
+                        fontSize: '0.75rem',
+                        fontWeight: 800,
+                        textTransform: 'capitalize'
+                      }}>
+                        {course.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
-          {courses.length === 0 ? (
-            <div style={{
-              background: 'var(--bg-card)',
-              border: '1px dashed #2A4A6B',
-              borderRadius: 'var(--radius)',
-              padding: '40px',
-              textAlign: 'center'
-            }}>
-              <p style={{ color: '#7A9BB5', marginBottom: '16px' }}>
-                You haven't posted any courses yet
-              </p>
-              <Link to="/org/courses/new">
-                <button style={{
-                  background: '#F5A623',
-                  color: '#1E3A5F',
-                  padding: '10px 24px',
-                  borderRadius: 'var(--radius)',
-                  fontWeight: '700',
-                  border: 'none',
-                  cursor: 'pointer'
-                }}>
-                  Post Your First Course
-                </button>
+          <div style={{
+            background: '#FFFFFF',
+            border: '1px solid #DDEBDD',
+            borderRadius: '18px',
+            padding: '24px',
+            boxShadow: '0 10px 24px rgba(22, 68, 32, 0.05)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+              <div>
+                <p style={{ margin: '0 0 6px 0', color: '#2F6B3E', fontSize: '0.78rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  Secondary Component
+                </p>
+                <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#17361F' }}>
+                  Recent Applications
+                </h2>
+              </div>
+              <Link to="/org/applications" style={{ color: '#2F6B3E', fontWeight: 700, textDecoration: 'none' }}>
+                View all →
               </Link>
             </div>
-          ) : (
-            <div style={{
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius)',
-              overflow: 'hidden'
-            }}>
-              {courses.slice(0, 5).map((course, i) => (
-                <div key={course._id} style={{
-                  padding: '16px 20px',
-                  borderBottom: i < courses.length - 1
-                    ? '1px solid var(--border-color)' : 'none',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  gap: '12px'
-                }}>
-                  <div>
-                    <p style={{
-                      fontWeight: '600',
-                      color: 'var(--text-primary)',
-                      fontSize: '0.95rem',
-                      marginBottom: '2px'
-                    }}>
-                      {course.title}
-                    </p>
-                    <p style={{
-                      fontSize: '0.8rem',
-                      color: 'var(--text-muted)'
-                    }}>
-                      {course.filledSlots}/{course.totalSlots} slots filled
-                    </p>
-                  </div>
-                  <span className={`fh-badge fh-badge-${course.status}`}>
-                    {course.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
 
-        {/* Recent Applications */}
-        <div>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '20px'
-          }}>
-            <h2 style={{
-              fontSize: '1.2rem',
-              fontWeight: '700',
-              color: 'var(--text-primary)'
-            }}>
-              Recent Applications
-            </h2>
-            <Link to="/org/applications" style={{
-              fontSize: '0.9rem',
-              color: '#F5A623',
-              fontWeight: '600'
-            }}>
-              View all →
-            </Link>
+            {filteredApplications.length === 0 ? (
+              <div style={{
+                background: '#F7FBF7',
+                border: '1px dashed #CFE3D1',
+                borderRadius: '14px',
+                padding: '32px',
+                textAlign: 'center'
+              }}>
+                <p style={{ color: '#6B8170', fontSize: '0.9rem', margin: 0 }}>
+                  No matching applications received yet.
+                </p>
+              </div>
+            ) : (
+              <div style={{ border: '1px solid #E1EEE2', borderRadius: '14px', overflow: 'hidden' }}>
+                {filteredApplications.slice(0, 5).map((app, i) => (
+                  <div key={app._id} style={{
+                    padding: '16px 18px',
+                    borderBottom: i < Math.min(filteredApplications.length, 5) - 1 ? '1px solid #E9F2EA' : 'none',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: '12px',
+                    flexWrap: 'wrap'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      {app.youth?.photo ? (
+                        <img
+                          src={app.youth.photo}
+                          alt={app.youth?.fullName || 'Youth'}
+                          style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <div style={{
+                          width: '38px',
+                          height: '38px',
+                          borderRadius: '50%',
+                          background: '#E7F5E9',
+                          color: '#2F6B3E',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontWeight: 800,
+                          fontSize: '0.8rem'
+                        }}>
+                          {(app.youth?.fullName || 'Y').charAt(0).toUpperCase()}
+                        </div>
+                      )}
+
+                      <div>
+                        <p style={{ fontWeight: 700, color: '#17361F', fontSize: '0.95rem', marginBottom: '2px' }}>
+                          <Link
+                            to={`/profiles/youth/${app.youth?._id}`}
+                            style={{ color: '#17361F', textDecoration: 'none' }}
+                          >
+                            {app.youth?.fullName}
+                          </Link>
+                        </p>
+                        <p style={{ fontSize: '0.8rem', color: '#6B8170', margin: 0 }}>
+                          {app.course?.title}
+                        </p>
+                      </div>
+                    </div>
+                    <span style={{
+                      padding: '6px 10px',
+                      borderRadius: '999px',
+                      background: app.status === 'accepted' ? '#E7F5E9' : app.status === 'shortlisted' ? '#F1F8F2' : '#F6FAF6',
+                      color: app.status === 'accepted' ? '#2F6B3E' : app.status === 'shortlisted' ? '#4F8F5B' : '#5F7264',
+                      fontSize: '0.75rem',
+                      fontWeight: 800,
+                      textTransform: 'capitalize'
+                    }}>
+                      {app.status.replace('_', ' ')}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-
-          {applications.length === 0 ? (
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-              No applications received yet.
-            </p>
-          ) : (
-            <div style={{
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius)',
-              overflow: 'hidden'
-            }}>
-              {applications.slice(0, 5).map((app, i) => (
-                <div key={app._id} style={{
-                  padding: '16px 20px',
-                  borderBottom: i < 4 ? '1px solid var(--border-color)' : 'none',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  gap: '12px'
-                }}>
-                  <div>
-                    <p style={{
-                      fontWeight: '600',
-                      color: 'var(--text-primary)',
-                      fontSize: '0.95rem',
-                      marginBottom: '2px'
-                    }}>
-                      {app.youth?.fullName}
-                    </p>
-                    <p style={{
-                      fontSize: '0.8rem',
-                      color: 'var(--text-muted)'
-                    }}>
-                      {app.course?.title}
-                    </p>
-                  </div>
-                  <span className={`fh-badge fh-badge-${app.status}`}>
-                    {app.status.replace('_', ' ')}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
+
       </div>
+
     </div>
   );
 };

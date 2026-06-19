@@ -42,6 +42,7 @@ app.use('/api/org/applications', require('./routes/organisation/applications'));
 
 app.use('/api/youth/notifications', require('./routes/youth/notifications'));
 app.use('/api/org/notifications', require('./routes/organisation/notifications'));
+app.use('/api/profiles', require('./routes/profiles'));
 
 // Admin routes
 app.use('/api/admin/organisations', require('./routes/admin/organisations'));
@@ -49,6 +50,10 @@ app.use('/api/admin/courses', require('./routes/admin/courses'));
 app.use('/api/admin/users', require('./routes/admin/users'));
 app.use('/api/org/impact', require('./routes/organisation/impact'));
 app.use('/api/youth/outcomes', require('./routes/youth/outcomes'));
+
+// Shared routes
+app.use('/api/profiles', require('./routes/profiles'));
+app.use('/api/follow', require('./routes/follow'));
 
 // Time Log routes
 app.use('/api/timelog', require('./routes/timeLog'));

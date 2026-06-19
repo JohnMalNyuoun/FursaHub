@@ -401,6 +401,51 @@ const Home = () => {
           </section>
         )}
 
+        {/* Preferences prompt */}
+        {user?.categoryPreferences?.length === 0 && (
+          <section style={{
+            background: '#1A3357',
+            border: '1px solid rgba(245, 166, 35, 0.45)',
+            borderRadius: '14px',
+            padding: '18px',
+            marginBottom: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '14px',
+            flexWrap: 'wrap'
+          }}>
+            <div>
+              <h3 style={{
+                color: '#FDE68A',
+                fontSize: '1rem',
+                fontWeight: 800,
+                marginBottom: '6px'
+              }}>
+                🔔 Get notified about new courses
+              </h3>
+              <p style={{
+                color: '#B8D0E8',
+                fontSize: '0.88rem'
+              }}>
+                Tell us your interests and never miss an opportunity
+              </p>
+            </div>
+
+            <Link to="/preferences" style={{
+              background: '#F5A623',
+              color: '#1E3A5F',
+              fontWeight: 800,
+              fontSize: '0.86rem',
+              borderRadius: '10px',
+              padding: '10px 14px',
+              whiteSpace: 'nowrap'
+            }}>
+              Set Interests -&gt;
+            </Link>
+          </section>
+        )}
+
         {/* Latest Courses */}
         <section style={{ marginBottom: '40px' }}>
           <div style={{

@@ -392,13 +392,42 @@ const Impact = () => {
                     flexWrap: 'wrap',
                     gap: '12px'
                   }}>
-                    <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      {app.youth?.photo ? (
+                        <img
+                          src={app.youth.photo}
+                          alt={app.youth?.fullName || 'Youth'}
+                          style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <div style={{
+                          width: '38px',
+                          height: '38px',
+                          borderRadius: '50%',
+                          background: '#F5A623',
+                          color: '#1E3A5F',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontWeight: 800,
+                          fontSize: '0.76rem'
+                        }}>
+                          {(app.youth?.fullName || 'Y').charAt(0).toUpperCase()}
+                        </div>
+                      )}
+
+                      <div>
                       <p style={{
                         fontWeight: '700',
                         color: 'var(--text-primary)',
                         marginBottom: '2px'
                       }}>
-                        {app.youth?.fullName}
+                        <Link
+                          to={`/profiles/youth/${app.youth?._id}`}
+                          style={{ color: 'var(--text-primary)', textDecoration: 'underline' }}
+                        >
+                          {app.youth?.fullName}
+                        </Link>
                       </p>
                       <p style={{
                         fontSize: '0.82rem',
@@ -406,6 +435,7 @@ const Impact = () => {
                       }}>
                         {app.course?.title}
                       </p>
+                    </div>
                     </div>
 
                     {app.completionStatus ? (

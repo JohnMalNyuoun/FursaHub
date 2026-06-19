@@ -14,9 +14,12 @@ import CourseDetail from './pages/youth/CourseDetail';
 import YouthApplications from './pages/youth/Applications';
 import YouthNotifications from './pages/youth/Notifications';
 import YouthProfile from './pages/youth/Profile';
+import YouthSettings from './pages/youth/Settings';
+import Preferences from './pages/youth/Preferences';
 
 // Organisation pages
 import OrgDashboard from './pages/organisation/Dashboard';
+import CourseAnalytics from './pages/organisation/CourseAnalytics';
 import OrgCourses from './pages/organisation/Courses';
 import OrgCourseForm from './pages/organisation/CourseForm';
 import OrgApplications from './pages/organisation/Applications';
@@ -32,7 +35,16 @@ import Impact from './pages/organisation/Impact';
 import CourseOutcomes from './pages/organisation/CourseOutcomes';
 import OutcomeForm from './pages/youth/OutcomeForm';
 import Loader from './components/common/Loader';
+import PublicYouthProfile from './pages/common/PublicYouthProfile';
+import PublicOrganisationProfile from './pages/common/PublicOrganisationProfile';
 // Route guards 
+const AuthRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return <Loader />;
+  if (!user) return <Navigate to="/login" />;
+  return children;
+};
+
 const YouthRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return <Loader />;
@@ -68,6 +80,10 @@ function App () {
       <Route path="/org/login" element={<OrgLogin />} />
       <Route path="/org/register" element={<OrgRegister />} />
 
+      {/* Shared profiles */}
+      <Route path="/profiles/youth/:id" element={<AuthRoute><PublicYouthProfile /></AuthRoute>} />
+      <Route path="/profiles/organisation/:id" element={<AuthRoute><PublicOrganisationProfile /></AuthRoute>} />
+
       {/* Youth */}
       <Route path="/home" element={<YouthRoute><YouthHome /></YouthRoute>} />
       <Route path="/courses" element={<YouthRoute><YouthCourses /></YouthRoute>} />
@@ -75,9 +91,15 @@ function App () {
       <Route path="/applications" element={<YouthRoute><YouthApplications /></YouthRoute>} />
       <Route path="/notifications" element={<YouthRoute><YouthNotifications /></YouthRoute>} />
       <Route path="/profile" element={<YouthRoute><YouthProfile /></YouthRoute>} />
+      <Route path="/youth/profile" element={<YouthRoute><YouthProfile /></YouthRoute>} />
+      <Route path="/settings" element={<YouthRoute><YouthSettings /></YouthRoute>} />
+      <Route path="/youth/settings" element={<YouthRoute><YouthSettings /></YouthRoute>} />
+      <Route path="/preferences" element={<YouthRoute><Preferences /></YouthRoute>} />
+      <Route path="/youth/preferences" element={<YouthRoute><Preferences /></YouthRoute>} />
 
       {/* Organisation */}
       <Route path="/org/dashboard" element={<OrgRoute><OrgDashboard /></OrgRoute>} />
+      <Route path="/org/analytics" element={<OrgRoute><CourseAnalytics /></OrgRoute>} />
       <Route path="/org/courses" element={<OrgRoute><OrgCourses /></OrgRoute>} />
       <Route path="/org/courses/new" element={<OrgRoute><OrgCourseForm /></OrgRoute>} />
       <Route path="/org/applications" element={<OrgRoute><OrgApplications /></OrgRoute>} />

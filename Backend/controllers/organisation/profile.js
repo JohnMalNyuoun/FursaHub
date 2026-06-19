@@ -63,6 +63,9 @@ const updateLogo = async (req, res) => {
     const uploadResult = await cloudinary.uploader.upload(
       `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`,
       {
+        upload_preset: 'Fursahub-profile',
+        type: 'upload',
+        resource_type: 'image',
         folder: 'fursahub/logos',
         transformation: [{ width: 400, height: 400, crop: 'fill' }]
       }

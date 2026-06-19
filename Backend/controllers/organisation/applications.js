@@ -14,7 +14,7 @@ const getOrgApplications = async (req, res) => {
     if (courseId) filter.course = courseId;
 
     const applications = await Application.find(filter)
-      .populate('youth', 'fullName email communityType age gender phoneNumber')
+      .populate('youth', 'fullName email communityType age gender phoneNumber photo')
       .populate('course', 'title category location')
       .sort({ createdAt: -1 });
 
@@ -34,7 +34,7 @@ const getOrgApplication = async (req, res) => {
       _id: req.params.id,
       organisation: req.user.id
     })
-      .populate('youth', 'fullName email communityType age gender phoneNumber')
+      .populate('youth', 'fullName email communityType age gender phoneNumber photo')
       .populate('course', 'title category location applicationQuestions');
 
     if (!application) {

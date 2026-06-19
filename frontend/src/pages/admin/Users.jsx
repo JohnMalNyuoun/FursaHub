@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
 import Button from '../../components/common/Button';
@@ -123,18 +124,48 @@ const Users = () => {
                 flexWrap: 'wrap',
                 gap: '12px'
               }}>
-                <div>
-                  <p style={{
-                    fontWeight: '600',
-                    color: 'var(--text-primary)',
-                    fontSize: '0.95rem',
-                    marginBottom: '2px'
-                  }}>
-                    {user.fullName}
-                  </p>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    {user.email} · {user.communityType?.replace('_', ' ')}
-                  </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  {user.photo ? (
+                    <img
+                      src={user.photo}
+                      alt={user.fullName || 'Youth'}
+                      style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <div style={{
+                      width: '38px',
+                      height: '38px',
+                      borderRadius: '50%',
+                      background: '#F5A623',
+                      color: '#1E3A5F',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 800,
+                      fontSize: '0.76rem'
+                    }}>
+                      {(user.fullName || 'Y').charAt(0).toUpperCase()}
+                    </div>
+                  )}
+
+                  <div>
+                    <p style={{
+                      fontWeight: '600',
+                      color: 'var(--text-primary)',
+                      fontSize: '0.95rem',
+                      marginBottom: '2px'
+                    }}>
+                      <Link
+                        to={`/profiles/youth/${user._id}`}
+                        style={{ color: 'var(--text-primary)', textDecoration: 'underline' }}
+                      >
+                        {user.fullName}
+                      </Link>
+                    </p>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                      {user.email} · {user.communityType?.replace('_', ' ')}
+                    </p>
+                  </div>
                 </div>
 
                 <div style={{

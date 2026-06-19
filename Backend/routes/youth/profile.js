@@ -9,7 +9,8 @@ const {
   verifyEmailChange,
   updateNotifications,
   updateTheme,
-  updateLanguage
+  updateLanguage,
+  updatePreferences
 } = require('../../controllers/youth/profile');
 const { protect } = require('../../middleware/auth');
 const { isYouth } = require('../../middleware/isYouth');
@@ -24,5 +25,6 @@ router.put('/email/verify', protect, isYouth, verifyEmailChange);
 router.put('/notifications', protect, isYouth, updateNotifications);
 router.put('/theme', protect, isYouth, updateTheme);
 router.put('/language', protect, isYouth, updateLanguage);
+router.put('/preferences', protect, isYouth, updatePreferences);
 
 module.exports = router;

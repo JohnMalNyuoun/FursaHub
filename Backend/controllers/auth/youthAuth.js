@@ -45,6 +45,7 @@ const registerYouth = async (req, res) => {
         id: user._id,
         fullName: user.fullName,
         email: user.email,
+        photo: user.photo,
         communityType: user.communityType,
         role: user.role
       }
@@ -93,6 +94,7 @@ const loginYouth = async (req, res) => {
         id: user._id,
         fullName: user.fullName,
         email: user.email,
+        photo: user.photo,
         communityType: user.communityType,
         role: user.role
       }

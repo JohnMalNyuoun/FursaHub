@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
 import Button from '../../components/common/Button';
@@ -142,14 +143,43 @@ const Organisations = () => {
                   gap: '12px',
                   marginBottom: '12px'
                 }}>
-                  <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    {org.logo ? (
+                      <img
+                        src={org.logo}
+                        alt={org.name}
+                        style={{ width: '40px', height: '40px', borderRadius: '10px', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <div style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '10px',
+                        background: '#F5A623',
+                        color: '#1E3A5F',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 800,
+                        fontSize: '0.9rem'
+                      }}>
+                        {(org.name || 'O').charAt(0).toUpperCase()}
+                      </div>
+                    )}
+
+                    <div>
                     <h3 style={{
                       fontSize: '1.05rem',
                       fontWeight: '700',
                       color: '#FFFFFF',
                       marginBottom: '2px'
                     }}>
-                      {org.name}
+                      <Link
+                        to={`/profiles/organisation/${org._id}`}
+                        style={{ color: '#FFFFFF', textDecoration: 'underline' }}
+                      >
+                        {org.name}
+                      </Link>
                     </h3>
                     <p style={{
                       fontSize: '0.82rem',
@@ -157,6 +187,7 @@ const Organisations = () => {
                     }}>
                       {org.type} · {org.location}
                     </p>
+                  </div>
                   </div>
 
                   <span className={`fh-badge fh-badge-${org.status}`}>

@@ -57,22 +57,15 @@ const Landing = () => {
         textAlign: 'center'
       }}>
         <div style={{ maxWidth: '640px', margin: '0 auto' }}>
-          <div style={{
-            display: 'inline-block',
-            background: 'rgba(245,166,35,0.2)',
-            border: '1px solid rgba(245,166,35,0.35)',
-            borderRadius: '20px',
-            padding: '6px 16px',
-            fontSize: '0.78rem',
+          <h3 style={{
+            fontSize: '1.1rem',
             fontWeight: 800,
-            color: '#FFFFFF',
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            marginBottom: '24px',
-            backdropFilter: 'blur(8px)'
+            color: '#F5A623',
+            marginBottom: '16px',
+            letterSpacing: '0.05em'
           }}>
             Built for Kakuma Youth
-          </div>
+          </h3>
 
           <h1 style={{
             fontSize: 'clamp(1.8rem, 6vw, 3rem)',
@@ -98,7 +91,7 @@ const Landing = () => {
             margin: '0 auto 36px'
           }}>
             FursaHub connects youth in Kakuma Refugee Camp with courses,
-            mentorship, and opportunities posted by NGOs and CBOs —
+            mentorship, and opportunities posted by NGOs and CBOs 
             all in one place.
           </p>
 
@@ -191,22 +184,22 @@ const Landing = () => {
           }}>
             {[
               {
-                number: '01',
+                
                 title: 'Create Your Account',
                 desc: 'Register as a youth or organisation in under 2 minutes'
               },
               {
-                number: '02',
+                
                 title: 'Explore Opportunities',
                 desc: 'Browse courses posted by verified NGOs and CBOs in Kakuma'
               },
               {
-                number: '03',
+                
                 title: 'Apply Directly',
                 desc: 'Submit your application inside FursaHub — no WhatsApp needed'
               },
               {
-                number: '04',
+                
                 title: 'Track Everything',
                 desc: 'Get notified when you are shortlisted, accepted or rejected'
               }
@@ -245,39 +238,31 @@ const Landing = () => {
       {/* For Youth / For Orgs */}
       <div style={{ padding: '72px 24px', background: 'var(--bg-base)' }}>
         <div style={{
-          maxWidth: '860px',
+          maxWidth: '1000px',
           margin: '0 auto',
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: '24px'
+          gap: '60px'
         }}>
           {/* Youth */}
-          <div style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '16px',
-            padding: '28px 24px',
-            boxShadow: 'var(--card-shadow)'
-          }}>
-            <div style={{
-              fontSize: '2rem',
-              marginBottom: '16px'
-            }}>
-              🎓
-            </div>
-            <h3 style={{
-              fontSize: '1.2rem',
+          <div>
+            <h2 style={{
+              fontSize: '1.8rem',
               fontWeight: '800',
               color: 'var(--text-primary)',
-              marginBottom: '12px'
+              marginBottom: '20px',
+              borderBottom: '3px solid #F5A623',
+              paddingBottom: '12px',
+              display: 'inline-block'
             }}>
               For Youth
-            </h3>
+            </h2>
             <p style={{
-              fontSize: '0.9rem',
+              fontSize: '0.95rem',
               color: 'var(--text-secondary)',
-              lineHeight: '1.7',
-              marginBottom: '24px'
+              lineHeight: '1.8',
+              marginBottom: '28px',
+              marginTop: '16px'
             }}>
               Whether you're a refugee or host community youth — FursaHub
               gives you one place to find every course, training, and
@@ -295,25 +280,23 @@ const Landing = () => {
                 'Get notified when shortlisted'
               ].map((item, i) => (
                 <li key={i} style={{
-                  fontSize: '0.88rem',
+                  fontSize: '0.9rem',
                   color: 'var(--text-secondary)',
-                  padding: '6px 0',
-                  borderBottom: '1px solid var(--border-color)',
+                  padding: '10px 0',
                   display: 'flex',
-                  gap: '10px',
-                  alignItems: 'center'
+                  gap: '12px',
+                  alignItems: 'flex-start'
                 }}>
-                  <span style={{ color: '#F5A623', fontWeight: '700' }}>✓</span>
+                  <span style={{ color: '#F5A623', fontWeight: '700', marginTop: '2px' }}>{i + 1}</span>
                   {item}
                 </li>
               ))}
             </ul>
             <Link to="/register" style={{
-              display: 'block',
-              textAlign: 'center',
+              display: 'inline-block',
               background: '#F5A623',
               color: '#1E3A5F',
-              padding: '12px 24px',
+              padding: '12px 28px',
               borderRadius: 'var(--radius)',
               fontSize: '0.95rem',
               fontWeight: '700',
@@ -324,32 +307,24 @@ const Landing = () => {
           </div>
 
           {/* Organisations */}
-          <div style={{
-            background: '#FDF3E0',
-            border: '1px solid #E8D5B0',
-            borderRadius: '16px',
-            padding: '28px 24px',
-            boxShadow: 'var(--card-shadow)'
-          }}>
-            <div style={{
-              fontSize: '2rem',
-              marginBottom: '16px'
-            }}>
-              🏢
-            </div>
-            <h3 style={{
-              fontSize: '1.2rem',
+          <div>
+            <h2 style={{
+              fontSize: '1.8rem',
               fontWeight: '800',
-              color: '#1E3A5F',
-              marginBottom: '12px'
+              color: 'var(--text-primary)',
+              marginBottom: '20px',
+              borderBottom: '3px solid #F5A623',
+              paddingBottom: '12px',
+              display: 'inline-block'
             }}>
               For Organisations
-            </h3>
+            </h2>
             <p style={{
-              fontSize: '0.9rem',
-              color: '#5C4A2A',
-              lineHeight: '1.7',
-              marginBottom: '24px'
+              fontSize: '0.95rem',
+              color: 'var(--text-secondary)',
+              lineHeight: '1.8',
+              marginBottom: '28px',
+              marginTop: '16px'
             }}>
               NGOs and CBOs in Kakuma can post courses and opportunities
               directly to verified youth. Manage applications, shortlist
@@ -367,28 +342,27 @@ const Landing = () => {
                 'Shortlist and notify candidates'
               ].map((item, i) => (
                 <li key={i} style={{
-                  fontSize: '0.88rem',
-                  color: '#5C4A2A',
-                  padding: '6px 0',
-                  borderBottom: '1px solid #E8D5B0',
+                  fontSize: '0.9rem',
+                  color: 'var(--text-secondary)',
+                  padding: '10px 0',
                   display: 'flex',
-                  gap: '10px',
-                  alignItems: 'center'
+                  gap: '12px',
+                  alignItems: 'flex-start'
                 }}>
                   <span style={{
-                    color: '#1E3A5F',
-                    fontWeight: '700'
-                  }}>✓</span>
+                    color: '#F5A623',
+                    fontWeight: '700',
+                    marginTop: '2px'
+                  }}>{i + 1}</span>
                   {item}
                 </li>
               ))}
             </ul>
             <Link to="/org/register" style={{
-              display: 'block',
-              textAlign: 'center',
+              display: 'inline-block',
               background: '#1E3A5F',
               color: '#FFFFFF',
-              padding: '12px 24px',
+              padding: '12px 28px',
               borderRadius: 'var(--radius)',
               fontSize: '0.95rem',
               fontWeight: '700',
@@ -408,21 +382,15 @@ const Landing = () => {
         <div style={{ maxWidth: '1040px', margin: '0 auto' }}>
 
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <div style={{
-              display: 'inline-block',
-              background: 'rgba(245,166,35,0.15)',
-              border: '1px solid rgba(245,166,35,0.35)',
-              borderRadius: '20px',
-              padding: '6px 16px',
-              fontSize: '0.78rem',
-              fontWeight: '700',
+            <h3 style={{
+              fontSize: '1.1rem',
+              fontWeight: 800,
               color: '#F5A623',
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              marginBottom: '20px'
+              marginBottom: '16px',
+              letterSpacing: '0.05em'
             }}>
               For Organisations
-            </div>
+            </h3>
             <h2 style={{
               fontSize: 'clamp(1.6rem, 4vw, 2.2rem)',
               fontWeight: '800',
@@ -464,9 +432,7 @@ const Landing = () => {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                marginBottom: '20px',
-                paddingBottom: '12px',
-                borderBottom: '1px solid var(--border-color)'
+                marginBottom: '20px'
               }}>
                 <span style={{
                   fontSize: '0.85rem',
@@ -591,8 +557,7 @@ const Landing = () => {
                   <li key={i} style={{
                     display: 'flex',
                     gap: '14px',
-                    padding: '14px 0',
-                    borderBottom: i === 3 ? 'none' : '1px solid var(--border-color)'
+                    padding: '14px 0'
                   }}>
                     <div style={{
                       flexShrink: 0,
@@ -607,7 +572,7 @@ const Landing = () => {
                       fontSize: '0.85rem',
                       fontWeight: '800'
                     }}>
-                      ✓
+                      {i + 1}
                     </div>
                     <div>
                       <h4 style={{

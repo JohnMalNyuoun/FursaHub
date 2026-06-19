@@ -1,5 +1,7 @@
 const Course = require('../../models/course');
+const User = require('../../models/Users');
 const cloudinary = require('../../config/cloudinary');
+const { notify } = require('../../services/notificationService');
 const { success, error } = require('../../utils/apiResponse');
 
 const parseQuestionsPayload = (questions) => {
@@ -26,6 +28,9 @@ const uploadCourseCover = async (file) => {
     const uploadResult = await cloudinary.uploader.upload(
       `data:${file.mimetype};base64,${file.buffer.toString('base64')}`,
       {
+        upload_preset: 'fursahub-courses',
+        type: 'upload',
+        resource_type: 'image',
         folder: 'fursahub/course-covers',
         transformation: [{ width: 1200, height: 675, crop: 'fill' }]
       }
@@ -303,6 +308,25 @@ const publishCourse = async (req, res) => {
 
     course.status = 'published';
     await course.save();
+
+    // Notify youth with matching category preferences
+    const matchingYouth = await User.find({
+      role: 'youth',
+      isActive: true,
+      categoryPreferences: course.category
+    });
+
+    await Promise.all(matchingYouth.map((youth) =>
+      notify({
+        recipient: youth._id,
+        recipientModel: 'User',
+        title: 'New Course Matching Your Interests',
+        message: `${course.title} has just been posted by ${req.user.name || 'an organisation'} in ${course.location}. ${course.totalSlots} slots available - apply before ${new Date(course.applicationDeadline).toLocaleDateString()}.`,
+        type: 'course_published',
+        reference: course._id,
+        referenceModel: 'Course'
+      })
+    ));
 
     return success(res, 200, 'Course published successfully', course);
 

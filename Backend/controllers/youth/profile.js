@@ -29,16 +29,19 @@ const updateProfile = async (req, res) => {
     if (!user) return error(res, 404, 'User not found');
 
     if (username !== undefined) {
-      const normalized = username.toLowerCase().trim();
-      if (normalized.length < 3) {
-        return error(res, 400, 'Username must be at least 3 characters');
-      }
+      const normalized = String(username).toLowerCase().trim();
 
-      const existing = await User.findOne({ username: normalized, _id: { $ne: req.user.id } });
-      if (existing) {
-        return error(res, 400, 'Username is already taken');
+      if (normalized.length === 0) {
+        user.username = undefined;
+      } else if (normalized.length < 3) {
+        return error(res, 400, 'Username must be at least 3 characters');
+      } else {
+        const existing = await User.findOne({ username: normalized, _id: { $ne: req.user.id } });
+        if (existing) {
+          return error(res, 400, 'Username is already taken');
+        }
+        user.username = normalized;
       }
-      user.username = normalized;
     }
 
     if (fullName) user.fullName = fullName;
@@ -75,24 +78,40 @@ const updateProfile = async (req, res) => {
 // @access  Youth
 const updatePhoto = async (req, res) => {
   try {
+    const user = await User.findById(req.user.id);
+    if (!user) return error(res, 404, 'User not found');
+
+    if (req.body?.photoUrl) {
+      user.photo = req.body.photoUrl;
+      await user.save();
+      return success(res, 200, 'Photo updated', { photo: user.photo });
+    }
+
     if (!req.file) return error(res, 400, 'No photo uploaded');
 
+    console.log('📸 Uploading youth profile photo to Cloudinary');
+    
     const uploadResult = await cloudinary.uploader.upload(
       `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`,
       {
+        resource_type: 'image',
         folder: 'fursahub/profiles',
         transformation: [{ width: 400, height: 400, crop: 'fill' }]
       }
     );
 
-    const user = await User.findById(req.user.id);
-    if (!user) return error(res, 404, 'User not found');
+    console.log('✅ Upload successful:', uploadResult.secure_url);
 
     user.photo = uploadResult.secure_url;
     await user.save();
 
     return success(res, 200, 'Photo updated', { photo: user.photo });
   } catch (err) {
+    console.error('❌ Upload error:', {
+      message: err.message,
+      http_code: err.http_code,
+      status: err.status
+    });
     return error(res, 500, err.message);
   }
 };
@@ -294,6 +313,27 @@ const updateLanguage = async (req, res) => {
   }
 };
 
+// @desc    Update category preferences
+// @route   PUT /api/youth/profile/preferences
+// @access  Youth
+const updatePreferences = async (req, res) => {
+  try {
+    const { categoryPreferences } = req.body;
+
+    const user = await User.findById(req.user.id);
+    if (!user) return error(res, 404, 'User not found');
+
+    user.categoryPreferences = categoryPreferences;
+    await user.save();
+
+    return success(res, 200, 'Preferences updated', {
+      categoryPreferences: user.categoryPreferences
+    });
+  } catch (err) {
+    return error(res, 500, err.message);
+  }
+};
+
 module.exports = {
   getProfile,
   updateProfile,
@@ -303,5 +343,6 @@ module.exports = {
   verifyEmailChange,
   updateNotifications,
   updateTheme,
-  updateLanguage
+  updateLanguage,
+  updatePreferences
 };

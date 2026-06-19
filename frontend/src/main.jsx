@@ -14,10 +14,10 @@ try {
   const preferredTheme =
     (savedYouthSettings && JSON.parse(savedYouthSettings)?.theme)
     || (savedOrgSettings && JSON.parse(savedOrgSettings)?.theme)
-    || 'dark';
+    || 'light';
   document.documentElement.setAttribute('data-theme', preferredTheme);
 } catch (err) {
-  document.documentElement.setAttribute('data-theme', 'dark');
+  document.documentElement.setAttribute('data-theme', 'light');
 }
 
 createRoot(document.getElementById('root')).render(

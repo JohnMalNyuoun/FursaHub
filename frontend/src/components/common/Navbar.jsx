@@ -101,6 +101,13 @@ const Icon = ({ name, active = false, size = 24 }) => {
           <path d="M21 3v6h-6" />
         </svg>
       );
+    case 'settings':
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="3" fill={fill} />
+          <path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a1 1 0 0 1 0 1.4l-1 1a1 1 0 0 1-1.4 0l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V19a1 1 0 0 1-1 1h-1.4a1 1 0 0 1-1-1v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a1 1 0 0 1-1.4 0l-1-1a1 1 0 0 1 0-1.4l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H5a1 1 0 0 1-1-1v-1.4a1 1 0 0 1 1-1h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a1 1 0 0 1 0-1.4l1-1a1 1 0 0 1 1.4 0l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V5a1 1 0 0 1 1-1h1.4a1 1 0 0 1 1 1v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a1 1 0 0 1 1.4 0l1 1a1 1 0 0 1 0 1.4l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6h.2a1 1 0 0 1 1 1V13a1 1 0 0 1-1 1h-.2a1 1 0 0 0-.9.6Z" />
+        </svg>
+      );
     default:
       return null;
   }
@@ -130,7 +137,9 @@ const Navbar = () => {
     { label: t('nav.home'),         path: '/home',          icon: 'home' },
     { label: t('nav.courses'),      path: '/courses',       icon: 'book' },
     { label: t('nav.applications'), path: '/applications',  icon: 'clipboard' },
-    { label: t('nav.notifications'), path: '/notifications', icon: 'bell' }
+    { label: t('nav.notifications'), path: '/notifications', icon: 'bell' },
+    { label: t('nav.profile'), path: '/profile', icon: 'user' },
+    { label: 'Interests', path: '/preferences', icon: 'settings' }
   ];
 
   const orgLinks = [
@@ -163,6 +172,7 @@ const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   const displayName = user?.fullName || user?.name || '';
+  const userPhoto = user?.photo || user?.logo || '';
   const initials = displayName
     ? displayName
         .split(' ')
@@ -387,9 +397,16 @@ const Navbar = () => {
               justifyContent: 'center',
               fontWeight: 800,
               fontSize: '0.78rem',
-              letterSpacing: '0.02em'
+              letterSpacing: '0.02em',
+              overflow: 'hidden'
             }}>
-              {initials}
+              {userPhoto ? (
+                <img
+                  src={userPhoto}
+                  alt={displayName || 'Profile'}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              ) : initials}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
               <span style={{
@@ -413,6 +430,27 @@ const Navbar = () => {
               </span>
             </div>
           </div>
+
+          {user?.role === 'youth' && (
+            <button
+              onClick={() => navigate('/settings')}
+              title="Settings"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px solid #2A4A6B',
+                color: '#B8D0E8',
+                background: '#1A3357',
+                borderRadius: '10px',
+                width: '40px',
+                height: '40px',
+                cursor: 'pointer'
+              }}
+            >
+              <Icon name="settings" size={16} />
+            </button>
+          )}
 
           <button
             onClick={handleLogout}
@@ -515,13 +553,41 @@ const Navbar = () => {
             justifyContent: 'center',
             fontWeight: 800,
             fontSize: '0.78rem',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            overflow: 'hidden'
           }}
           onClick={() => navigate(profilePath)}
           title="View profile"
           >
-            {initials}
+            {userPhoto ? (
+              <img
+                src={userPhoto}
+                alt={displayName || 'Profile'}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            ) : initials}
           </div>
+          {user?.role === 'youth' && (
+            <button
+              onClick={() => navigate('/settings')}
+              aria-label="Settings"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'transparent',
+                color: '#B8D0E8',
+                border: 'none',
+                padding: '8px',
+                minHeight: '44px',
+                minWidth: '44px',
+                cursor: 'pointer',
+                borderRadius: '8px'
+              }}
+            >
+              <Icon name="settings" size={20} />
+            </button>
+          )}
           <button
             onClick={handleLogout}
             aria-label="Logout"

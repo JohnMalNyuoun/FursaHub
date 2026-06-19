@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
 import Button from '../../components/common/Button';
@@ -213,14 +214,43 @@ const Applications = () => {
                     gap: '12px',
                     marginBottom: '16px'
                   }}>
-                    <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      {app.youth?.photo ? (
+                        <img
+                          src={app.youth.photo}
+                          alt={app.youth?.fullName || 'Youth'}
+                          style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <div style={{
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          background: '#F5A623',
+                          color: '#1E3A5F',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontWeight: 800,
+                          fontSize: '0.8rem'
+                        }}>
+                          {(app.youth?.fullName || 'Y').charAt(0).toUpperCase()}
+                        </div>
+                      )}
+
+                      <div>
                       <h3 style={{
                         fontSize: '1.05rem',
                         fontWeight: '700',
                         color: '#FFFFFF',
                         marginBottom: '2px'
                       }}>
-                        {app.youth?.fullName}
+                        <Link
+                          to={`/profiles/youth/${app.youth?._id}`}
+                          style={{ color: '#FFFFFF', textDecoration: 'underline' }}
+                        >
+                          {app.youth?.fullName}
+                        </Link>
                       </h3>
                       <p style={{
                         fontSize: '0.85rem',
@@ -228,6 +258,7 @@ const Applications = () => {
                       }}>
                         {app.youth?.email} · {app.youth?.communityType?.replace('_', ' ')}
                       </p>
+                    </div>
                     </div>
 
                     <span className={`fh-badge fh-badge-${app.status}`}>

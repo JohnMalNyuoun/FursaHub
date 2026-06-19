@@ -74,6 +74,19 @@ const userSchema = new mongoose.Schema({
     enum: ['en', 'sw', 'fr', 'ar'],
     default: 'en'
   },
+  categoryPreferences: [{
+    type: String,
+    enum: [
+      'technology',
+      'business',
+      'health',
+      'education',
+      'vocational',
+      'language',
+      'leadership',
+      'other'
+    ]
+  }],
   pendingEmail: {
     type: String,
     lowercase: true,
