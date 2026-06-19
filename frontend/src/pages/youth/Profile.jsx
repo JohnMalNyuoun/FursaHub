@@ -143,115 +143,117 @@ const YouthProfile = () => {
         </div>
       ) : (
         <>
-          {/* Cover Section */}
+          {/* Cover Section with Overlapping Profile Picture (Facebook Style) */}
           <div style={{
             background: 'linear-gradient(135deg, #1A3357 0%, #2A5A8F 50%, #152A47 100%)',
-            padding: '40px 20px',
-            textAlign: 'center',
+            paddingBottom: '80px',
+            paddingTop: '40px',
+            paddingLeft: '20px',
+            paddingRight: '20px',
             borderBottom: '2px solid #2A4A6B',
             position: 'relative'
           }}>
             <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-              {/* Profile Image & Name Row */}
-              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: '24px', marginBottom: '20px', flexWrap: 'wrap' }}>
-                {/* Profile Photo */}
+              {/* Cover height */}
+              <div style={{ height: '200px' }} />
+            </div>
+
+            {/* Profile Picture Overlapping Cover (Positioned Absolutely) */}
+            <div style={{
+              position: 'absolute',
+              bottom: '-70px',
+              left: '20px',
+              display: 'flex',
+              alignItems: 'flex-end',
+              gap: '24px',
+              maxWidth: '1200px'
+            }}>
+              {/* Profile Photo */}
+              <button
+                type="button"
+                onClick={() => setShowPhotoPreview(true)}
+                title="View profile image"
+                style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', flexShrink: 0 }}
+              >
+                {profile?.photo && !photoFailed ? (
+                  <img
+                    src={photoVersionedSrc}
+                    alt={profile.fullName}
+                    onError={() => setPhotoFailed(true)}
+                    style={{
+                      width: '160px',
+                      height: '160px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: '6px solid #0F1620',
+                      boxShadow: '0 12px 48px rgba(0,0,0,0.6)'
+                    }}
+                  />
+                ) : (
+                  <div style={{
+                    width: '160px',
+                    height: '160px',
+                    borderRadius: '50%',
+                    background: '#F5A623',
+                    color: '#1E3A5F',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 900,
+                    fontSize: '2.8rem',
+                    border: '6px solid #0F1620',
+                    boxShadow: '0 12px 48px rgba(0,0,0,0.6)',
+                    flexShrink: 0
+                  }}>
+                    {initials}
+                  </div>
+                )}
+              </button>
+
+              {/* Name & Bio & Button */}
+              <div style={{ paddingBottom: '16px', flex: 1 }}>
+                <h1 style={{ color: '#FFFFFF', fontSize: '2.2rem', fontWeight: 900, margin: '0 0 4px 0' }}>
+                  {profile?.fullName || 'Youth User'}
+                </h1>
+                <p style={{ color: '#F5A623', fontSize: '1rem', fontWeight: 700, margin: '0 0 12px 0' }}>
+                  @{profile?.username || 'username_not_set'}
+                </p>
+                {profile?.bio && (
+                  <p style={{
+                    color: '#B8D0E8',
+                    fontSize: '0.95rem',
+                    lineHeight: 1.5,
+                    margin: '0 0 14px 0',
+                    maxWidth: '500px'
+                  }}>
+                    {profile.bio}
+                  </p>
+                )}
                 <button
                   type="button"
-                  onClick={() => setShowPhotoPreview(true)}
-                  title="View profile image"
-                  style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}
+                  onClick={() => setEditMode((prev) => !prev)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: editMode ? 'transparent' : '#F5A623',
+                    color: editMode ? '#F5A623' : '#FFFFFF',
+                    border: editMode ? '2px solid #F5A623' : 'none',
+                    fontWeight: 800,
+                    borderRadius: '8px',
+                    padding: '10px 20px',
+                    fontSize: '0.88rem',
+                    cursor: 'pointer'
+                  }}
                 >
-                  {profile?.photo && !photoFailed ? (
-                    <img
-                      src={photoVersionedSrc}
-                      alt={profile.fullName}
-                      onError={() => setPhotoFailed(true)}
-                      style={{
-                        width: '140px',
-                        height: '140px',
-                        borderRadius: '50%',
-                        objectFit: 'cover',
-                        border: '6px solid #F5A623',
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
-                      }}
-                    />
-                  ) : (
-                    <div style={{
-                      width: '140px',
-                      height: '140px',
-                      borderRadius: '50%',
-                      background: '#F5A623',
-                      color: '#1E3A5F',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 900,
-                      fontSize: '2.4rem',
-                      border: '6px solid #F5A623',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
-                    }}>
-                      {initials}
-                    </div>
-                  )}
+                  {editMode ? 'Cancel' : 'Edit Profile'}
                 </button>
-
-                {/* Name & Edit Button */}
-                <div style={{ textAlign: 'left' }}>
-                  <h1 style={{ color: '#FFFFFF', fontSize: '2rem', fontWeight: 900, margin: '0 0 6px 0' }}>
-                    {profile?.fullName || 'Youth User'}
-                  </h1>
-                  <p style={{ color: '#F5A623', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 12px 0' }}>
-                    @{profile?.username || 'username_not_set'}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setEditMode((prev) => !prev)}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      background: editMode ? 'transparent' : '#F5A623',
-                      color: editMode ? '#F5A623' : '#FFFFFF',
-                      border: editMode ? '2px solid #F5A623' : 'none',
-                      fontWeight: 800,
-                      borderRadius: '8px',
-                      padding: '10px 18px',
-                      fontSize: '0.88rem',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {editMode ? 'Cancel' : 'Edit Profile'}
-                  </button>
-                </div>
               </div>
-
-              {/* Bio & Details */}
-              {!editMode && (
-                <>
-                  {profile?.bio && (
-                    <p style={{
-                      color: '#B8D0E8',
-                      fontSize: '1rem',
-                      lineHeight: 1.6,
-                      maxWidth: '600px',
-                      margin: '20px auto 0',
-                      fontStyle: 'italic'
-                    }}>
-                      {profile.bio}
-                    </p>
-                  )}
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '16px', fontSize: '0.9rem', color: '#B8D0E8' }}>
-                    {profile?.age && <span>Age: <strong>{profile.age}</strong></span>}
-                    {profile?.gender && <span>Gender: <strong style={{ textTransform: 'capitalize' }}>{profile.gender}</strong></span>}
-                    {profile?.communityType && <span>Community: <strong style={{ textTransform: 'capitalize' }}>{profile.communityType.replace('_', ' ')}</strong></span>}
-                  </div>
-                </>
-              )}
             </div>
           </div>
 
-          {/* Edit Form or Content Section */}
-          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
+          {/* Main Content Section */}
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '100px 20px 40px' }}>
             {editMode ? (
               <div style={{
                 background: '#1A3357',
@@ -343,18 +345,16 @@ const YouthProfile = () => {
                   padding: '28px'
                 }}>
                   <h3 style={{ color: '#FFFFFF', fontSize: '1.1rem', fontWeight: 800, marginBottom: '20px' }}>
-                    Personal Information
+                    About
                   </h3>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
                     {[
-                      ['Full Name', profile?.fullName || 'N/A'],
                       ['Age', profile?.age || 'N/A'],
                       ['Gender', profile?.gender ? profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1) : 'N/A'],
-                      ['Language', profile?.language || 'N/A'],
                       ['Email', profile?.email || 'N/A'],
                       ['Phone', profile?.phoneNumber || 'N/A'],
-                      ['Registration ID', registrationId],
-                      ['Theme', profile?.theme || 'N/A']
+                      ['Language', profile?.language || 'N/A'],
+                      ['Community Type', profile?.communityType ? profile.communityType.replace('_', ' ').charAt(0).toUpperCase() + profile.communityType.slice(1).replace('_', ' ') : 'N/A']
                     ].map(([label, value]) => (
                       <div key={label}>
                         <p style={{ color: '#7A9BB5', fontSize: '0.82rem', fontWeight: 700, margin: '0 0 4px 0' }}>{label}</p>
@@ -364,7 +364,7 @@ const YouthProfile = () => {
                   </div>
                 </div>
 
-                {/* Progress Tracking */}
+                {/* Courses Attended */}
                 <div style={{
                   background: '#1A3357',
                   border: '1px solid #2A4A6B',
@@ -372,94 +372,32 @@ const YouthProfile = () => {
                   padding: '28px'
                 }}>
                   <h3 style={{ color: '#FFFFFF', fontSize: '1.1rem', fontWeight: 800, marginBottom: '20px' }}>
-                    Progress Tracking
+                    Courses Attended
                   </h3>
-                  <div style={{ display: 'grid', gap: '22px' }}>
-                    {[
-                      ['Training Phase Progress', trainingPhaseProgress],
-                      ['Mentorship Attendance Rate', mentorshipAttendanceRate],
-                      ['Capstone Progress', capstoneProgress]
-                    ].map(([label, value]) => (
-                      <div key={label}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                          <span style={{ color: '#FFFFFF', fontWeight: 700, fontSize: '0.95rem' }}>{label}</span>
-                          <span style={{ color: '#F5A623', fontWeight: 800, fontSize: '0.9rem' }}>{value}%</span>
-                        </div>
-                        <div style={{ height: '14px', background: '#152A47', borderRadius: '8px', overflow: 'hidden' }}>
-                          <div style={{
-                            width: `${Math.max(0, Math.min(100, value))}%`,
-                            height: '100%',
-                            background: 'linear-gradient(90deg, #4A9EFF 0%, #F5A623 100%)',
-                            borderRadius: '8px',
-                            transition: 'width 0.3s ease'
-                          }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Skills */}
-                <div style={{
-                  background: '#1A3357',
-                  border: '1px solid #2A4A6B',
-                  borderRadius: '16px',
-                  padding: '28px'
-                }}>
-                  <h3 style={{ color: '#FFFFFF', fontSize: '1.1rem', fontWeight: 800, marginBottom: '20px' }}>
-                    Skills
-                  </h3>
-                  {skills.length > 0 ? (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                      {skills.map((skill) => (
-                        <span key={skill} style={{
-                          background: '#0F2035',
-                          color: '#B8D0E8',
-                          border: '1px solid #2A4A6B',
-                          borderRadius: '20px',
-                          padding: '8px 14px',
-                          fontSize: '0.84rem',
-                          fontWeight: 700
-                        }}>
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <p style={{ color: '#7A9BB5', fontSize: '0.95rem', margin: 0 }}>No skills listed yet.</p>
-                  )}
-                </div>
-
-                {/* Activity Log */}
-                <div style={{
-                  background: '#1A3357',
-                  border: '1px solid #2A4A6B',
-                  borderRadius: '16px',
-                  padding: '28px'
-                }}>
-                  <h3 style={{ color: '#FFFFFF', fontSize: '1.1rem', fontWeight: 800, marginBottom: '20px' }}>
-                    Activity Log
-                  </h3>
-                  {activityLogs.length > 0 ? (
+                  {profile?.enrolledCourses && profile.enrolledCourses.length > 0 ? (
                     <div style={{ display: 'grid', gap: '14px' }}>
-                      {activityLogs.map((log, index) => (
-                        <div key={`${log.timestamp || index}-${index}`} style={{
+                      {profile.enrolledCourses.map((course, index) => (
+                        <div key={course._id || index} style={{
                           padding: '16px',
                           border: '1px solid #2A4A6B',
                           borderRadius: '12px',
                           background: '#152A47'
                         }}>
-                          <p style={{ margin: '0 0 6px 0', color: '#FFFFFF', fontSize: '0.95rem', fontWeight: 600 }}>
-                            {log.text || log.message || 'Activity recorded'}
+                          <p style={{ margin: '0 0 6px 0', color: '#FFFFFF', fontSize: '0.95rem', fontWeight: 700 }}>
+                            {course.title || course.name || 'Course Name'}
                           </p>
-                          <p style={{ margin: 0, color: '#7A9BB5', fontSize: '0.8rem' }}>
-                            {log.timestamp ? new Date(log.timestamp).toLocaleString() : 'No timestamp available'}
+                          <p style={{ margin: '0 0 4px 0', color: '#B8D0E8', fontSize: '0.85rem' }}>
+                            {course.description || 'No description available'}
                           </p>
+                          <div style={{ display: 'flex', gap: '16px', marginTop: '8px', fontSize: '0.8rem', color: '#7A9BB5' }}>
+                            {course.status && <span>Status: <strong style={{ color: '#F5A623' }}>{course.status}</strong></span>}
+                            {course.progress && <span>Progress: <strong style={{ color: '#F5A623' }}>{course.progress}%</strong></span>}
+                          </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p style={{ color: '#7A9BB5', fontSize: '0.95rem', margin: 0 }}>No activity logs available yet.</p>
+                    <p style={{ color: '#7A9BB5', fontSize: '0.95rem', margin: 0 }}>No courses attended yet.</p>
                   )}
                 </div>
               </section>
