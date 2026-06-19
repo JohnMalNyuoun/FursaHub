@@ -14,7 +14,7 @@ const getOrgApplications = async (req, res) => {
     if (courseId) filter.course = courseId;
 
     const applications = await Application.find(filter)
-      .populate('youth', 'fullName email communityType age gender phoneNumber photo')
+      .populate('youth', 'fullName email communityType dateOfBirth gender phoneNumber photo')
       .populate('course', 'title category location')
       .sort({ createdAt: -1 });
 
@@ -34,7 +34,7 @@ const getOrgApplication = async (req, res) => {
       _id: req.params.id,
       organisation: req.user.id
     })
-      .populate('youth', 'fullName email communityType age gender phoneNumber photo')
+      .populate('youth', 'fullName email communityType dateOfBirth gender phoneNumber photo')
       .populate('course', 'title category location applicationQuestions');
 
     if (!application) {
@@ -87,7 +87,9 @@ const shortlistApplicant = async (req, res) => {
       message: `Congratulations! You have been shortlisted for a course. Check your application for next steps.`,
       type: 'application_shortlisted',
       reference: application._id,
-      referenceModel: 'Application'
+      referenceModel: 'Application',
+      sender: req.user.id,
+      senderModel: 'Organisation'
     });
 
     return success(res, 200, 'Applicant shortlisted', application);
@@ -131,7 +133,9 @@ const acceptApplicant = async (req, res) => {
       message: `Your application has been accepted. Welcome aboard!`,
       type: 'application_accepted',
       reference: application._id,
-      referenceModel: 'Application'
+      referenceModel: 'Application',
+      sender: req.user.id,
+      senderModel: 'Organisation'
     });
 
     return success(res, 200, 'Applicant accepted', application);
@@ -178,7 +182,9 @@ const rejectApplicant = async (req, res) => {
       message: `Your application status has been updated. Log in to FursaHub to view details.`,
       type: 'application_rejected',
       reference: application._id,
-      referenceModel: 'Application'
+      referenceModel: 'Application',
+      sender: req.user.id,
+      senderModel: 'Organisation'
     });
 
     return success(res, 200, 'Applicant rejected', application);

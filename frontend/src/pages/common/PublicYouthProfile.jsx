@@ -15,7 +15,6 @@ const PublicYouthProfile = () => {
   const [followerCount, setFollowerCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
-  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -110,27 +109,16 @@ const PublicYouthProfile = () => {
         ) : (
           <div
             style={{
-              background: '#1A3357',
-              border: '1px solid #2A4A6B',
-              borderRadius: '16px',
-              padding: '18px',
-              boxShadow: 'var(--card-shadow)'
+              padding: '0'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '8px' }}>
-              <button
-                type="button"
-                onClick={() => setShowDetails((prev) => !prev)}
+              <div
                 style={{
-                  background: 'transparent',
-                  border: 'none',
-                  padding: 0,
-                  cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '12px'
                 }}
-                title="Toggle profile details"
               >
                 {profile?.photo ? (
                   <img
@@ -164,11 +152,8 @@ const PublicYouthProfile = () => {
                   <p style={{ color: '#B8D0E8', fontSize: '0.82rem', marginBottom: '2px' }}>
                     @{profile?.username || 'username_not_set'}
                   </p>
-                  <p style={{ color: '#F5A623', fontSize: '0.78rem', fontWeight: 700 }}>
-                    {showDetails ? 'Hide Details' : 'View Profile Details'}
-                  </p>
                 </div>
-              </button>
+              </div>
 
               <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
                 <span style={{ color: '#B8D0E8', fontSize: '0.82rem', display: 'block', marginBottom: '8px' }}>
@@ -197,27 +182,61 @@ const PublicYouthProfile = () => {
               </div>
             </div>
 
-            {showDetails && (
-              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #2A4A6B' }}>
-                <p style={{ color: '#B8D0E8', fontSize: '0.92rem', marginBottom: '16px' }}>
-                  {profile?.bio || 'No bio provided.'}
-                </p>
+            <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #2A4A6B' }}>
+              <p style={{ color: '#B8D0E8', fontSize: '0.92rem', marginBottom: '16px' }}>
+                {profile?.bio || 'No bio provided.'}
+              </p>
 
-                <div style={{ display: 'grid', gap: '8px' }}>
-                  {[
-                    ['Community', profile?.communityType?.replace('_', ' ') || 'N/A'],
-                    ['Age', profile?.age || 'N/A'],
-                    ['Gender', profile?.gender || 'N/A'],
-                    ['Language', profile?.language || 'N/A']
-                  ].map(([label, value]) => (
-                    <div key={label} style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '10px' }}>
-                      <span style={{ color: '#7A9BB5', fontWeight: 700, fontSize: '0.84rem' }}>{label}</span>
-                      <span style={{ color: '#FFFFFF', fontSize: '0.88rem', textTransform: 'capitalize' }}>{value}</span>
-                    </div>
-                  ))}
-                </div>
+              <div style={{ display: 'grid', gap: '8px' }}>
+                {[
+                  ['Community', profile?.communityType?.replace('_', ' ') || 'N/A'],
+                  ['Date of Birth', profile?.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString() : 'N/A'],
+                  ['Email', profile?.email || 'N/A'],
+                  ['Phone', profile?.phoneNumber || 'N/A'],
+                  ['Gender', profile?.gender || 'N/A'],
+                  ['Language', profile?.language || 'N/A']
+                ].map(([label, value]) => (
+                  <div key={label} style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '10px' }}>
+                    <span style={{ color: '#7A9BB5', fontWeight: 700, fontSize: '0.84rem' }}>{label}</span>
+                    <span style={{ color: '#FFFFFF', fontSize: '0.88rem', textTransform: 'capitalize' }}>{value}</span>
+                  </div>
+                ))}
               </div>
-            )}
+
+              <div style={{ marginTop: '20px', paddingTop: '12px', borderTop: '1px solid #2A4A6B' }}>
+                <h3 style={{ color: '#FFFFFF', fontSize: '0.98rem', fontWeight: 800, marginBottom: '10px' }}>
+                  Courses
+                </h3>
+
+                {profile?.attendedCourses && profile.attendedCourses.length > 0 ? (
+                  <div style={{ display: 'grid', gap: '0' }}>
+                    {profile.attendedCourses.map((course, index) => (
+                      <div
+                        key={course._id || index}
+                        style={{
+                          padding: '12px 0',
+                          borderBottom: index < profile.attendedCourses.length - 1 ? '1px solid #2A4A6B' : 'none'
+                        }}
+                      >
+                        <p style={{ margin: '0 0 4px 0', color: '#FFFFFF', fontSize: '0.88rem', fontWeight: 700 }}>
+                          {course.title || 'Course Name'}
+                        </p>
+                        <p style={{ margin: '0 0 3px 0', color: '#B8D0E8', fontSize: '0.78rem' }}>
+                          {course.description || 'No details'}
+                        </p>
+                        {course.status && (
+                          <p style={{ margin: '6px 0 0 0', fontSize: '0.74rem', color: '#7A9BB5' }}>
+                            Status: <strong style={{ color: '#F5A623' }}>{String(course.status).replace('_', ' ')}</strong>
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ color: '#7A9BB5', fontSize: '0.85rem', margin: 0 }}>No courses yet.</p>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>

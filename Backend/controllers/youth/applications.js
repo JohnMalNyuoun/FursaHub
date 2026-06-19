@@ -78,7 +78,9 @@ const applyForCourse = async (req, res) => {
       message: `A youth has applied for ${course.title}`,
       type: 'application_submitted',
       reference: application._id,
-      referenceModel: 'Application'
+      referenceModel: 'Application',
+      sender: req.user.id,
+      senderModel: 'User'
     });
 
     return success(res, 201, 'Application submitted successfully', application);

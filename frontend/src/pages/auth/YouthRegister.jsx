@@ -14,6 +14,7 @@ const YouthRegister = () => {
     fullName: '',
     email: '',
     password: '',
+    dateOfBirth: '',
     communityType: ''
   });
   const [error, setError] = useState('');
@@ -126,6 +127,13 @@ const YouthRegister = () => {
             value={form.password}
             onChange={handleChange}
             required
+          />
+          <Input
+            label="Date of Birth"
+            type="date"
+            name="dateOfBirth"
+            value={form.dateOfBirth}
+            onChange={handleChange}
           />
 
           <div style={{ marginBottom: '16px' }}>

@@ -4,6 +4,7 @@ const User = require('../../models/Users');
 const { success, error } = require('../../utils/apiResponse');
 const cloudinary = require('../../config/cloudinary');
 const { sendEmail, hasEmailConfig } = require('../../services/emailService');
+const NAME_CHANGE_COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000;
 
 // @desc    Get youth profile
 // @route   GET /api/youth/profile
@@ -23,7 +24,7 @@ const getProfile = async (req, res) => {
 // @access  Youth
 const updateProfile = async (req, res) => {
   try {
-    const { fullName, username, age, gender, phoneNumber, bio } = req.body;
+    const { fullName, username, dateOfBirth, gender, phoneNumber, bio, visibilitySettings } = req.body;
 
     const user = await User.findById(req.user.id);
     if (!user) return error(res, 404, 'User not found');
@@ -44,11 +45,48 @@ const updateProfile = async (req, res) => {
       }
     }
 
-    if (fullName) user.fullName = fullName;
-    if (age) user.age = age;
+    if (fullName !== undefined) {
+      const normalizedFullName = String(fullName).trim();
+      if (normalizedFullName && normalizedFullName !== user.fullName) {
+        return error(res, 400, 'Name can only be changed from Account settings');
+      }
+    }
+    if (dateOfBirth !== undefined) {
+      const parsedDate = dateOfBirth ? new Date(dateOfBirth) : undefined;
+      if (dateOfBirth && Number.isNaN(parsedDate.getTime())) {
+        return error(res, 400, 'Invalid dateOfBirth value');
+      }
+      user.dateOfBirth = parsedDate;
+    }
     if (gender) user.gender = gender;
-    if (phoneNumber) user.phoneNumber = phoneNumber;
+    if (phoneNumber !== undefined) user.phoneNumber = phoneNumber;
     if (bio !== undefined) user.bio = bio;
+
+    if (visibilitySettings && typeof visibilitySettings === 'object') {
+      const allowed = ['public', 'mutual', 'private'];
+      const next = { ...(user.visibilitySettings || {}) };
+
+      if (visibilitySettings.dateOfBirth !== undefined) {
+        if (!allowed.includes(visibilitySettings.dateOfBirth)) {
+          return error(res, 400, 'Invalid dateOfBirth visibility');
+        }
+        next.dateOfBirth = visibilitySettings.dateOfBirth;
+      }
+      if (visibilitySettings.email !== undefined) {
+        if (!allowed.includes(visibilitySettings.email)) {
+          return error(res, 400, 'Invalid email visibility');
+        }
+        next.email = visibilitySettings.email;
+      }
+      if (visibilitySettings.phoneNumber !== undefined) {
+        if (!allowed.includes(visibilitySettings.phoneNumber)) {
+          return error(res, 400, 'Invalid phone visibility');
+        }
+        next.phoneNumber = visibilitySettings.phoneNumber;
+      }
+
+      user.visibilitySettings = next;
+    }
 
     await user.save();
 
@@ -57,16 +95,70 @@ const updateProfile = async (req, res) => {
       fullName: user.fullName,
       username: user.username,
       email: user.email,
-      age: user.age,
+      dateOfBirth: user.dateOfBirth,
       gender: user.gender,
       phoneNumber: user.phoneNumber,
       bio: user.bio,
       photo: user.photo,
+      visibilitySettings: user.visibilitySettings,
       communityType: user.communityType,
       notificationsEnabled: user.notificationsEnabled,
       theme: user.theme,
       language: user.language,
       role: user.role
+    });
+  } catch (err) {
+    return error(res, 500, err.message);
+  }
+};
+
+// @desc    Change profile name with password confirmation
+// @route   PUT /api/youth/profile/name
+// @access  Youth
+const changeFullName = async (req, res) => {
+  try {
+    const { newFullName, currentPassword } = req.body;
+
+    if (!newFullName || !currentPassword) {
+      return error(res, 400, 'Please provide newFullName and currentPassword');
+    }
+
+    const normalizedFullName = String(newFullName).trim();
+    if (normalizedFullName.length < 2) {
+      return error(res, 400, 'Name must be at least 2 characters');
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) return error(res, 404, 'User not found');
+
+    if (normalizedFullName === user.fullName) {
+      return error(res, 400, 'New name cannot be the same as current name');
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return error(res, 401, 'Current password is incorrect');
+    }
+
+    if (user.lastFullNameChangeAt) {
+      const nextAllowedAt = new Date(user.lastFullNameChangeAt.getTime() + NAME_CHANGE_COOLDOWN_MS);
+      if (nextAllowedAt > new Date()) {
+        return error(
+          res,
+          400,
+          `Name can only be changed once every 30 days. Try again on ${nextAllowedAt.toLocaleDateString()}`
+        );
+      }
+    }
+
+    user.fullName = normalizedFullName;
+    user.lastFullNameChangeAt = new Date();
+    await user.save();
+
+    return success(res, 200, 'Name updated successfully', {
+      fullName: user.fullName,
+      lastFullNameChangeAt: user.lastFullNameChangeAt,
+      nextAllowedNameChangeAt: new Date(user.lastFullNameChangeAt.getTime() + NAME_CHANGE_COOLDOWN_MS)
     });
   } catch (err) {
     return error(res, 500, err.message);
@@ -339,6 +431,7 @@ module.exports = {
   updateProfile,
   updatePhoto,
   changePassword,
+  changeFullName,
   requestEmailChange,
   verifyEmailChange,
   updateNotifications,

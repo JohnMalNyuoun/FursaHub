@@ -15,6 +15,8 @@ import YouthApplications from './pages/youth/Applications';
 import YouthNotifications from './pages/youth/Notifications';
 import YouthProfile from './pages/youth/Profile';
 import YouthSettings from './pages/youth/Settings';
+import YouthAccount from './pages/youth/Account';
+import YouthQuickAccess from './pages/youth/QuickAccess';
 import Preferences from './pages/youth/Preferences';
 
 // Organisation pages
@@ -97,6 +99,10 @@ function App () {
       <Route path="/youth/profile" element={<YouthRoute><YouthProfile /></YouthRoute>} />
       <Route path="/settings" element={<YouthRoute><YouthSettings /></YouthRoute>} />
       <Route path="/youth/settings" element={<YouthRoute><YouthSettings /></YouthRoute>} />
+      <Route path="/account" element={<YouthRoute><YouthAccount /></YouthRoute>} />
+      <Route path="/youth/account" element={<YouthRoute><YouthAccount /></YouthRoute>} />
+      <Route path="/quick-access" element={<YouthRoute><YouthQuickAccess /></YouthRoute>} />
+      <Route path="/youth/quick-access" element={<YouthRoute><YouthQuickAccess /></YouthRoute>} />
       <Route path="/preferences" element={<YouthRoute><Preferences /></YouthRoute>} />
       <Route path="/youth/preferences" element={<YouthRoute><Preferences /></YouthRoute>} />
 

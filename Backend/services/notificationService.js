@@ -7,7 +7,9 @@ const notify = async ({
   message,
   type,
   reference,
-  referenceModel
+  referenceModel,
+  sender,
+  senderModel
 }) => {
   try {
     await Notification.create({
@@ -17,7 +19,8 @@ const notify = async ({
       message,
       type,
       reference,
-      referenceModel
+      referenceModel,
+      ...(sender ? { sender, senderModel } : {})
     });
   } catch (err) {
     console.error('Notification error:', err.message);

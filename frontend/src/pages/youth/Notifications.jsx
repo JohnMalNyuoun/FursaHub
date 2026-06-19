@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
 import Button from '../../components/common/Button';
@@ -8,26 +9,48 @@ import {
   markAllAsRead
 } from '../../services/notificationService';
 import { useNotifications } from '../../context/NotificationContext';
-
-const notificationIcons = {
-  application_submitted: '📝',
-  application_shortlisted: '🎉',
-  application_accepted: '✅',
-  application_rejected: '❌',
-  course_published: '📢',
-  org_approved: '✅',
-  org_rejected: '❌'
-};
+import { checkFollowStatus, followTarget } from '../../services/followService';
 
 const Notifications = () => {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [followStatusByUser, setFollowStatusByUser] = useState({});
+  const [followLoadingByUser, setFollowLoadingByUser] = useState({});
   const { resetUnreadCount } = useNotifications();
+
+  const loadFollowStatus = async (notificationList) => {
+    const followerIds = [...new Set(
+      notificationList
+        .filter((item) => item.type === 'new_follower' && item.referenceModel === 'User' && item.reference)
+        .map((item) => String(item.reference))
+    )];
+
+    if (followerIds.length === 0) {
+      setFollowStatusByUser({});
+      return;
+    }
+
+    const entries = await Promise.all(
+      followerIds.map(async (userId) => {
+        try {
+          const res = await checkFollowStatus(userId, 'User');
+          const isFollowing = Boolean(res?.data?.data?.isFollowing);
+          return [userId, isFollowing];
+        } catch {
+          return [userId, false];
+        }
+      })
+    );
+
+    setFollowStatusByUser(Object.fromEntries(entries));
+  };
 
   const fetchNotifications = async () => {
     try {
       const res = await getNotifications();
       setNotifications(res.data);
+      await loadFollowStatus(res.data || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -60,6 +83,18 @@ const Notifications = () => {
     }
   };
 
+  const handleFollowBack = async (followerId) => {
+    setFollowLoadingByUser((prev) => ({ ...prev, [followerId]: true }));
+    try {
+      await followTarget(followerId, 'User');
+      setFollowStatusByUser((prev) => ({ ...prev, [followerId]: true }));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setFollowLoadingByUser((prev) => ({ ...prev, [followerId]: false }));
+    }
+  };
+
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   if (loading) return <Loader />;
@@ -68,26 +103,38 @@ const Notifications = () => {
     <div style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
       <Navbar />
 
-      {/* Header */}
-      <div className="fh-section-head">
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: '12px',
-          flexWrap: 'wrap'
-        }}>
+      {/* Back */}
+      <div style={{ maxWidth: '720px', margin: '0 auto', padding: '14px 20px 0' }}>
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            color: '#B8D0E8',
+            fontSize: '0.9rem',
+            fontWeight: 700,
+            padding: 0,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            cursor: 'pointer'
+          }}
+        >
+          <span style={{ color: '#F5A623', fontSize: '1rem', lineHeight: 1 }}>←</span>
+          <span>Back</span>
+        </button>
+      </div>
+
+      <div className="fh-container" style={{ maxWidth: '720px' }}>
+        {/* Header */}
+        <div style={{ padding: '20px 0 4px', borderBottom: '1px solid #2A4A6B', marginBottom: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
           <div>
-            <h1 style={{
-              fontSize: '1.5rem',
-              fontWeight: '800',
-              color: '#FFFFFF',
-              marginBottom: '4px'
-            }}>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#FFFFFF', marginBottom: '4px' }}>
               Notifications
             </h1>
-            <p style={{ fontSize: '0.9rem', color: '#7A9BB5' }}>
-              {unreadCount > 0 ? (
+            {unreadCount > 0 && (
+              <p style={{ fontSize: '0.9rem', color: '#7A9BB5' }}>
                 <span style={{
                   display: 'inline-block',
                   background: '#F5A623',
@@ -100,48 +147,49 @@ const Notifications = () => {
                 }}>
                   {unreadCount}
                 </span>
-              ) : null}
-              {unreadCount > 0 ? 'unread' : 'All caught up'}
-            </p>
+                unread
+              </p>
+            )}
           </div>
-
-          {unreadCount > 0 && (
-            <Button
-              variant="outline"
+          {notifications.length > 0 && (
+            <button
               onClick={handleMarkAllAsRead}
-              style={{ fontSize: '0.82rem', padding: '10px 16px', minHeight: '44px' }}
+              disabled={unreadCount === 0}
+              title="Mark all as read"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                cursor: unreadCount === 0 ? 'default' : 'pointer',
+                padding: '4px',
+                color: unreadCount === 0 ? '#2A4A6B' : '#F5A623',
+                display: 'inline-flex',
+                alignItems: 'center'
+              }}
             >
-              Mark all as read
-            </Button>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 12l5 5L20 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
           )}
         </div>
-      </div>
 
-      <div className="fh-container" style={{ maxWidth: '720px' }}>
         {notifications.length === 0 ? (
           <div className="fh-empty">
-            <div className="fh-empty-icon">🔔</div>
             <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
               No notifications yet
             </p>
           </div>
         ) : (
-          <div style={{
-            background: '#1A3357',
-            border: '1px solid #2A4A6B',
-            borderRadius: 'var(--radius)',
-            overflow: 'hidden'
-          }}>
+          <div>
             {notifications.map((notification, i) => (
               <div
                 key={notification._id}
                 onClick={() => !notification.isRead && handleMarkAsRead(notification._id)}
                 style={{
-                  padding: '20px 24px',
+                  padding: '16px 0',
                   borderBottom: i < notifications.length - 1
                     ? '1px solid #2A4A6B' : 'none',
-                  background: notification.isRead
-                    ? '#1A3357' : '#152A47',
+                  background: 'transparent',
                   cursor: notification.isRead ? 'default' : 'pointer',
                   display: 'flex',
                   gap: '16px',
@@ -149,9 +197,36 @@ const Notifications = () => {
                   transition: 'var(--transition)'
                 }}
               >
-                <span style={{ fontSize: '1.4rem' }}>
-                  {notificationIcons[notification.type] || '🔔'}
-                </span>
+                <div style={{ flexShrink: 0 }}>
+                  {(() => {
+                    const s = notification.sender;
+                    const imgSrc = s?.logo || s?.photo || null;
+                    const initial = s?.name?.[0] || s?.fullName?.[0] || '?';
+                    return imgSrc ? (
+                      <img
+                        src={imgSrc}
+                        alt={s?.name || s?.fullName || ''}
+                        style={{
+                          width: '40px', height: '40px',
+                          borderRadius: '50%', objectFit: 'cover',
+                          border: '1px solid #2A4A6B'
+                        }}
+                      />
+                    ) : (
+                      <div style={{
+                        width: '40px', height: '40px',
+                        borderRadius: '50%',
+                        background: '#1A3357',
+                        border: '1px solid #2A4A6B',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '1rem', fontWeight: 800, color: '#F5A623',
+                        textTransform: 'uppercase'
+                      }}>
+                        {initial}
+                      </div>
+                    );
+                  })()}
+                </div>
 
                 <div style={{ flex: 1 }}>
                   <div style={{
@@ -191,6 +266,32 @@ const Notifications = () => {
                   <p style={{ fontSize: '0.78rem', color: '#7A9BB5' }}>
                     {new Date(notification.createdAt).toLocaleString()}
                   </p>
+
+                  {notification.type === 'new_follower' && notification.referenceModel === 'User' && notification.reference && (
+                    <div style={{ marginTop: '10px' }}>
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!notification.isRead) {
+                            handleMarkAsRead(notification._id);
+                          }
+                          handleFollowBack(String(notification.reference));
+                        }}
+                        disabled={Boolean(followLoadingByUser[String(notification.reference)]) || Boolean(followStatusByUser[String(notification.reference)])}
+                        style={{
+                          minHeight: '36px',
+                          padding: '8px 12px',
+                          fontSize: '0.78rem'
+                        }}
+                      >
+                        {followStatusByUser[String(notification.reference)]
+                          ? 'Following'
+                          : followLoadingByUser[String(notification.reference)]
+                            ? 'Following...'
+                            : 'Follow back'}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

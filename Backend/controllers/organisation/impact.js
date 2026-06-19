@@ -79,7 +79,9 @@ const markCompletion = async (req, res) => {
         message: `You have completed ${application.course.title}. Please fill in your outcome form to share your experience.`,
         type: 'application_accepted',
         reference: application._id,
-        referenceModel: 'Application'
+        referenceModel: 'Application',
+        sender: req.user.id,
+        senderModel: 'Organisation'
       });
     }
 

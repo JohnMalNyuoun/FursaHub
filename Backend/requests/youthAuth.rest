@@ -7,7 +7,7 @@ Content-Type: application/json
   "email": "john.mal@example.com",
   "password": "password123",
   "communityType": "refugee",
-  "age": 22,
+  "dateOfBirth": "2004-01-15",
   "gender": "male",
   "phoneNumber": "0712345678"
 }

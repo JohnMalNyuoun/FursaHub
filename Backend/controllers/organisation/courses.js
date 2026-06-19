@@ -324,7 +324,9 @@ const publishCourse = async (req, res) => {
         message: `${course.title} has just been posted by ${req.user.name || 'an organisation'} in ${course.location}. ${course.totalSlots} slots available - apply before ${new Date(course.applicationDeadline).toLocaleDateString()}.`,
         type: 'course_published',
         reference: course._id,
-        referenceModel: 'Course'
+        referenceModel: 'Course',
+        sender: req.user.id,
+        senderModel: 'Organisation'
       })
     ));
 

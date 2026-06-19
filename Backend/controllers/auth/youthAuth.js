@@ -8,7 +8,7 @@ const { success, error } = require('../../utils/apiResponse');
 // @access  Public
 const registerYouth = async (req, res) => {
   try {
-    const { fullName, email, password, communityType, age, gender, phoneNumber } = req.body;
+    const { fullName, email, password, communityType, dateOfBirth, age, gender, phoneNumber } = req.body;
 
     // Check required fields
     if (!fullName || !email || !password || !communityType) {
@@ -26,12 +26,21 @@ const registerYouth = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create user
+    const resolvedDateOfBirth = dateOfBirth
+      ? new Date(dateOfBirth)
+      : undefined;
+
+    if (dateOfBirth && Number.isNaN(resolvedDateOfBirth.getTime())) {
+      return error(res, 400, 'Invalid dateOfBirth value');
+    }
+
     const user = await User.create({
       fullName,
       email,
       password: hashedPassword,
       communityType,
-      age,
+      dateOfBirth: resolvedDateOfBirth,
+      ...(age !== undefined ? { age } : {}),
       gender,
       phoneNumber
     });

@@ -2,6 +2,7 @@ const Follow = require('../../models/Follow');
 const User = require('../../models/Users');
 const Organisation = require('../../models/Organisation');
 const { success, error } = require('../../utils/apiResponse');
+const { notify } = require('../../services/notificationService');
 
 // @desc    Follow a user or organisation
 // @route   POST /api/follow/:targetId/:targetModel
@@ -10,6 +11,7 @@ const followTarget = async (req, res) => {
   try {
     const { targetId, targetModel } = req.params;
     const followerId = req.user.id;
+    const followerUser = await User.findById(followerId).select('fullName username');
 
     // Validate targetModel
     if (!['User', 'Organisation', 'Admin'].includes(targetModel)) {
@@ -50,6 +52,21 @@ const followTarget = async (req, res) => {
       following: targetId,
       followingModel: targetModel
     });
+
+    if (targetModel === 'User' && target.notificationsEnabled !== false) {
+      const followerName = followerUser?.fullName || followerUser?.username || 'Someone';
+      await notify({
+        recipient: targetId,
+        recipientModel: 'User',
+        title: 'New follower',
+        message: `${followerName} started following you`,
+        type: 'new_follower',
+        reference: followerId,
+        referenceModel: 'User',
+        sender: followerId,
+        senderModel: 'User'
+      });
+    }
 
     return success(res, 201, 'Following successfully', { followId: follow._id });
   } catch (err) {

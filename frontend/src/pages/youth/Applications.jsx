@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
 import Button from '../../components/common/Button';
@@ -8,38 +9,32 @@ const statusConfig = {
   submitted: {
     label: 'Submitted',
     color: '#93C5FD',
-    bg: 'rgba(59,130,246,0.15)',
-    icon: '📝'
+    bg: 'rgba(59,130,246,0.15)'
   },
   under_review: {
     label: 'Under Review',
     color: '#F5A623',
-    bg: 'rgba(245,166,35,0.15)',
-    icon: '🔍'
+    bg: 'rgba(245,166,35,0.15)'
   },
   shortlisted: {
     label: 'Shortlisted',
     color: '#F5A623',
-    bg: 'rgba(245,166,35,0.2)',
-    icon: '🎉'
+    bg: 'rgba(245,166,35,0.2)'
   },
   accepted: {
     label: 'Accepted',
     color: '#D4891A',
-    bg: 'rgba(245,166,35,0.25)',
-    icon: '✅'
+    bg: 'rgba(245,166,35,0.25)'
   },
   rejected: {
     label: 'Not Selected',
     color: '#FCA5A5',
-    bg: 'rgba(229,62,62,0.15)',
-    icon: '💪'
+    bg: 'rgba(229,62,62,0.15)'
   },
   withdrawn: {
     label: 'Withdrawn',
     color: '#94A3B8',
-    bg: 'rgba(148,163,184,0.15)',
-    icon: '↩️'
+    bg: 'rgba(148,163,184,0.15)'
   }
 };
 
@@ -52,6 +47,7 @@ const stageLabels = {
 };
 
 const Applications = () => {
+  const navigate = useNavigate();
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [withdrawing, setWithdrawing] = useState(null);
@@ -96,28 +92,42 @@ const Applications = () => {
     <div style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
       <Navbar />
 
-      {/* Header */}
-      <div className="fh-section-head">
-        <div>
-          <h1 style={{
-            fontSize: '1.5rem',
-            fontWeight: '800',
-            color: '#FFFFFF',
-            marginBottom: '6px'
-          }}>
+      {/* Back */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '14px 20px 0' }}>
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            color: '#B8D0E8',
+            fontSize: '0.9rem',
+            fontWeight: 700,
+            padding: 0,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            cursor: 'pointer'
+          }}
+        >
+          <span style={{ color: '#F5A623', fontSize: '1rem', lineHeight: 1 }}>←</span>
+          <span>Back</span>
+        </button>
+      </div>
+
+      <div className="fh-container">
+        {/* Header */}
+        <div style={{ padding: '20px 0 4px', borderBottom: '1px solid #2A4A6B', marginBottom: '4px' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#FFFFFF', marginBottom: '4px' }}>
             My Applications
           </h1>
           <p style={{ fontSize: '0.9rem', color: '#7A9BB5' }}>
             {applications.length} application{applications.length !== 1 ? 's' : ''} total
           </p>
         </div>
-      </div>
-
-      <div className="fh-container">
 
         {applications.length === 0 ? (
           <div className="fh-empty">
-            <div className="fh-empty-icon">📋</div>
             <p style={{ fontSize: '1rem', marginBottom: '6px', color: 'var(--text-secondary)', fontWeight: '600' }}>
               No applications yet
             </p>
@@ -126,7 +136,7 @@ const Applications = () => {
             </p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
             {applications.map(app => {
               const config = statusConfig[app.status] || statusConfig.submitted;
               const isExpanded = expandedApp === app._id;
@@ -137,16 +147,13 @@ const Applications = () => {
 
               return (
                 <div key={app._id} style={{
-                  background: '#1A3357',
-                  border: '1px solid #2A4A6B',
-                  borderRadius: '16px',
-                  boxShadow: 'var(--card-shadow)'
+                  borderBottom: '1px solid #2A4A6B'
                 }}>
                   {/* Card header */}
                   <div
                     onClick={() => setExpandedApp(isExpanded ? null : app._id)}
                     style={{
-                      padding: '18px 20px',
+                      padding: '16px 0',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
@@ -162,10 +169,25 @@ const Applications = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '1.1rem',
-                      flexShrink: 0
+                      flexShrink: 0,
+                      overflow: 'hidden'
                     }}>
-                      {config.icon}
+                      {app.organisation?.logo ? (
+                        <img
+                          src={app.organisation.logo}
+                          alt={app.organisation.name}
+                          style={{ width: '42px', height: '42px', objectFit: 'cover', borderRadius: '10px' }}
+                        />
+                      ) : (
+                        <span style={{
+                          fontSize: '0.85rem',
+                          fontWeight: 800,
+                          color: config.color,
+                          textTransform: 'uppercase'
+                        }}>
+                          {app.organisation?.name?.[0] ?? '?'}
+                        </span>
+                      )}
                     </div>
 
                     {/* Info */}
@@ -310,10 +332,8 @@ const Applications = () => {
                                 display: 'flex',
                                 alignItems: 'flex-start',
                                 gap: '8px',
-                                background: '#152A47',
-                                border: '1px solid #2A4A6B',
-                                borderRadius: '10px',
-                                padding: '10px'
+                                padding: '8px 0',
+                                borderBottom: i < timeline.length - 1 ? '1px solid #2A4A6B' : 'none'
                               }}>
                                 <span style={{ color: '#F5A623', fontSize: '0.95rem' }}>•</span>
                                 <div>
@@ -345,7 +365,7 @@ const Applications = () => {
                             color: '#F5A623',
                             marginBottom: '4px'
                           }}>
-                            🎉 Interview Details
+                            Interview Details
                           </p>
 
                           <p style={{ fontSize: '0.82rem', color: '#FDF3E0' }}>
@@ -355,12 +375,12 @@ const Applications = () => {
 
                           {app.nextStep.location && (
                             <p style={{ fontSize: '0.82rem', color: '#FDF3E0' }}>
-                              📍 {app.nextStep.location}
+                              Location: {app.nextStep.location}
                             </p>
                           )}
                           {app.nextStep.scheduledAt && (
                             <p style={{ fontSize: '0.82rem', color: '#FDF3E0' }}>
-                              📅 {new Date(app.nextStep.scheduledAt).toLocaleString()}
+                              Scheduled: {new Date(app.nextStep.scheduledAt).toLocaleString()}
                             </p>
                           )}
                         </div>
@@ -375,15 +395,15 @@ const Applications = () => {
                       }}>
                         {[
                           {
-                            label: '📍 Location',
+                            label: 'Location',
                             value: app.course?.location
                           },
                           {
-                            label: '🎓 Mode',
+                            label: 'Mode',
                             value: app.course?.deliveryMode?.replace('_', ' ')
                           },
                           {
-                            label: '📅 Starts',
+                            label: 'Starts',
                             value: app.course?.startDate
                               ? new Date(app.course.startDate).toLocaleDateString()
                               : null

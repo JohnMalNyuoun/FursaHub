@@ -5,6 +5,7 @@ const {
   updateProfile,
   updatePhoto,
   changePassword,
+  changeFullName,
   requestEmailChange,
   verifyEmailChange,
   updateNotifications,
@@ -20,6 +21,7 @@ router.get('/', protect, isYouth, getProfile);
 router.put('/', protect, isYouth, updateProfile);
 router.put('/photo', protect, isYouth, uploadProfile.single('photo'), updatePhoto);
 router.put('/password', protect, isYouth, changePassword);
+router.put('/name', protect, isYouth, changeFullName);
 router.put('/email/request-change', protect, isYouth, requestEmailChange);
 router.put('/email/verify', protect, isYouth, verifyEmailChange);
 router.put('/notifications', protect, isYouth, updateNotifications);

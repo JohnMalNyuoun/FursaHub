@@ -23,6 +23,7 @@ const notificationSchema = new mongoose.Schema({
   type: {
     type: String,
     enum: [
+      'new_follower',
       'application_submitted',
       'application_shortlisted',
       'application_accepted',
@@ -38,7 +39,15 @@ const notificationSchema = new mongoose.Schema({
   },
   referenceModel: {
     type: String,
-    enum: ['Course', 'Application', 'Organisation']
+    enum: ['Course', 'Application', 'Organisation', 'User']
+  },
+  sender: {
+    type: mongoose.Schema.Types.ObjectId,
+    refPath: 'senderModel'
+  },
+  senderModel: {
+    type: String,
+    enum: ['User', 'Organisation', 'Admin']
   },
   isRead: {
     type: Boolean,

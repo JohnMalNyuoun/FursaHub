@@ -20,6 +20,11 @@ export const changeYouthPassword = async (payload) => {
   return response.data;
 };
 
+export const changeYouthName = async (payload) => {
+  const response = await api.put('/youth/profile/name', payload);
+  return response.data;
+};
+
 export const requestYouthEmailChange = async (newEmail) => {
   const response = await api.put('/youth/profile/email/request-change', { newEmail });
   return response.data;

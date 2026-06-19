@@ -10,7 +10,9 @@ const getNotifications = async (req, res) => {
     const notifications = await Notification.find({
       recipient: req.user.id,
       recipientModel: 'User'
-    }).sort({ createdAt: -1 });
+    })
+      .populate('sender', 'fullName photo name logo')
+      .sort({ createdAt: -1 });
 
     return success(res, 200, 'Notifications fetched', notifications);
 

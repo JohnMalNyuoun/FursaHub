@@ -1,43 +1,57 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
 import { getYouthProfile, updateYouthProfile, updateYouthPhoto } from '../../services/profileService';
+import * as followService from '../../services/followService';
+import { COURSE_CATEGORIES } from '../../utils/constants';
 
 const CLOUDINARY_CLOUD_NAME = 'dkxjwhxne';
 const CLOUDINARY_PROFILE_PRESET = 'Fursahub-profile';
 const CLOUDINARY_PROFILE_PRESET_FALLBACK = 'fursahub-courses';
+const BIO_MAX_LENGTH = 101;
 
 const editInputStyle = {
   width: '100%',
-  padding: '10px 12px',
+  padding: '8px 10px',
   background: '#152A47',
   color: '#FFFFFF',
   border: '1px solid #2A4A6B',
-  borderRadius: '10px',
-  fontSize: '0.9rem'
+  borderRadius: '8px',
+  fontSize: '0.85rem'
 };
 
 const YouthProfile = () => {
+  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [photoFailed, setPhotoFailed] = useState(false);
   const [showPhotoPreview, setShowPhotoPreview] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [editForm, setEditForm] = useState({ fullName: '', username: '', bio: '' });
-  const [newPhoto, setNewPhoto] = useState(null);
+  const [editForm, setEditForm] = useState({ username: '', bio: '' });
+  const [photoUploading, setPhotoUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [saveNotice, setSaveNotice] = useState('');
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const photoInputRef = useRef(null);
 
   const fetchProfile = async () => {
     try {
       const res = await getYouthProfile();
       setProfile(res.data);
       setEditForm({
-        fullName: res.data.fullName || '',
         username: res.data.username || '',
-        bio: res.data.bio || ''
+        bio: res.data.bio || '',
+        dateOfBirth: res.data.dateOfBirth ? String(res.data.dateOfBirth).slice(0, 10) : '',
+        phoneNumber: res.data.phoneNumber || '',
+        visibilitySettings: {
+          dateOfBirth: res.data.visibilitySettings?.dateOfBirth || 'private',
+          email: res.data.visibilitySettings?.email || 'private',
+          phoneNumber: res.data.visibilitySettings?.phoneNumber || 'private'
+        }
       });
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load profile');
@@ -48,36 +62,95 @@ const YouthProfile = () => {
 
   useEffect(() => { fetchProfile(); }, []);
 
+  useEffect(() => {
+    const userId = profile?._id || profile?.id;
+    if (!userId) return;
+
+    let cancelled = false;
+
+    const fetchFollowStats = async () => {
+      try {
+        const [followersRes, followingRes] = await Promise.all([
+          followService.getFollowCount(userId, 'User'),
+          followService.getFollowing(userId, 1, 0)
+        ]);
+
+        if (cancelled) return;
+
+        setFollowerCount(followersRes?.data?.data?.count || 0);
+        setFollowingCount(followingRes?.data?.data?.total || 0);
+      } catch {
+        if (cancelled) return;
+        setFollowerCount(0);
+        setFollowingCount(0);
+      }
+    };
+
+    fetchFollowStats();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [profile?._id, profile?.id]);
+
+  const uploadProfilePhoto = async (file) => {
+    const uploadWithPreset = async (preset) => {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('upload_preset', preset);
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+        { method: 'POST', body: fd }
+      );
+      return res.json();
+    };
+
+    let data = await uploadWithPreset(CLOUDINARY_PROFILE_PRESET);
+    if (!data?.secure_url) data = await uploadWithPreset(CLOUDINARY_PROFILE_PRESET_FALLBACK);
+    if (!data?.secure_url) throw new Error('Failed to upload profile image');
+
+    await updateYouthPhoto({ photoUrl: data.secure_url });
+    setProfile((prev) => ({ ...prev, photo: data.secure_url, updatedAt: new Date().toISOString() }));
+  };
+
+  const handleProfilePhotoChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setPhotoUploading(true);
+    setSaveError('');
+    try {
+      await uploadProfilePhoto(file);
+    } catch (err) {
+      setSaveError(err.response?.data?.message || err.message || 'Failed to update profile photo');
+    } finally {
+      setPhotoUploading(false);
+      if (photoInputRef.current) photoInputRef.current.value = '';
+    }
+  };
+
   const handleSaveProfile = async () => {
     setSaving(true);
     setSaveError('');
     setSaveNotice('');
     try {
+      if (editForm.bio.length > BIO_MAX_LENGTH) {
+        setSaveError(`Bio must be ${BIO_MAX_LENGTH} characters or less.`);
+        setSaving(false);
+        return;
+      }
+
       const payload = {
-        fullName: editForm.fullName,
-        bio: editForm.bio,
+        bio: (editForm.bio || '').slice(0, BIO_MAX_LENGTH),
+        dateOfBirth: editForm.dateOfBirth || null,
+        phoneNumber: editForm.phoneNumber || '',
+        visibilitySettings: {
+          dateOfBirth: editForm.visibilitySettings?.dateOfBirth || 'private',
+          email: editForm.visibilitySettings?.email || 'private',
+          phoneNumber: editForm.visibilitySettings?.phoneNumber || 'private'
+        },
         ...(editForm.username.trim() ? { username: editForm.username } : {})
       };
-
-      if (newPhoto) {
-        const uploadWithPreset = async (preset) => {
-          const fd = new FormData();
-          fd.append('file', newPhoto);
-          fd.append('upload_preset', preset);
-          const res = await fetch(
-            `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-            { method: 'POST', body: fd }
-          );
-          return res.json();
-        };
-        let data = await uploadWithPreset(CLOUDINARY_PROFILE_PRESET);
-        if (!data?.secure_url) data = await uploadWithPreset(CLOUDINARY_PROFILE_PRESET_FALLBACK);
-        if (data?.secure_url) {
-          await updateYouthPhoto({ photoUrl: data.secure_url });
-          payload.photo = data.secure_url;
-        }
-        setNewPhoto(null);
-      }
 
       const res = await updateYouthProfile(payload);
       setProfile((prev) => ({ ...prev, ...res.data, updatedAt: new Date().toISOString() }));
@@ -104,6 +177,11 @@ const YouthProfile = () => {
     );
   }, [profile]);
 
+  const categoryLabelMap = useMemo(
+    () => Object.fromEntries(COURSE_CATEGORIES.map((item) => [item.value, item.label])),
+    []
+  );
+
   const photoVersionedSrc = useMemo(() => {
     if (!profile?.photo) return '';
     const version = profile?.updatedAt ? encodeURIComponent(profile.updatedAt) : '';
@@ -111,13 +189,6 @@ const YouthProfile = () => {
     const separator = profile.photo.includes('?') ? '&' : '?';
     return `${profile.photo}${separator}v=${version}`;
   }, [profile?.photo, profile?.updatedAt]);
-
-  const registrationId = profile?._id || 'N/A';
-  const trainingPhaseProgress = profile?.trainingPhaseProgress ?? 0;
-  const mentorshipAttendanceRate = profile?.mentorshipAttendanceRate ?? 0;
-  const capstoneProgress = profile?.capstoneProgress ?? 0;
-  const skills = profile?.skills || [];
-  const activityLogs = profile?.activityLogs || [];
 
   useEffect(() => {
     setPhotoFailed(false);
@@ -143,144 +214,273 @@ const YouthProfile = () => {
         </div>
       ) : (
         <>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '14px 20px 0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+              <button
+                type="button"
+                onClick={() => navigate('/settings')}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#B8D0E8',
+                  fontSize: '0.9rem',
+                  fontWeight: 700,
+                  padding: 0,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  cursor: 'pointer'
+                }}
+              >
+                <span aria-hidden="true" style={{ color: '#F5A623', fontSize: '1rem', lineHeight: 1 }}>←</span>
+                <span>{profile?.fullName || 'Youth Profile'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setEditMode((prev) => !prev)}
+                title={editMode ? 'Close edit' : 'Edit profile'}
+                aria-label={editMode ? 'Close edit' : 'Edit profile'}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'transparent',
+                  color: editMode ? '#FFFFFF' : '#F5A623',
+                  border: 'none',
+                  padding: '2px',
+                  cursor: 'pointer',
+                  flexShrink: 0
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="m14.06 4.94 3.75 3.75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
           {/* Profile Header Section */}
           <div style={{
             maxWidth: '1200px',
             margin: '0 auto',
-            padding: '40px 20px',
+            padding: '28px 20px',
             borderBottom: '1px solid #2A4A6B'
           }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '28px' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '20px' }}>
               {/* Profile Photo */}
-              <button
-                type="button"
-                onClick={() => setShowPhotoPreview(true)}
-                title="View profile image"
-                style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', flexShrink: 0 }}
-              >
-                {profile?.photo && !photoFailed ? (
-                  <img
-                    src={photoVersionedSrc}
-                    alt={profile.fullName}
-                    onError={() => setPhotoFailed(true)}
-                    style={{
-                      width: '160px',
-                      height: '160px',
+              <div style={{ position: 'relative', width: '128px', height: '128px', flexShrink: 0 }}>
+                <button
+                  type="button"
+                  onClick={() => setShowPhotoPreview(true)}
+                  title="View profile image"
+                  style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}
+                >
+                  {profile?.photo && !photoFailed ? (
+                    <img
+                      src={photoVersionedSrc}
+                      alt={profile.fullName}
+                      onError={() => setPhotoFailed(true)}
+                      style={{
+                        width: '128px',
+                        height: '128px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: '3px solid #F5A623',
+                        boxShadow: '0 6px 20px rgba(0,0,0,0.25)'
+                      }}
+                    />
+                  ) : (
+                    <div style={{
+                      width: '128px',
+                      height: '128px',
                       borderRadius: '50%',
-                      objectFit: 'cover',
-                      border: '4px solid #F5A623',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
-                    }}
-                  />
-                ) : (
-                  <div style={{
-                    width: '160px',
-                    height: '160px',
+                      background: '#F5A623',
+                      color: '#1E3A5F',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 900,
+                      fontSize: '2.2rem',
+                      border: '3px solid #F5A623',
+                      boxShadow: '0 6px 20px rgba(0,0,0,0.25)'
+                    }}>
+                      {initials}
+                    </div>
+                  )}
+                </button>
+
+                <input
+                  ref={photoInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfilePhotoChange}
+                  style={{ display: 'none' }}
+                />
+                <button
+                  type="button"
+                  title="Change profile image"
+                  aria-label="Change profile image"
+                  disabled={photoUploading}
+                  onClick={() => photoInputRef.current?.click()}
+                  style={{
+                    position: 'absolute',
+                    right: '2px',
+                    bottom: '2px',
+                    width: '30px',
+                    height: '30px',
                     borderRadius: '50%',
-                    background: '#F5A623',
-                    color: '#1E3A5F',
-                    display: 'flex',
+                    border: '1px solid #2A4A6B',
+                    background: '#1A3357',
+                    color: '#F5A623',
+                    display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontWeight: 900,
-                    fontSize: '2.8rem',
-                    border: '4px solid #F5A623',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-                    flexShrink: 0
-                  }}>
-                    {initials}
-                  </div>
-                )}
-              </button>
+                    cursor: photoUploading ? 'not-allowed' : 'pointer',
+                    opacity: photoUploading ? 0.6 : 1
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M4 7h3l1.2-2h7.6L17 7h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx="12" cy="13" r="3.5" stroke="currentColor" strokeWidth="2" />
+                  </svg>
+                </button>
+              </div>
 
-              {/* Name, Bio & Button */}
-              <div style={{ flex: 1, paddingTop: '8px' }}>
-                <h1 style={{ color: '#FFFFFF', fontSize: '2.2rem', fontWeight: 900, margin: '0 0 4px 0' }}>
-                  {profile?.fullName || 'Youth User'}
-                </h1>
-                <p style={{ color: '#F5A623', fontSize: '1rem', fontWeight: 700, margin: '0 0 12px 0' }}>
+              {/* Username & Bio */}
+              <div style={{ paddingBottom: '6px' }}>
+                <p style={{ color: '#F5A623', fontSize: '1rem', fontWeight: 700, margin: '0 0 8px 0' }}>
                   @{profile?.username || 'username_not_set'}
+                </p>
+                <p style={{ color: '#7A9BB5', fontSize: '0.78rem', margin: '0 0 6px 0' }}>
+                  <strong style={{ color: '#FFFFFF' }}>{followerCount}</strong> followers · <strong style={{ color: '#FFFFFF' }}>{followingCount}</strong> following
                 </p>
                 {profile?.bio && (
                   <p style={{
                     color: '#B8D0E8',
-                    fontSize: '0.95rem',
-                    lineHeight: 1.5,
-                    margin: '0 0 16px 0',
-                    maxWidth: '500px'
+                    fontSize: '0.86rem',
+                    lineHeight: 1.4,
+                    margin: '0 0 12px 0',
+                    maxWidth: '420px'
                   }}>
                     {profile.bio}
                   </p>
                 )}
-                <button
-                  type="button"
-                  onClick={() => setEditMode((prev) => !prev)}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: editMode ? 'transparent' : '#F5A623',
-                    color: editMode ? '#F5A623' : '#FFFFFF',
-                    border: editMode ? '2px solid #F5A623' : 'none',
-                    fontWeight: 800,
-                    borderRadius: '8px',
-                    padding: '10px 20px',
-                    fontSize: '0.88rem',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {editMode ? 'Cancel' : 'Edit Profile'}
-                </button>
+
+                {!editMode && saveError ? (
+                  <p style={{ color: '#FCA5A5', fontSize: '0.78rem', margin: '6px 0 0 0' }}>{saveError}</p>
+                ) : null}
               </div>
             </div>
           </div>
 
           {/* Main Content Section */}
-          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '28px 20px' }}>
             {editMode ? (
               <div style={{
-                background: '#1A3357',
-                border: '2px solid #F5A623',
-                borderRadius: '18px',
-                padding: '32px',
-                maxWidth: '600px',
+                padding: '0',
+                maxWidth: '560px',
                 margin: '0 auto'
               }}>
-                <h2 style={{ color: '#FFFFFF', fontSize: '1.3rem', fontWeight: 800, marginBottom: '20px' }}>
-                  Edit Profile
+                <h2 style={{ color: '#FFFFFF', fontSize: '1.05rem', fontWeight: 800, marginBottom: '14px' }}>
+                  Edit
                 </h2>
 
                 {saveError && (
-                  <div style={{ background: 'rgba(229,62,62,0.1)', border: '1px solid #E53E3E', borderRadius: '10px', padding: '12px', color: '#FCA5A5', marginBottom: '16px', fontSize: '0.88rem' }}>
+                  <div style={{ background: 'rgba(229,62,62,0.1)', border: '1px solid #E53E3E', borderRadius: '8px', padding: '10px', color: '#FCA5A5', marginBottom: '12px', fontSize: '0.82rem' }}>
                     {saveError}
                   </div>
                 )}
                 {saveNotice && (
-                  <div style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid #10B981', borderRadius: '10px', padding: '12px', color: '#A7F3D0', marginBottom: '16px', fontSize: '0.88rem' }}>
+                  <div style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid #10B981', borderRadius: '8px', padding: '10px', color: '#A7F3D0', marginBottom: '12px', fontSize: '0.82rem' }}>
                     {saveNotice}
                   </div>
                 )}
 
-                <div style={{ display: 'grid', gap: '16px' }}>
+                <div style={{ display: 'grid', gap: '12px' }}>
                   <div>
-                    <label style={{ color: '#B8D0E8', fontSize: '0.82rem', display: 'block', marginBottom: '6px', fontWeight: 700 }}>Profile Photo</label>
-                    <input type="file" accept="image/*" onChange={(e) => setNewPhoto(e.target.files?.[0] || null)} style={{ color: '#FFFFFF', fontSize: '0.82rem' }} />
-                  </div>
-                  <div>
-                    <label style={{ color: '#B8D0E8', fontSize: '0.82rem', display: 'block', marginBottom: '6px', fontWeight: 700 }}>Display Name</label>
-                    <input style={editInputStyle} value={editForm.fullName} onChange={(e) => setEditForm((f) => ({ ...f, fullName: e.target.value }))} />
-                  </div>
-                  <div>
-                    <label style={{ color: '#B8D0E8', fontSize: '0.82rem', display: 'block', marginBottom: '6px', fontWeight: 700 }}>Username</label>
+                    <label style={{ color: '#B8D0E8', fontSize: '0.78rem', display: 'block', marginBottom: '5px', fontWeight: 700 }}>Username</label>
                     <input style={editInputStyle} value={editForm.username} onChange={(e) => setEditForm((f) => ({ ...f, username: e.target.value }))} placeholder="your_username" />
                   </div>
                   <div>
-                    <label style={{ color: '#B8D0E8', fontSize: '0.82rem', display: 'block', marginBottom: '6px', fontWeight: 700 }}>Bio</label>
-                    <textarea rows={4} style={editInputStyle} value={editForm.bio} onChange={(e) => setEditForm((f) => ({ ...f, bio: e.target.value }))} />
+                    <label style={{ color: '#B8D0E8', fontSize: '0.78rem', display: 'block', marginBottom: '5px', fontWeight: 700 }}>Date of Birth</label>
+                    <input type="date" style={editInputStyle} value={editForm.dateOfBirth || ''} onChange={(e) => setEditForm((f) => ({ ...f, dateOfBirth: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label style={{ color: '#B8D0E8', fontSize: '0.78rem', display: 'block', marginBottom: '5px', fontWeight: 700 }}>Phone</label>
+                    <input style={editInputStyle} value={editForm.phoneNumber || ''} onChange={(e) => setEditForm((f) => ({ ...f, phoneNumber: e.target.value }))} placeholder="+255..." />
+                  </div>
+                  <div>
+                    <label style={{ color: '#B8D0E8', fontSize: '0.78rem', display: 'block', marginBottom: '5px', fontWeight: 700 }}>Bio</label>
+                    <textarea
+                      rows={3}
+                      maxLength={BIO_MAX_LENGTH}
+                      style={editInputStyle}
+                      value={editForm.bio}
+                      onChange={(e) => setEditForm((f) => ({ ...f, bio: e.target.value.slice(0, BIO_MAX_LENGTH) }))}
+                    />
+                    <p style={{ color: '#7A9BB5', fontSize: '0.72rem', margin: '4px 0 0 0', textAlign: 'right' }}>
+                      {(editForm.bio || '').length}/{BIO_MAX_LENGTH}
+                    </p>
+                  </div>
+
+                  <div style={{ borderTop: '1px solid #2A4A6B', paddingTop: '10px' }}>
+                    <p style={{ color: '#FFFFFF', fontSize: '0.82rem', fontWeight: 700, margin: '0 0 8px 0' }}>Visibility</p>
+
+                    <div style={{ display: 'grid', gap: '8px' }}>
+                      <div>
+                        <label style={{ color: '#7A9BB5', fontSize: '0.76rem', display: 'block', marginBottom: '4px' }}>Date of Birth visibility</label>
+                        <select
+                          style={editInputStyle}
+                          value={editForm.visibilitySettings?.dateOfBirth || 'private'}
+                          onChange={(e) => setEditForm((f) => ({
+                            ...f,
+                            visibilitySettings: { ...(f.visibilitySettings || {}), dateOfBirth: e.target.value }
+                          }))}
+                        >
+                          <option value="public">Public</option>
+                          <option value="mutual">Mutual follow only</option>
+                          <option value="private">Private (hidden)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label style={{ color: '#7A9BB5', fontSize: '0.76rem', display: 'block', marginBottom: '4px' }}>Email visibility</label>
+                        <select
+                          style={editInputStyle}
+                          value={editForm.visibilitySettings?.email || 'private'}
+                          onChange={(e) => setEditForm((f) => ({
+                            ...f,
+                            visibilitySettings: { ...(f.visibilitySettings || {}), email: e.target.value }
+                          }))}
+                        >
+                          <option value="public">Public</option>
+                          <option value="mutual">Mutual follow only</option>
+                          <option value="private">Private (hidden)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label style={{ color: '#7A9BB5', fontSize: '0.76rem', display: 'block', marginBottom: '4px' }}>Phone visibility</label>
+                        <select
+                          style={editInputStyle}
+                          value={editForm.visibilitySettings?.phoneNumber || 'private'}
+                          onChange={(e) => setEditForm((f) => ({
+                            ...f,
+                            visibilitySettings: { ...(f.visibilitySettings || {}), phoneNumber: e.target.value }
+                          }))}
+                        >
+                          <option value="public">Public</option>
+                          <option value="mutual">Mutual follow only</option>
+                          <option value="private">Private (hidden)</option>
+                        </select>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
                   <button
                     type="button"
                     onClick={handleSaveProfile}
@@ -290,15 +490,15 @@ const YouthProfile = () => {
                       background: '#F5A623',
                       color: '#1E3A5F',
                       border: 'none',
-                      borderRadius: '10px',
-                      padding: '14px',
+                      borderRadius: '8px',
+                      padding: '11px',
                       fontWeight: 800,
-                      fontSize: '0.95rem',
+                      fontSize: '0.86rem',
                       cursor: saving ? 'not-allowed' : 'pointer',
                       opacity: saving ? 0.7 : 1
                     }}
                   >
-                    {saving ? 'Saving...' : 'Save Changes'}
+                    {saving ? 'Saving...' : 'Save'}
                   </button>
                   <button
                     type="button"
@@ -308,9 +508,10 @@ const YouthProfile = () => {
                       background: 'transparent',
                       color: '#B8D0E8',
                       border: '1px solid #2A4A6B',
-                      borderRadius: '10px',
-                      padding: '14px',
+                      borderRadius: '8px',
+                      padding: '11px',
                       fontWeight: 700,
+                      fontSize: '0.84rem',
                       cursor: 'pointer'
                     }}
                   >
@@ -319,60 +520,79 @@ const YouthProfile = () => {
                 </div>
               </div>
             ) : (
-              <section style={{ display: 'grid', gap: '32px' }}>
+              <section style={{ display: 'grid', gap: '20px' }}>
                 {/* Personal Information */}
                 <div style={{
-                  background: '#1A3357',
-                  border: '1px solid #2A4A6B',
-                  borderRadius: '16px',
-                  padding: '28px'
+                  padding: '2px 2px 6px'
                 }}>
-                  <h3 style={{ color: '#FFFFFF', fontSize: '1.1rem', fontWeight: 800, marginBottom: '20px' }}>
-                    About
+                  <h3 style={{ color: '#FFFFFF', fontSize: '0.98rem', fontWeight: 800, marginBottom: '10px' }}>
+                    Info
                   </h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
                     {[
-                      ['Age', profile?.age || 'N/A'],
+                      ['Date of Birth', profile?.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString() : 'N/A'],
                       ['Gender', profile?.gender ? profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1) : 'N/A'],
                       ['Email', profile?.email || 'N/A'],
                       ['Phone', profile?.phoneNumber || 'N/A'],
                       ['Language', profile?.language || 'N/A'],
-                      ['Community Type', profile?.communityType ? profile.communityType.replace('_', ' ').charAt(0).toUpperCase() + profile.communityType.slice(1).replace('_', ' ') : 'N/A']
+                      ['Community', profile?.communityType ? profile.communityType.replace('_', ' ').charAt(0).toUpperCase() + profile.communityType.slice(1).replace('_', ' ') : 'N/A']
                     ].map(([label, value]) => (
                       <div key={label}>
-                        <p style={{ color: '#7A9BB5', fontSize: '0.82rem', fontWeight: 700, margin: '0 0 4px 0' }}>{label}</p>
-                        <p style={{ color: '#FFFFFF', fontSize: '0.95rem', fontWeight: 600, margin: 0, wordBreak: 'break-word' }}>{value}</p>
+                        <p style={{ color: '#7A9BB5', fontSize: '0.76rem', fontWeight: 700, margin: '0 0 3px 0' }}>{label}</p>
+                        <p style={{ color: '#FFFFFF', fontSize: '0.86rem', fontWeight: 600, margin: 0, wordBreak: 'break-word' }}>{value}</p>
                       </div>
                     ))}
                   </div>
                 </div>
 
+                {/* My Interests */}
+                <div style={{ padding: '0' }}>
+                  <h3 style={{ color: '#FFFFFF', fontSize: '0.98rem', fontWeight: 800, marginBottom: '10px' }}>
+                    My Interests
+                  </h3>
+
+                  {profile?.categoryPreferences && profile.categoryPreferences.length > 0 ? (
+                    <div style={{ display: 'grid', gap: '4px' }}>
+                      {profile.categoryPreferences.map((category) => (
+                        <p
+                          key={category}
+                          style={{
+                            color: '#B8D0E8',
+                            fontSize: '0.86rem',
+                            fontWeight: 600,
+                            margin: 0
+                          }}
+                        >
+                          {categoryLabelMap[category] || category}
+                        </p>
+                      ))}
+                    </div>
+                  ) : (
+                    <p style={{ color: '#7A9BB5', fontSize: '0.85rem', margin: 0 }}>No interests selected yet.</p>
+                  )}
+                </div>
+
                 {/* Courses Attended */}
                 <div style={{
-                  background: '#1A3357',
-                  border: '1px solid #2A4A6B',
-                  borderRadius: '16px',
-                  padding: '28px'
+                  padding: '0'
                 }}>
-                  <h3 style={{ color: '#FFFFFF', fontSize: '1.1rem', fontWeight: 800, marginBottom: '20px' }}>
-                    Courses Attended
+                  <h3 style={{ color: '#FFFFFF', fontSize: '0.98rem', fontWeight: 800, marginBottom: '12px' }}>
+                    Courses
                   </h3>
                   {profile?.enrolledCourses && profile.enrolledCourses.length > 0 ? (
-                    <div style={{ display: 'grid', gap: '14px' }}>
+                    <div style={{ display: 'grid', gap: '10px' }}>
                       {profile.enrolledCourses.map((course, index) => (
                         <div key={course._id || index} style={{
-                          padding: '16px',
-                          border: '1px solid #2A4A6B',
-                          borderRadius: '12px',
-                          background: '#152A47'
+                          padding: '12px 0',
+                          borderBottom: index < profile.enrolledCourses.length - 1 ? '1px solid #2A4A6B' : 'none'
                         }}>
-                          <p style={{ margin: '0 0 6px 0', color: '#FFFFFF', fontSize: '0.95rem', fontWeight: 700 }}>
+                          <p style={{ margin: '0 0 4px 0', color: '#FFFFFF', fontSize: '0.88rem', fontWeight: 700 }}>
                             {course.title || course.name || 'Course Name'}
                           </p>
-                          <p style={{ margin: '0 0 4px 0', color: '#B8D0E8', fontSize: '0.85rem' }}>
-                            {course.description || 'No description available'}
+                          <p style={{ margin: '0 0 3px 0', color: '#B8D0E8', fontSize: '0.78rem' }}>
+                            {course.description || 'No details'}
                           </p>
-                          <div style={{ display: 'flex', gap: '16px', marginTop: '8px', fontSize: '0.8rem', color: '#7A9BB5' }}>
+                          <div style={{ display: 'flex', gap: '12px', marginTop: '6px', fontSize: '0.74rem', color: '#7A9BB5' }}>
                             {course.status && <span>Status: <strong style={{ color: '#F5A623' }}>{course.status}</strong></span>}
                             {course.progress && <span>Progress: <strong style={{ color: '#F5A623' }}>{course.progress}%</strong></span>}
                           </div>
@@ -380,7 +600,7 @@ const YouthProfile = () => {
                       ))}
                     </div>
                   ) : (
-                    <p style={{ color: '#7A9BB5', fontSize: '0.95rem', margin: 0 }}>No courses attended yet.</p>
+                    <p style={{ color: '#7A9BB5', fontSize: '0.85rem', margin: 0 }}>No courses yet.</p>
                   )}
                 </div>
               </section>

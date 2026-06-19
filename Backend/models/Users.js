@@ -17,6 +17,9 @@ const userSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  lastFullNameChangeAt: {
+    type: Date
+  },
   username: {
     type: String,
     unique: true,
@@ -31,6 +34,9 @@ const userSchema = new mongoose.Schema({
   },
   age: {
     type: Number
+  },
+  dateOfBirth: {
+    type: Date
   },
   gender: {
     type: String,
@@ -73,6 +79,23 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['en', 'sw', 'fr', 'ar'],
     default: 'en'
+  },
+  visibilitySettings: {
+    dateOfBirth: {
+      type: String,
+      enum: ['public', 'mutual', 'private'],
+      default: 'public'
+    },
+    email: {
+      type: String,
+      enum: ['public', 'mutual', 'private'],
+      default: 'public'
+    },
+    phoneNumber: {
+      type: String,
+      enum: ['public', 'mutual', 'private'],
+      default: 'public'
+    }
   },
   categoryPreferences: [{
     type: String,
