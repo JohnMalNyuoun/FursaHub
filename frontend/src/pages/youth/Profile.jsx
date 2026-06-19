@@ -143,31 +143,14 @@ const YouthProfile = () => {
         </div>
       ) : (
         <>
-          {/* Cover Section with Overlapping Profile Picture (Facebook Style) */}
+          {/* Profile Header Section */}
           <div style={{
-            background: 'linear-gradient(135deg, #1A3357 0%, #2A5A8F 50%, #152A47 100%)',
-            paddingBottom: '80px',
-            paddingTop: '40px',
-            paddingLeft: '20px',
-            paddingRight: '20px',
-            borderBottom: '2px solid #2A4A6B',
-            position: 'relative'
+            maxWidth: '1200px',
+            margin: '0 auto',
+            padding: '40px 20px',
+            borderBottom: '1px solid #2A4A6B'
           }}>
-            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-              {/* Cover height */}
-              <div style={{ height: '200px' }} />
-            </div>
-
-            {/* Profile Picture Overlapping Cover (Positioned Absolutely) */}
-            <div style={{
-              position: 'absolute',
-              bottom: '-70px',
-              left: '20px',
-              display: 'flex',
-              alignItems: 'flex-end',
-              gap: '24px',
-              maxWidth: '1200px'
-            }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '28px' }}>
               {/* Profile Photo */}
               <button
                 type="button"
@@ -185,8 +168,8 @@ const YouthProfile = () => {
                       height: '160px',
                       borderRadius: '50%',
                       objectFit: 'cover',
-                      border: '6px solid #0F1620',
-                      boxShadow: '0 12px 48px rgba(0,0,0,0.6)'
+                      border: '4px solid #F5A623',
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
                     }}
                   />
                 ) : (
@@ -201,8 +184,8 @@ const YouthProfile = () => {
                     justifyContent: 'center',
                     fontWeight: 900,
                     fontSize: '2.8rem',
-                    border: '6px solid #0F1620',
-                    boxShadow: '0 12px 48px rgba(0,0,0,0.6)',
+                    border: '4px solid #F5A623',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
                     flexShrink: 0
                   }}>
                     {initials}
@@ -210,8 +193,8 @@ const YouthProfile = () => {
                 )}
               </button>
 
-              {/* Name & Bio & Button */}
-              <div style={{ paddingBottom: '16px', flex: 1 }}>
+              {/* Name, Bio & Button */}
+              <div style={{ flex: 1, paddingTop: '8px' }}>
                 <h1 style={{ color: '#FFFFFF', fontSize: '2.2rem', fontWeight: 900, margin: '0 0 4px 0' }}>
                   {profile?.fullName || 'Youth User'}
                 </h1>
@@ -223,7 +206,7 @@ const YouthProfile = () => {
                     color: '#B8D0E8',
                     fontSize: '0.95rem',
                     lineHeight: 1.5,
-                    margin: '0 0 14px 0',
+                    margin: '0 0 16px 0',
                     maxWidth: '500px'
                   }}>
                     {profile.bio}
@@ -253,7 +236,7 @@ const YouthProfile = () => {
           </div>
 
           {/* Main Content Section */}
-          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '100px 20px 40px' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
             {editMode ? (
               <div style={{
                 background: '#1A3357',
