@@ -85,6 +85,9 @@ const Courses = () => {
           <p style={{ fontSize: '0.9rem', color: '#7A9BB5' }}>
             Discover courses and opportunities posted by organisations in Kakuma
           </p>
+          <p style={{ fontSize: '0.8rem', color: '#93C5FD', marginTop: '6px' }}>
+            Active courses only: expired application deadlines are hidden.
+          </p>
         </div>
       </div>
 

@@ -108,38 +108,52 @@ const Icon = ({ name, active = false, size = 24 }) => {
           <path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a1 1 0 0 1 0 1.4l-1 1a1 1 0 0 1-1.4 0l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V19a1 1 0 0 1-1 1h-1.4a1 1 0 0 1-1-1v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a1 1 0 0 1-1.4 0l-1-1a1 1 0 0 1 0-1.4l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H5a1 1 0 0 1-1-1v-1.4a1 1 0 0 1 1-1h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a1 1 0 0 1 0-1.4l1-1a1 1 0 0 1 1.4 0l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V5a1 1 0 0 1 1-1h1.4a1 1 0 0 1 1 1v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a1 1 0 0 1 1.4 0l1 1a1 1 0 0 1 0 1.4l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6h.2a1 1 0 0 1 1 1V13a1 1 0 0 1-1 1h-.2a1 1 0 0 0-.9.6Z" />
         </svg>
       );
+    case 'menu':
+      return (
+        <svg {...common}>
+          <path d="M4 7h16" />
+          <path d="M4 12h16" />
+          <path d="M4 17h16" />
+        </svg>
+      );
     default:
       return null;
   }
 };
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { unreadCount } = useNotifications();
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useLanguage();
 
-  const handleLogout = () => {
-    logout();
-    if (user?.role === 'organisation') {
-      navigate('/org/login');
-    } else {
-      navigate('/login');
+  const triggerRouteRefresh = (path) => {
+    navigate(path, {
+      replace: true,
+      state: { __refreshNonce: Date.now() }
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNavClick = (e, path) => {
+    if (location.pathname === path) {
+      e.preventDefault();
+      triggerRouteRefresh(path);
+      return;
     }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleRefresh = () => {
-    window.location.reload();
+    triggerRouteRefresh(location.pathname);
   };
 
   const youthLinks = [
     { label: t('nav.home'),         path: '/home',          icon: 'home' },
     { label: t('nav.courses'),      path: '/courses',       icon: 'book' },
-    { label: t('nav.applications'), path: '/applications',  icon: 'clipboard' },
-    { label: t('nav.notifications'), path: '/notifications', icon: 'bell' },
-    { label: t('nav.profile'), path: '/profile', icon: 'user' },
-    { label: 'Interests', path: '/preferences', icon: 'settings' }
+    { label: t('nav.notifications'), path: '/notifications', icon: 'bell' }
   ];
 
   const orgLinks = [
@@ -165,27 +179,8 @@ const Navbar = () => {
   const homePath =
     user?.role === 'organisation' ? '/org/dashboard' :
     user?.role === 'admin' ? '/admin/dashboard' : '/home';
-  const profilePath =
-    user?.role === 'organisation' ? '/org/profile' :
-    user?.role === 'admin' ? '/admin/dashboard' : '/profile';
 
   const isActive = (path) => location.pathname === path;
-
-  const displayName = user?.fullName || user?.name || '';
-  const userPhoto = user?.photo || user?.logo || '';
-  const initials = displayName
-    ? displayName
-        .split(' ')
-        .filter(Boolean)
-        .slice(0, 2)
-        .map(p => p[0])
-        .join('')
-        .toUpperCase()
-    : 'FH';
-
-  const roleLabel =
-    user?.role === 'organisation' ? 'Organisation' :
-    user?.role === 'admin' ? 'Admin' : 'Youth';
 
   const currentLabel =
     links.find(l => l.path === location.pathname)?.label || '';
@@ -214,7 +209,11 @@ const Navbar = () => {
         }}
       >
         {/* Logo */}
-        <Link to={homePath} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <Link
+          to={homePath}
+          onClick={(e) => handleNavClick(e, homePath)}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+        >
           <div style={{
             width: '34px',
             height: '34px',
@@ -257,6 +256,7 @@ const Navbar = () => {
               <Link
                 key={link.path}
                 to={link.path}
+                onClick={(e) => handleNavClick(e, link.path)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -331,6 +331,7 @@ const Navbar = () => {
               <Link
                 key={link.path}
                 to={link.path}
+                onClick={(e) => handleNavClick(e, link.path)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -373,114 +374,27 @@ const Navbar = () => {
 
         {/* User cluster */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            padding: '6px 14px 6px 6px',
-            background: '#1A3357',
-            borderRadius: '999px',
-            border: '1px solid #2A4A6B',
-            cursor: 'pointer'
-          }}
-          onClick={() => navigate(profilePath)}
-          title="View profile"
-          >
-            <div style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              background: '#F5A623',
-              color: '#1E3A5F',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 800,
-              fontSize: '0.78rem',
-              letterSpacing: '0.02em',
-              overflow: 'hidden'
-            }}>
-              {userPhoto ? (
-                <img
-                  src={userPhoto}
-                  alt={displayName || 'Profile'}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              ) : initials}
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
-              <span style={{
-                fontSize: '0.82rem',
-                fontWeight: 700,
-                color: '#FFFFFF',
-                maxWidth: '140px',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
-              }}>
-                {displayName || 'Account'}
-              </span>
-              <span style={{
-                fontSize: '0.68rem',
-                fontWeight: 600,
-                color: '#7A9BB5',
-                marginTop: '2px'
-              }}>
-                {roleLabel}
-              </span>
-            </div>
-          </div>
-
           {user?.role === 'youth' && (
             <button
               onClick={() => navigate('/settings')}
-              title="Settings"
+              title="Menu"
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                border: '1px solid #2A4A6B',
-                color: '#B8D0E8',
-                background: '#1A3357',
+                border: '1px solid #F5A623',
+                color: '#F5A623',
+                background: 'rgba(245, 166, 35, 0.12)',
                 borderRadius: '10px',
                 width: '40px',
                 height: '40px',
                 cursor: 'pointer'
               }}
             >
-              <Icon name="settings" size={16} />
+              <Icon name="menu" size={16} />
             </button>
           )}
 
-          <button
-            onClick={handleLogout}
-            title="Logout"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              border: '1px solid #F5A623',
-              color: '#F5A623',
-              background: 'transparent',
-              borderRadius: '10px',
-              padding: '0 14px',
-              fontWeight: 700,
-              fontSize: '0.82rem',
-              cursor: 'pointer',
-              height: '40px',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(245, 166, 35, 0.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent';
-            }}
-          >
-            <Icon name="logout" size={16} />
-            {t('common.logout')}
-          </button>
         </div>
       </nav>
 
@@ -501,7 +415,11 @@ const Navbar = () => {
           zIndex: 100
         }}
       >
-        <Link to={homePath} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <Link
+          to={homePath}
+          onClick={(e) => handleNavClick(e, homePath)}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+        >
           <div style={{
             width: '30px',
             height: '30px',
@@ -542,41 +460,16 @@ const Navbar = () => {
         </Link>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <div style={{
-            width: '34px',
-            height: '34px',
-            borderRadius: '50%',
-            background: '#F5A623',
-            color: '#1E3A5F',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 800,
-            fontSize: '0.78rem',
-            cursor: 'pointer',
-            overflow: 'hidden'
-          }}
-          onClick={() => navigate(profilePath)}
-          title="View profile"
-          >
-            {userPhoto ? (
-              <img
-                src={userPhoto}
-                alt={displayName || 'Profile'}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            ) : initials}
-          </div>
           {user?.role === 'youth' && (
             <button
               onClick={() => navigate('/settings')}
-              aria-label="Settings"
+              aria-label="Menu"
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 background: 'transparent',
-                color: '#B8D0E8',
+                color: '#F5A623',
                 border: 'none',
                 padding: '8px',
                 minHeight: '44px',
@@ -585,28 +478,9 @@ const Navbar = () => {
                 borderRadius: '8px'
               }}
             >
-              <Icon name="settings" size={20} />
+              <Icon name="menu" size={20} />
             </button>
           )}
-          <button
-            onClick={handleLogout}
-            aria-label="Logout"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'transparent',
-              color: '#F5A623',
-              border: 'none',
-              padding: '8px',
-              minHeight: '44px',
-              minWidth: '44px',
-              cursor: 'pointer',
-              borderRadius: '8px'
-            }}
-          >
-            <Icon name="logout" size={20} />
-          </button>
         </div>
       </nav>
 
@@ -637,6 +511,7 @@ const Navbar = () => {
             <Link
               key={link.path}
               to={link.path}
+              onClick={(e) => handleNavClick(e, link.path)}
               style={{
                 flex: 1,
                 display: 'flex',

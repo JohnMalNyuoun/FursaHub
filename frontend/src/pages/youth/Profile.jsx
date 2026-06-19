@@ -1,8 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
-import { getYouthProfile } from '../../services/profileService';
+import { getYouthProfile, updateYouthProfile, updateYouthPhoto } from '../../services/profileService';
+
+const CLOUDINARY_CLOUD_NAME = 'dkxjwhxne';
+const CLOUDINARY_PROFILE_PRESET = 'Fursahub-profile';
+const CLOUDINARY_PROFILE_PRESET_FALLBACK = 'fursahub-courses';
+
+const editInputStyle = {
+  width: '100%',
+  padding: '10px 12px',
+  background: '#152A47',
+  color: '#FFFFFF',
+  border: '1px solid #2A4A6B',
+  borderRadius: '10px',
+  fontSize: '0.9rem'
+};
 
 const YouthProfile = () => {
   const [profile, setProfile] = useState(null);
@@ -10,21 +23,73 @@ const YouthProfile = () => {
   const [error, setError] = useState('');
   const [photoFailed, setPhotoFailed] = useState(false);
   const [showPhotoPreview, setShowPhotoPreview] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [editForm, setEditForm] = useState({ fullName: '', username: '', bio: '' });
+  const [newPhoto, setNewPhoto] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const [saveNotice, setSaveNotice] = useState('');
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await getYouthProfile();
-        setProfile(res.data);
-      } catch (err) {
-        setError(err.response?.data?.message || 'Failed to load profile');
-      } finally {
-        setLoading(false);
+  const fetchProfile = async () => {
+    try {
+      const res = await getYouthProfile();
+      setProfile(res.data);
+      setEditForm({
+        fullName: res.data.fullName || '',
+        username: res.data.username || '',
+        bio: res.data.bio || ''
+      });
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to load profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchProfile(); }, []);
+
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    setSaveError('');
+    setSaveNotice('');
+    try {
+      const payload = {
+        fullName: editForm.fullName,
+        bio: editForm.bio,
+        ...(editForm.username.trim() ? { username: editForm.username } : {})
+      };
+
+      if (newPhoto) {
+        const uploadWithPreset = async (preset) => {
+          const fd = new FormData();
+          fd.append('file', newPhoto);
+          fd.append('upload_preset', preset);
+          const res = await fetch(
+            `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+            { method: 'POST', body: fd }
+          );
+          return res.json();
+        };
+        let data = await uploadWithPreset(CLOUDINARY_PROFILE_PRESET);
+        if (!data?.secure_url) data = await uploadWithPreset(CLOUDINARY_PROFILE_PRESET_FALLBACK);
+        if (data?.secure_url) {
+          await updateYouthPhoto({ photoUrl: data.secure_url });
+          payload.photo = data.secure_url;
+        }
+        setNewPhoto(null);
       }
-    };
 
-    fetchProfile();
-  }, []);
+      const res = await updateYouthProfile(payload);
+      setProfile((prev) => ({ ...prev, ...res.data, updatedAt: new Date().toISOString() }));
+      setSaveNotice('Profile updated successfully.');
+      setTimeout(() => setSaveNotice(''), 3000);
+      setEditMode(false);
+    } catch (err) {
+      setSaveError(err.response?.data?.message || err.message || 'Failed to save profile');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const initials = useMemo(() => {
     const name = profile?.fullName || '';
@@ -154,23 +219,25 @@ const YouthProfile = () => {
                 <p style={{ color: '#7A9BB5', fontSize: '0.84rem', marginBottom: '16px' }}>
                   {profile?.communityType?.replace('_', ' ') || 'Community not set'}
                 </p>
-                <Link
-                  to="/settings"
+                <button
+                  type="button"
+                  onClick={() => setEditMode((prev) => !prev)}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: '#F5A623',
-                    color: '#FFFFFF',
+                    background: editMode ? 'transparent' : '#F5A623',
+                    color: editMode ? '#F5A623' : '#FFFFFF',
+                    border: editMode ? '1px solid #F5A623' : 'none',
                     fontWeight: 800,
                     borderRadius: '999px',
                     padding: '12px 16px',
                     fontSize: '0.86rem',
-                    textDecoration: 'none'
+                    cursor: 'pointer'
                   }}
                 >
-                  Edit Profile & Settings
-                </Link>
+                  {editMode ? 'Cancel Edit' : 'Edit Profile'}
+                </button>
               </div>
             </div>
 
@@ -207,111 +274,117 @@ const YouthProfile = () => {
           </section>
 
           <section style={{ display: 'grid', gap: '24px' }}>
-            <div style={{
-              background: '#1A3357',
-              border: '1px solid #2A4A6B',
-              borderRadius: '18px',
-              boxShadow: '0 10px 24px rgba(15, 32, 53, 0.18)',
-              padding: '24px'
-            }}>
-              <p style={{ margin: '0 0 6px 0', color: '#F5A623', fontSize: '0.78rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                Right Side
-              </p>
-              <h3 style={{ margin: '0 0 18px 0', color: '#FFFFFF', fontSize: '1.08rem', fontWeight: 800 }}>
-                Progress Tracking Canvas
-              </h3>
+            {editMode ? (
+              <div style={{ background: '#1A3357', border: '1px solid #F5A623', borderRadius: '18px', padding: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                  <h3 style={{ color: '#FFFFFF', fontSize: '1.05rem', fontWeight: 800 }}>Edit Profile</h3>
+                  <button type="button" onClick={() => setEditMode(false)} style={{ background: 'transparent', border: 'none', color: '#7A9BB5', cursor: 'pointer', fontSize: '1.4rem', lineHeight: 1 }}>×</button>
+                </div>
 
-              <div style={{ display: 'grid', gap: '18px' }}>
-                {[
-                  ['Training Phase Progress', trainingPhaseProgress],
-                  ['Mentorship Attendance Rate', mentorshipAttendanceRate],
-                  ['Capstone Progress', capstoneProgress]
-                ].map(([label, value]) => (
-                  <div key={label}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <span style={{ color: '#FFFFFF', fontWeight: 700, fontSize: '0.9rem' }}>{label}</span>
-                      <span style={{ color: '#F5A623', fontWeight: 800, fontSize: '0.88rem' }}>{value}%</span>
-                    </div>
-                    <div style={{ height: '12px', background: '#152A47', borderRadius: '999px', overflow: 'hidden' }}>
-                      <div style={{
-                        width: `${Math.max(0, Math.min(100, value))}%`,
-                        height: '100%',
-                        background: 'linear-gradient(90deg, #4A9EFF 0%, #7A9BB5 100%)',
-                        borderRadius: '999px'
-                      }} />
-                    </div>
+                {saveError && (
+                  <div style={{ background: 'rgba(229,62,62,0.1)', border: '1px solid #E53E3E', borderRadius: '10px', padding: '10px 12px', color: '#FCA5A5', marginBottom: '14px', fontSize: '0.88rem' }}>
+                    {saveError}
                   </div>
-                ))}
+                )}
+                {saveNotice && (
+                  <div style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid #10B981', borderRadius: '10px', padding: '10px 12px', color: '#A7F3D0', marginBottom: '14px', fontSize: '0.88rem' }}>
+                    {saveNotice}
+                  </div>
+                )}
+
+                <div style={{ display: 'grid', gap: '14px' }}>
+                  <div>
+                    <label style={{ color: '#B8D0E8', fontSize: '0.82rem', display: 'block', marginBottom: '6px' }}>Profile photo</label>
+                    <input type="file" accept="image/*" onChange={(e) => setNewPhoto(e.target.files?.[0] || null)} style={{ color: '#FFFFFF', fontSize: '0.82rem' }} />
+                  </div>
+                  <div>
+                    <label style={{ color: '#B8D0E8', fontSize: '0.82rem', display: 'block', marginBottom: '6px' }}>Display name</label>
+                    <input style={editInputStyle} value={editForm.fullName} onChange={(e) => setEditForm((f) => ({ ...f, fullName: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label style={{ color: '#B8D0E8', fontSize: '0.82rem', display: 'block', marginBottom: '6px' }}>Username</label>
+                    <input style={editInputStyle} value={editForm.username} onChange={(e) => setEditForm((f) => ({ ...f, username: e.target.value }))} placeholder="your_username" />
+                  </div>
+                  <div>
+                    <label style={{ color: '#B8D0E8', fontSize: '0.82rem', display: 'block', marginBottom: '6px' }}>Bio</label>
+                    <textarea rows={4} style={editInputStyle} value={editForm.bio} onChange={(e) => setEditForm((f) => ({ ...f, bio: e.target.value }))} />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px', marginTop: '18px' }}>
+                  <button
+                    type="button"
+                    onClick={handleSaveProfile}
+                    disabled={saving}
+                    style={{ flex: 1, background: '#F5A623', color: '#1E3A5F', border: 'none', borderRadius: '10px', padding: '13px', fontWeight: 800, fontSize: '0.92rem', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1 }}
+                  >
+                    {saving ? 'Saving...' : 'Save Changes'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditMode(false)}
+                    style={{ background: 'transparent', color: '#B8D0E8', border: '1px solid #2A4A6B', borderRadius: '10px', padding: '13px 18px', fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
-            </div>
-
-            <div style={{
-              background: '#1A3357',
-              border: '1px solid #2A4A6B',
-              borderRadius: '18px',
-              boxShadow: '0 10px 24px rgba(15, 32, 53, 0.18)',
-              padding: '24px'
-            }}>
-              <h3 style={{ color: '#FFFFFF', fontSize: '1.08rem', fontWeight: 800, marginBottom: '14px' }}>
-                Skills
-              </h3>
-              {skills.length > 0 ? (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                  {skills.map((skill) => (
-                    <span key={skill} style={{
-                      background: '#0F2035',
-                      color: '#B8D0E8',
-                      border: '1px solid #2A4A6B',
-                      borderRadius: '999px',
-                      padding: '8px 12px',
-                      fontSize: '0.84rem',
-                      fontWeight: 700
-                    }}>
-                      {skill}
-                    </span>
-                  ))}
+            ) : (
+              <>
+                <div style={{ background: '#1A3357', border: '1px solid #2A4A6B', borderRadius: '18px', boxShadow: '0 10px 24px rgba(15,32,53,0.18)', padding: '24px' }}>
+                  <p style={{ margin: '0 0 6px 0', color: '#F5A623', fontSize: '0.78rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Progress</p>
+                  <h3 style={{ margin: '0 0 18px 0', color: '#FFFFFF', fontSize: '1.08rem', fontWeight: 800 }}>Progress Tracking Canvas</h3>
+                  <div style={{ display: 'grid', gap: '18px' }}>
+                    {[
+                      ['Training Phase Progress', trainingPhaseProgress],
+                      ['Mentorship Attendance Rate', mentorshipAttendanceRate],
+                      ['Capstone Progress', capstoneProgress]
+                    ].map(([label, value]) => (
+                      <div key={label}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                          <span style={{ color: '#FFFFFF', fontWeight: 700, fontSize: '0.9rem' }}>{label}</span>
+                          <span style={{ color: '#F5A623', fontWeight: 800, fontSize: '0.88rem' }}>{value}%</span>
+                        </div>
+                        <div style={{ height: '12px', background: '#152A47', borderRadius: '999px', overflow: 'hidden' }}>
+                          <div style={{ width: `${Math.max(0, Math.min(100, value))}%`, height: '100%', background: 'linear-gradient(90deg, #4A9EFF 0%, #7A9BB5 100%)', borderRadius: '999px' }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ) : (
-                <p style={{ margin: 0, color: '#B8D0E8', fontSize: '0.9rem' }}>
-                  No skills listed yet.
-                </p>
-              )}
-            </div>
 
-            <div style={{
-              background: '#1A3357',
-              border: '1px solid #2A4A6B',
-              borderRadius: '18px',
-              boxShadow: '0 10px 24px rgba(15, 32, 53, 0.18)',
-              padding: '24px'
-            }}>
-              <h3 style={{ color: '#FFFFFF', fontSize: '1.08rem', fontWeight: 800, marginBottom: '14px' }}>
-                Activity Log
-              </h3>
-              {activityLogs.length > 0 ? (
-                <div style={{ display: 'grid', gap: '12px' }}>
-                  {activityLogs.map((log, index) => (
-                    <div key={`${log.timestamp || index}-${index}`} style={{
-                      padding: '14px 16px',
-                      border: '1px solid #2A4A6B',
-                      borderRadius: '14px',
-                      background: '#152A47'
-                    }}>
-                      <p style={{ margin: '0 0 6px 0', color: '#FFFFFF', fontSize: '0.9rem', fontWeight: 600 }}>
-                        {log.text || log.message || 'Activity recorded'}
-                      </p>
-                      <p style={{ margin: 0, color: '#7A9BB5', fontSize: '0.78rem' }}>
-                        {log.timestamp ? new Date(log.timestamp).toLocaleString() : 'No timestamp available'}
-                      </p>
+                <div style={{ background: '#1A3357', border: '1px solid #2A4A6B', borderRadius: '18px', boxShadow: '0 10px 24px rgba(15,32,53,0.18)', padding: '24px' }}>
+                  <h3 style={{ color: '#FFFFFF', fontSize: '1.08rem', fontWeight: 800, marginBottom: '14px' }}>Skills</h3>
+                  {skills.length > 0 ? (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                      {skills.map((skill) => (
+                        <span key={skill} style={{ background: '#0F2035', color: '#B8D0E8', border: '1px solid #2A4A6B', borderRadius: '999px', padding: '8px 12px', fontSize: '0.84rem', fontWeight: 700 }}>
+                          {skill}
+                        </span>
+                      ))}
                     </div>
-                  ))}
+                  ) : (
+                    <p style={{ margin: 0, color: '#B8D0E8', fontSize: '0.9rem' }}>No skills listed yet.</p>
+                  )}
                 </div>
-              ) : (
-                <p style={{ margin: 0, color: '#B8D0E8', fontSize: '0.9rem' }}>
-                  No activity logs available yet.
-                </p>
-              )}
-            </div>
+
+                <div style={{ background: '#1A3357', border: '1px solid #2A4A6B', borderRadius: '18px', boxShadow: '0 10px 24px rgba(15,32,53,0.18)', padding: '24px' }}>
+                  <h3 style={{ color: '#FFFFFF', fontSize: '1.08rem', fontWeight: 800, marginBottom: '14px' }}>Activity Log</h3>
+                  {activityLogs.length > 0 ? (
+                    <div style={{ display: 'grid', gap: '12px' }}>
+                      {activityLogs.map((log, index) => (
+                        <div key={`${log.timestamp || index}-${index}`} style={{ padding: '14px 16px', border: '1px solid #2A4A6B', borderRadius: '14px', background: '#152A47' }}>
+                          <p style={{ margin: '0 0 6px 0', color: '#FFFFFF', fontSize: '0.9rem', fontWeight: 600 }}>{log.text || log.message || 'Activity recorded'}</p>
+                          <p style={{ margin: 0, color: '#7A9BB5', fontSize: '0.78rem' }}>{log.timestamp ? new Date(log.timestamp).toLocaleString() : 'No timestamp available'}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p style={{ margin: 0, color: '#B8D0E8', fontSize: '0.9rem' }}>No activity logs available yet.</p>
+                  )}
+                </div>
+              </>
+            )}
           </section>
         </div>
       </div>

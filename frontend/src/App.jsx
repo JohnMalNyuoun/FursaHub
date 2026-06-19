@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import useAuth from './hooks/useAuth';
 
 // Auth pages
@@ -70,8 +70,11 @@ const AdminRoute = ({ children }) => {
   return children;
 };
 function App () {
+  const location = useLocation();
+  const routeRefreshKey = `${location.pathname}:${location.state?.__refreshNonce || 0}`;
+
   return (
-    <Routes>
+    <Routes key={routeRefreshKey}>
       {/* Public */}
 
       <Route path="/" element={<Landing />} />

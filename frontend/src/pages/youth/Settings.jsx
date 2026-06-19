@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
 import Button from '../../components/common/Button';
@@ -36,7 +37,8 @@ const CLOUDINARY_PROFILE_PRESET = 'Fursahub-profile';
 const CLOUDINARY_PROFILE_PRESET_FALLBACK = 'fursahub-courses';
 
 const YouthSettings = () => {
-  const { updateUser } = useAuth();
+  const navigate = useNavigate();
+  const { updateUser, logout } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -44,6 +46,7 @@ const YouthSettings = () => {
   const [photoFailed, setPhotoFailed] = useState(false);
   const [showPhotoPreview, setShowPhotoPreview] = useState(false);
   const [localPhotoPreview, setLocalPhotoPreview] = useState('');
+  const [showProfileCard, setShowProfileCard] = useState(false);
 
   const [publicForm, setPublicForm] = useState({
     fullName: '',
@@ -79,7 +82,7 @@ const YouthSettings = () => {
       });
       document.documentElement.setAttribute('data-theme', res.data.theme || 'light');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load settings');
+      setError(err.response?.data?.message || 'Failed to load menu');
     } finally {
       setLoading(false);
     }
@@ -261,6 +264,11 @@ const YouthSettings = () => {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   if (loading) return <Loader />;
 
   return (
@@ -270,15 +278,58 @@ const YouthSettings = () => {
       <div className="fh-section-head">
         <div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '6px' }}>
-            Settings
+            Menu
           </h1>
           <p style={{ fontSize: '0.9rem', color: '#7A9BB5' }}>
-            Configure your public profile, privacy, and personal preferences.
+            Manage your public profile, privacy, interests, applications, and personal preferences.
           </p>
         </div>
       </div>
 
       <div className="fh-container" style={{ display: 'grid', gap: '16px' }}>
+
+        {/* Profile card - click to go to full profile page */}
+        <Link
+          to="/profile"
+          style={{ textDecoration: 'none' }}
+        >
+          <div
+            style={{
+              background: '#1A3357',
+              border: '1px solid #2A4A6B',
+              borderRadius: '16px',
+              padding: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px',
+              transition: 'background 0.2s ease'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#1E3D63'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = '#1A3357'; }}
+          >
+            {profilePhotoSrc && !photoFailed ? (
+              <img
+                src={profilePhotoSrc}
+                alt={profile?.fullName}
+                onError={() => setPhotoFailed(true)}
+                style={{ width: '72px', height: '72px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '3px solid #F5A623' }}
+              />
+            ) : (
+              <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: '#F5A623', color: '#1E3A5F', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1.3rem', flexShrink: 0, border: '3px solid #F5A623' }}>
+                {(profile?.fullName || 'YU').slice(0, 2).toUpperCase()}
+              </div>
+            )}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ color: '#FFFFFF', fontSize: '1.08rem', fontWeight: 800, marginBottom: '3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {profile?.fullName || 'Your Name'}
+              </p>
+              {profile?.username && <p style={{ color: '#7A9BB5', fontSize: '0.82rem', marginBottom: '4px' }}>@{profile.username}</p>}
+              {profile?.bio && <p style={{ color: '#B8D0E8', fontSize: '0.82rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile.bio}</p>}
+              <p style={{ color: '#F5A623', fontSize: '0.78rem', fontWeight: 700, marginTop: '4px' }}>View profile →</p>
+            </div>
+          </div>
+        </Link>
+
         {error && (
           <div style={{
             background: 'rgba(229,62,62,0.1)',
@@ -304,107 +355,7 @@ const YouthSettings = () => {
 
         <section style={cardStyle}>
           <h2 style={{ color: '#FFFFFF', fontSize: '1.05rem', fontWeight: 800, marginBottom: '12px' }}>
-            1. Public Profile Info
-          </h2>
-          <p style={{ color: '#7A9BB5', fontSize: '0.84rem', marginBottom: '16px' }}>
-            This controls what other users and the system see about you.
-          </p>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '14px' }}>
-            <button
-              type="button"
-              onClick={() => setShowPhotoPreview(true)}
-              title="View profile image"
-              style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}
-            >
-              {profilePhotoSrc && !photoFailed ? (
-                <img
-                  src={profilePhotoSrc}
-                  alt={profile.fullName}
-                  onError={() => setPhotoFailed(true)}
-                  style={{ width: '72px', height: '72px', borderRadius: '50%', objectFit: 'cover' }}
-                />
-              ) : (
-                <div style={{
-                  width: '72px',
-                  height: '72px',
-                  borderRadius: '50%',
-                  background: '#F5A623',
-                  color: '#1E3A5F',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 800,
-                  fontSize: '1rem'
-                }}>
-                  {(profile?.fullName || 'YU').slice(0, 2).toUpperCase()}
-                </div>
-              )}
-            </button>
-
-            <div>
-              <label style={{ color: '#B8D0E8', fontSize: '0.82rem', marginBottom: '6px', display: 'block' }}>
-                Avatar / Profile picture
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setNewPhoto(e.target.files?.[0] || null)}
-                style={{ color: '#FFFFFF', fontSize: '0.82rem' }}
-              />
-              {profilePhotoSrc && !localPhotoPreview && (
-                <a
-                  href={profilePhotoSrc}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{ color: '#F5A623', fontSize: '0.75rem', marginTop: '6px', display: 'inline-block' }}
-                >
-                  Open current photo URL
-                </a>
-              )}
-              <p style={{ color: '#7A9BB5', fontSize: '0.72rem', marginTop: '4px' }}>
-                Click avatar to preview
-              </p>
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gap: '10px' }}>
-            <div>
-              <label style={{ color: '#B8D0E8', fontSize: '0.82rem' }}>Display name</label>
-              <input
-                style={inputStyle}
-                value={publicForm.fullName}
-                onChange={(e) => setPublicForm((c) => ({ ...c, fullName: e.target.value }))}
-              />
-            </div>
-            <div>
-              <label style={{ color: '#B8D0E8', fontSize: '0.82rem' }}>Username</label>
-              <input
-                style={inputStyle}
-                value={publicForm.username}
-                onChange={(e) => setPublicForm((c) => ({ ...c, username: e.target.value }))}
-                placeholder="your_username"
-              />
-            </div>
-            <div>
-              <label style={{ color: '#B8D0E8', fontSize: '0.82rem' }}>Bio / Short description</label>
-              <textarea
-                rows={3}
-                style={inputStyle}
-                value={publicForm.bio}
-                onChange={(e) => setPublicForm((c) => ({ ...c, bio: e.target.value }))}
-              />
-            </div>
-          </div>
-
-          <div style={{ marginTop: '12px' }}>
-            <Button onClick={savePublicProfile}>Save Public Profile</Button>
-          </div>
-        </section>
-
-        <section style={cardStyle}>
-          <h2 style={{ color: '#FFFFFF', fontSize: '1.05rem', fontWeight: 800, marginBottom: '12px' }}>
-            2. Account & Privacy (Private)
+            1. Account &amp; Privacy (Private)
           </h2>
           <p style={{ color: '#7A9BB5', fontSize: '0.84rem', marginBottom: '16px' }}>
             Sensitive information below is private and not publicly visible.
@@ -476,7 +427,7 @@ const YouthSettings = () => {
 
         <section style={cardStyle}>
           <h2 style={{ color: '#FFFFFF', fontSize: '1.05rem', fontWeight: 800, marginBottom: '12px' }}>
-            3. User Preferences
+            2. User Preferences
           </h2>
 
           <div style={{ display: 'grid', gap: '12px' }}>
@@ -505,6 +456,84 @@ const YouthSettings = () => {
               <Button onClick={savePreferences}>Save Preferences</Button>
             </div>
           </div>
+        </section>
+
+        <section style={cardStyle}>
+          <h2 style={{ color: '#FFFFFF', fontSize: '1.05rem', fontWeight: 800, marginBottom: '12px' }}>
+            3. Quick Access
+          </h2>
+          <p style={{ color: '#7A9BB5', fontSize: '0.84rem', marginBottom: '14px' }}>
+            Open your interests and applications directly from menu.
+          </p>
+
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <Link
+              to="/preferences"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px solid #2A4A6B',
+                color: '#B8D0E8',
+                background: '#152A47',
+                borderRadius: '10px',
+                padding: '10px 14px',
+                fontWeight: 700,
+                fontSize: '0.85rem',
+                textDecoration: 'none'
+              }}
+            >
+              Interests
+            </Link>
+
+            <Link
+              to="/applications"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px solid #2A4A6B',
+                color: '#B8D0E8',
+                background: '#152A47',
+                borderRadius: '10px',
+                padding: '10px 14px',
+                fontWeight: 700,
+                fontSize: '0.85rem',
+                textDecoration: 'none'
+              }}
+            >
+              Applications
+            </Link>
+          </div>
+        </section>
+
+        <section style={cardStyle}>
+          <h2 style={{ color: '#FFFFFF', fontSize: '1.05rem', fontWeight: 800, marginBottom: '12px' }}>
+            4. Session
+          </h2>
+          <p style={{ color: '#7A9BB5', fontSize: '0.84rem', marginBottom: '14px' }}>
+            Sign out from your account on this device.
+          </p>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1px solid #F5A623',
+              color: '#F5A623',
+              background: 'transparent',
+              borderRadius: '10px',
+              padding: '10px 14px',
+              fontWeight: 700,
+              fontSize: '0.85rem',
+              cursor: 'pointer'
+            }}
+          >
+            Log Out
+          </button>
         </section>
       </div>
 

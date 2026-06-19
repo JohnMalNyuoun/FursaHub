@@ -10,6 +10,21 @@ export const getCourse = async (id) => {
   return response.data;
 };
 
+export const getCourseEngagement = async (id) => {
+  const response = await api.get(`/youth/courses/${id}/engagement`);
+  return response.data;
+};
+
+export const toggleCourseReaction = async (id) => {
+  const response = await api.put(`/youth/courses/${id}/reaction`);
+  return response.data;
+};
+
+export const addCourseComment = async (id, text) => {
+  const response = await api.post(`/youth/courses/${id}/comments`, { text });
+  return response.data;
+};
+
 export const getOrgCourses = async () => {
   const response = await api.get('/org/courses');
   return response.data;
