@@ -150,6 +150,12 @@ const Navbar = () => {
     triggerRouteRefresh(location.pathname);
   };
 
+  const getMenuPath = () => {
+    if (user?.role === 'organisation') return '/org/settings';
+    if (user?.role === 'admin') return '/admin/settings';
+    return '/settings';
+  };
+
   const youthLinks = [
     { label: t('nav.home'),         path: '/home',          icon: 'home' },
     { label: t('nav.courses'),      path: '/courses',       icon: 'book' },
@@ -167,7 +173,7 @@ const Navbar = () => {
     { label: t('nav.dashboard'), path: '/admin/dashboard',     icon: 'grid' },
     { label: t('nav.profile'),      path: '/admin/organisations', icon: 'building' },
     { label: t('nav.courses'),   path: '/admin/courses',       icon: 'book' },
-    { label: t('nav.profile'),     path: '/admin/users',         icon: 'user' }
+    { label: t('nav.notifications'), path: '/admin/notifications', icon: 'bell' }
   ];
 
   const links = user?.role === 'organisation'
@@ -251,7 +257,7 @@ const Navbar = () => {
         }}>
           {leftLinks.map(link => {
             const active = isActive(link.path);
-            const isNotificationsLink = link.path === '/notifications';
+            const isNotificationsLink = link.path === '/notifications' || link.path === '/admin/notifications';
             return (
               <Link
                 key={link.path}
@@ -326,7 +332,7 @@ const Navbar = () => {
 
           {rightLinks.map(link => {
             const active = isActive(link.path);
-            const isNotificationsLink = link.path === '/notifications';
+            const isNotificationsLink = link.path === '/notifications' || link.path === '/admin/notifications';
             return (
               <Link
                 key={link.path}
@@ -374,9 +380,9 @@ const Navbar = () => {
 
         {/* User cluster */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {user?.role === 'youth' && (
+          {(user?.role === 'youth' || user?.role === 'organisation' || user?.role === 'admin') && (
             <button
-              onClick={() => navigate('/settings')}
+              onClick={() => navigate(getMenuPath())}
               title="Menu"
               style={{
                 display: 'flex',
@@ -460,9 +466,9 @@ const Navbar = () => {
         </Link>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          {user?.role === 'youth' && (
+          {(user?.role === 'youth' || user?.role === 'organisation' || user?.role === 'admin') && (
             <button
-              onClick={() => navigate('/settings')}
+              onClick={() => navigate(getMenuPath())}
               aria-label="Menu"
               style={{
                 display: 'flex',
@@ -506,7 +512,7 @@ const Navbar = () => {
       >
         {links.map(link => {
           const active = isActive(link.path);
-          const isNotificationsLink = link.path === '/notifications';
+          const isNotificationsLink = link.path === '/notifications' || link.path === '/admin/notifications';
           return (
             <Link
               key={link.path}

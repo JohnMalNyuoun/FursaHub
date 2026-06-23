@@ -21,16 +21,24 @@ const getProfile = async (req, res) => {
 // @access  Organisation
 const updateProfile = async (req, res) => {
   try {
-    const { name, description, phoneNumber, location, website } = req.body;
+    const { name, description, bio, phoneNumber, location, website } = req.body;
 
     const org = await Organisation.findById(req.user.id);
     if (!org) return error(res, 404, 'Organisation not found');
 
-    if (name) org.name = name;
-    if (description) org.description = description;
-    if (phoneNumber) org.phoneNumber = phoneNumber;
-    if (location) org.location = location;
-    if (website !== undefined) org.website = website;
+    if (name !== undefined) {
+      const nextName = String(name).trim();
+      if (!nextName) {
+        return error(res, 400, 'Organisation name is required');
+      }
+      org.name = nextName;
+    }
+
+    if (description !== undefined) org.description = String(description).trim();
+    if (bio !== undefined) org.bio = String(bio).trim();
+    if (phoneNumber !== undefined) org.phoneNumber = String(phoneNumber).trim();
+    if (location !== undefined) org.location = String(location).trim();
+    if (website !== undefined) org.website = String(website).trim();
 
     await org.save();
 
@@ -39,6 +47,7 @@ const updateProfile = async (req, res) => {
       name: org.name,
       email: org.email,
       description: org.description,
+      bio: org.bio,
       phoneNumber: org.phoneNumber,
       location: org.location,
       website: org.website,
@@ -58,28 +67,44 @@ const updateProfile = async (req, res) => {
 // @access  Organisation
 const updateLogo = async (req, res) => {
   try {
+    const org = await Organisation.findById(req.user.id);
+    if (!org) return error(res, 404, 'Organisation not found');
+
+    if (req.body?.logoUrl !== undefined) {
+      const logoUrl = String(req.body.logoUrl).trim();
+      if (!logoUrl) return error(res, 400, 'Invalid logo URL');
+
+      org.logo = logoUrl;
+      await org.save();
+      return success(res, 200, 'Logo updated', { logo: org.logo });
+    }
+
     if (!req.file) return error(res, 400, 'No logo uploaded');
+
+    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+      return error(res, 500, 'Cloudinary is not configured on the server');
+    }
 
     const uploadResult = await cloudinary.uploader.upload(
       `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`,
       {
-        upload_preset: 'Fursahub-profile',
-        type: 'upload',
         resource_type: 'image',
         folder: 'fursahub/logos',
         transformation: [{ width: 400, height: 400, crop: 'fill' }]
       }
     );
 
-    const org = await Organisation.findById(req.user.id);
-    if (!org) return error(res, 404, 'Organisation not found');
-
     org.logo = uploadResult.secure_url;
     await org.save();
 
     return success(res, 200, 'Logo updated', { logo: org.logo });
   } catch (err) {
-    return error(res, 500, err.message);
+    console.error('❌ Organisation logo upload error:', {
+      message: err.message,
+      http_code: err.http_code,
+      status: err.status
+    });
+    return error(res, 500, err.message || 'Failed to upload logo');
   }
 };
 

@@ -107,12 +107,7 @@ const Users = () => {
             <p>No users found</p>
           </div>
         ) : (
-          <div style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius)',
-            overflow: 'hidden'
-          }}>
+          <div>
             {users.map((user, i) => (
               <div key={user._id} style={{
                 padding: '16px 20px',

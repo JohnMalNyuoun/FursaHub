@@ -17,9 +17,37 @@ const getAllCourses = async (req, res) => {
 
     const courses = await Course.find(filter)
       .populate('organisation', 'name type location')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
-    return success(res, 200, 'Courses fetched', courses);
+    const courseIds = courses.map((course) => course._id);
+    const applications = courseIds.length
+      ? await Application.find({ course: { $in: courseIds } })
+        .populate('youth', 'fullName username photo')
+        .select('course youth status createdAt')
+        .sort({ createdAt: -1 })
+        .lean()
+      : [];
+
+    const applicantsByCourse = applications.reduce((acc, item) => {
+      const key = String(item.course);
+      if (!acc[key]) acc[key] = [];
+      acc[key].push({
+        id: item.youth?._id,
+        fullName: item.youth?.fullName || item.youth?.username || 'Youth',
+        photo: item.youth?.photo || null,
+        status: item.status,
+        appliedAt: item.createdAt
+      });
+      return acc;
+    }, {});
+
+    const coursesWithApplicants = courses.map((course) => ({
+      ...course,
+      applicants: applicantsByCourse[String(course._id)] || []
+    }));
+
+    return success(res, 200, 'Courses fetched', coursesWithApplicants);
 
   } catch (err) {
     return error(res, 500, err.message);
@@ -32,13 +60,33 @@ const getAllCourses = async (req, res) => {
 const getCourse = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id)
-      .populate('organisation', 'name type location email phoneNumber');
+      .populate('organisation', 'name type location email phoneNumber')
+      .lean();
 
     if (!course) {
       return error(res, 404, 'Course not found');
     }
 
-    return success(res, 200, 'Course fetched', course);
+    const applications = await Application.find({ course: course._id })
+      .populate('youth', 'fullName username photo email communityType')
+      .select('youth status createdAt')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const applicants = applications.map((item) => ({
+      id: item.youth?._id,
+      fullName: item.youth?.fullName || item.youth?.username || 'Youth',
+      photo: item.youth?.photo || null,
+      email: item.youth?.email || '',
+      communityType: item.youth?.communityType || '',
+      status: item.status,
+      appliedAt: item.createdAt
+    }));
+
+    return success(res, 200, 'Course fetched', {
+      ...course,
+      applicants
+    });
 
   } catch (err) {
     return error(res, 500, err.message);

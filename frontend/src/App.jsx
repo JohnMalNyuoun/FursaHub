@@ -24,14 +24,19 @@ import OrgDashboard from './pages/organisation/Dashboard';
 import CourseAnalytics from './pages/organisation/CourseAnalytics';
 import OrgCourses from './pages/organisation/Courses';
 import OrgCourseForm from './pages/organisation/CourseForm';
+import OrgCourseDetail from './pages/organisation/CourseDetail';
 import OrgApplications from './pages/organisation/Applications';
 import OrgProfile from './pages/organisation/Profile';
+import OrgSettings from './pages/organisation/Settings';
 
 // Admin pages
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminOrganisations from './pages/admin/Organisations';
 import AdminCourses from './pages/admin/Courses';
 import AdminUsers from './pages/admin/Users';
+import AdminSettings from './pages/admin/Settings';
+import AdminCourseDetail from './pages/admin/CourseDetail';
+import AdminNotifications from './pages/admin/Notifications';
 import Landing from './pages/Landing';
 import Impact from './pages/organisation/Impact';
 import CourseOutcomes from './pages/organisation/CourseOutcomes';
@@ -111,14 +116,20 @@ function App () {
       <Route path="/org/analytics" element={<OrgRoute><CourseAnalytics /></OrgRoute>} />
       <Route path="/org/courses" element={<OrgRoute><OrgCourses /></OrgRoute>} />
       <Route path="/org/courses/new" element={<OrgRoute><OrgCourseForm /></OrgRoute>} />
+      <Route path="/org/courses/:id" element={<OrgRoute><OrgCourseDetail /></OrgRoute>} />
+      <Route path="/org/courses/:id/edit" element={<OrgRoute><OrgCourseForm /></OrgRoute>} />
       <Route path="/org/applications" element={<OrgRoute><OrgApplications /></OrgRoute>} />
       <Route path="/org/profile" element={<OrgRoute><OrgProfile /></OrgRoute>} />
+      <Route path="/org/settings" element={<OrgRoute><OrgSettings /></OrgRoute>} />
 
       {/* Admin */}
       <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
       <Route path="/admin/organisations" element={<AdminRoute><AdminOrganisations /></AdminRoute>} />
       <Route path="/admin/courses" element={<AdminRoute><AdminCourses /></AdminRoute>} />
+      <Route path="/admin/courses/:id" element={<AdminRoute><AdminCourseDetail /></AdminRoute>} />
       <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+      <Route path="/admin/notifications" element={<AdminRoute><AdminNotifications /></AdminRoute>} />
+      <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
 
       {/* Organisation impact */}
 <Route path="/org/impact" element={<OrgRoute><Impact /></OrgRoute>} />

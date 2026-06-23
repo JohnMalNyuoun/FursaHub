@@ -125,15 +125,11 @@ const Organisations = () => {
             <p>No organisations found</p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
             {organisations.map(org => (
               <div key={org._id} style={{
-                background: '#1A3357',
-                border: '1px solid #2A4A6B',
-                borderLeft: org.status === 'pending' ? '3px solid #F5A623' : '1px solid #2A4A6B',
-                borderRadius: '16px',
-                padding: '20px',
-                boxShadow: 'var(--card-shadow)'
+                borderBottom: org.status === 'pending' ? '2px solid #F5A623' : '1px solid #2A4A6B',
+                padding: '20px 0'
               }}>
                 <div style={{
                   display: 'flex',

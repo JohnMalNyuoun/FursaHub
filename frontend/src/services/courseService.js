@@ -30,8 +30,18 @@ export const getOrgCourses = async () => {
   return response.data;
 };
 
+export const getOrgCourse = async (id) => {
+  const response = await api.get(`/org/courses/${id}`);
+  return response.data;
+};
+
 export const createCourse = async (data) => {
   const response = await api.post('/org/courses', data);
+  return response.data;
+};
+
+export const updateCourse = async (id, data) => {
+  const response = await api.put(`/org/courses/${id}`, data);
   return response.data;
 };
 

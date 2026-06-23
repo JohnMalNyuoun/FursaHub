@@ -120,7 +120,7 @@ const Courses = () => {
               Your Courses
             </h1>
             <p style={{ fontSize: '0.9rem', color: '#7A9BB5' }}>
-              Manage all your posted courses
+              Number of courses posted: {courses.length}
             </p>
           </div>
           <Link to="/org/courses/new" className="fh-mobile-full" style={{ display: 'inline-block' }}>
@@ -159,50 +159,31 @@ const Courses = () => {
                     </p>
                   </div>
 
-                  <div className="fh-card-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '14px' }}>
-                    {section.items.map((course) => {
+                  <div>
+                    {section.items.map((course, idx) => {
                       const cardImage = (course.coverImage || '').replace('http://', 'https://');
                       return (
                         <div key={course._id} style={{
-                          background: '#1A3357',
-                          border: '1px solid #2A4A6B',
-                          borderRadius: '16px',
-                          padding: cardImage ? '0 0 18px' : '18px',
-                          overflow: 'hidden',
-                          boxShadow: 'var(--card-shadow)'
+                          padding: '18px 0',
+                          borderBottom: '1px solid #2A4A6B'
                         }}>
-                          {cardImage ? (
+                          {cardImage && (
                             <img
                               src={cardImage}
                               alt={course.title}
                               style={{
                                 width: '100%',
-                                height: '165px',
+                                maxHeight: '320px',
                                 objectFit: 'cover',
                                 display: 'block',
-                                borderBottom: '1px solid #2A4A6B',
+                                border: '1px solid #2A4A6B',
+                                borderRadius: '10px',
                                 marginBottom: '16px'
                               }}
                             />
-                          ) : (
-                            <div style={{
-                              width: '100%',
-                              height: '140px',
-                              background: 'linear-gradient(135deg, #122845 0%, #1E3A5F 60%, #2B527E 100%)',
-                              borderBottom: '1px solid #2A4A6B',
-                              marginBottom: '16px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              color: '#B8D0E8',
-                              fontSize: '0.85rem',
-                              fontWeight: '700'
-                            }}>
-                              No cover image
-                            </div>
                           )}
 
-                          <div style={{ padding: cardImage ? '0 16px' : 0 }}>
+                          <div>
                             <div style={{
                               display: 'flex',
                               justifyContent: 'space-between',
@@ -211,27 +192,48 @@ const Courses = () => {
                               marginBottom: '10px'
                             }}>
                               <h3 style={{ fontSize: '1rem', fontWeight: '700', color: '#FFFFFF', lineHeight: 1.3 }}>
-                                {course.title}
+                                Course {idx + 1}
                               </h3>
                               <span className={`fh-badge fh-badge-${course.status}`}>
                                 {course.status}
                               </span>
                             </div>
 
-                            <p style={{ fontSize: '0.8rem', color: '#7A9BB5', marginBottom: '12px' }}>
-                              {course.category} · {course.deliveryMode.replace('_', ' ')} · {course.location}
-                            </p>
-
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '14px' }}>
-                              <span style={{ fontSize: '0.8rem', color: '#7A9BB5' }}>
-                                👥 {course.filledSlots}/{course.totalSlots} slots filled
-                              </span>
-                              <span style={{ fontSize: '0.8rem', color: '#7A9BB5' }}>
-                                📅 Deadline: {new Date(course.applicationDeadline).toLocaleDateString()}
-                              </span>
-                            </div>
-
                             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                              <Link
+                                to={`/org/courses/${course._id}`}
+                                style={{
+                                  border: '1px solid #2A4A6B',
+                                  background: 'transparent',
+                                  color: '#B8D0E8',
+                                  borderRadius: '999px',
+                                  padding: '8px 12px',
+                                  fontSize: '0.8rem',
+                                  fontWeight: 700,
+                                  textDecoration: 'none'
+                                }}
+                              >
+                                View
+                              </Link>
+
+                              {course.status !== 'published' && (
+                                <Link
+                                  to={`/org/courses/${course._id}/edit`}
+                                  style={{
+                                    border: '1px solid #F5A623',
+                                    background: 'transparent',
+                                    color: '#F5A623',
+                                    borderRadius: '999px',
+                                    padding: '8px 12px',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 700,
+                                    textDecoration: 'none'
+                                  }}
+                                >
+                                  Edit
+                                </Link>
+                              )}
+
                               {course.status === 'draft' && (
                                 <>
                                   <Button

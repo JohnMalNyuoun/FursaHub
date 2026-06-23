@@ -26,6 +26,10 @@ const organisationSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  bio: {
+    type: String,
+    default: ''
+  },
   location: {
     type: String,
     default: 'Kakuma'

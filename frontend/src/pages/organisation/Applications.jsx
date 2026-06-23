@@ -195,15 +195,12 @@ const Applications = () => {
             <p style={{ fontSize: '1.1rem' }}>No applications yet</p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
             {applications.map(app => {
               return (
                 <div key={app._id} style={{
-                  background: '#1A3357',
-                  border: '1px solid #2A4A6B',
-                  borderRadius: '16px',
-                  padding: '20px',
-                  boxShadow: 'var(--card-shadow)'
+                  padding: '20px 0',
+                  borderBottom: '1px solid #2A4A6B'
                 }}>
                   {/* Top row */}
                   <div style={{
@@ -279,9 +276,8 @@ const Applications = () => {
                   {/* Answers */}
                   {app.answers && app.answers.length > 0 && (
                     <div style={{
-                      background: '#152A47',
-                      borderRadius: 'var(--radius)',
-                      padding: '16px',
+                      borderLeft: '2px solid #2A4A6B',
+                      padding: '4px 0 4px 12px',
                       marginBottom: '16px'
                     }}>
                       {app.answers.map((a, i) => (

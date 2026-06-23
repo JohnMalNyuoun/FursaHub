@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
 import Button from '../../components/common/Button';
@@ -9,6 +10,8 @@ const Courses = () => {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [filterStatus, setFilterStatus] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchCourses = async () => {
     try {
@@ -42,6 +45,20 @@ const Courses = () => {
 
   if (loading) return <Loader />;
 
+  const q = searchTerm.trim().toLowerCase();
+  const visibleCourses = q
+    ? courses.filter((course) => {
+      const title = course.title?.toLowerCase() || '';
+      const org = course.organisation?.name?.toLowerCase() || '';
+      const location = course.location?.toLowerCase() || '';
+      const category = course.category?.toLowerCase() || '';
+      const youthNames = Array.isArray(course.applicants)
+        ? course.applicants.map((a) => (a.fullName || '').toLowerCase()).join(' ')
+        : '';
+      return `${title} ${org} ${location} ${category} ${youthNames}`.includes(q);
+    })
+    : [];
+
   return (
     <div style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
       <Navbar />
@@ -64,8 +81,8 @@ const Courses = () => {
 
       <div className="fh-container">
 
-        {/* Filter */}
-        <div style={{ marginBottom: '24px' }}>
+        {/* Filter + Search */}
+        <div style={{ marginBottom: '24px', display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
@@ -85,25 +102,62 @@ const Courses = () => {
             <option value="closed">Closed</option>
             <option value="cancelled">Cancelled</option>
           </select>
+
+          <input
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search course, organisation, youth"
+            style={{
+              flex: '1 1 280px',
+              maxWidth: '420px',
+              padding: '10px 12px',
+              borderRadius: '10px',
+              border: '1px solid #2A4A6B',
+              background: '#10223A',
+              color: '#FFFFFF'
+            }}
+          />
+
+          <button
+            type="button"
+            onClick={() => setSearchTerm(searchInput)}
+            style={{
+              background: '#F5A623',
+              color: '#1E3A5F',
+              border: 'none',
+              borderRadius: '999px',
+              padding: '10px 14px',
+              fontSize: '0.84rem',
+              fontWeight: 800,
+              cursor: 'pointer'
+            }}
+          >
+            Search
+          </button>
         </div>
 
-        {courses.length === 0 ? (
+        {!q ? (
           <div style={{
             textAlign: 'center',
             padding: '64px 24px',
             color: 'var(--text-muted)'
           }}>
-            <p>No courses found</p>
+            <p>Search for a course to display results.</p>
+          </div>
+        ) : visibleCourses.length === 0 ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '64px 24px',
+            color: 'var(--text-muted)'
+          }}>
+            <p>No courses found for that search.</p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {courses.map(course => (
+          <div>
+            {visibleCourses.map(course => (
               <div key={course._id} style={{
-                background: '#1A3357',
-                border: '1px solid #2A4A6B',
-                borderRadius: '16px',
-                padding: '20px',
-                boxShadow: 'var(--card-shadow)'
+                padding: '20px 0',
+                borderBottom: '1px solid #2A4A6B'
               }}>
                 <div style={{
                   display: 'flex',
@@ -120,14 +174,24 @@ const Courses = () => {
                       color: '#FFFFFF',
                       marginBottom: '2px'
                     }}>
-                      {course.title}
+                      <Link
+                        to={`/admin/courses/${course._id}`}
+                        style={{ color: '#FFFFFF', textDecoration: 'underline' }}
+                      >
+                        {course.title}
+                      </Link>
                     </h3>
                     <p style={{
                       fontSize: '0.82rem',
                       color: '#F5A623',
                       fontWeight: '600'
                     }}>
-                      {course.organisation?.name}
+                      <Link
+                        to={`/profiles/organisation/${course.organisation?._id}`}
+                        style={{ color: '#F5A623', textDecoration: 'underline' }}
+                      >
+                        {course.organisation?.name || 'Organisation'}
+                      </Link>
                     </p>
                   </div>
 
@@ -154,6 +218,38 @@ const Courses = () => {
                   <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
                     📅 {new Date(course.applicationDeadline).toLocaleDateString()}
                   </span>
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <Link
+                    to={`/admin/courses/${course._id}`}
+                    style={{
+                      border: '1px solid #2A4A6B',
+                      color: '#B8D0E8',
+                      borderRadius: '999px',
+                      padding: '8px 12px',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      textDecoration: 'none'
+                    }}
+                  >
+                    View Course
+                  </Link>
+
+                  <Link
+                    to={`/profiles/organisation/${course.organisation?._id}`}
+                    style={{
+                      border: '1px solid #F5A623',
+                      color: '#F5A623',
+                      borderRadius: '999px',
+                      padding: '8px 12px',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      textDecoration: 'none'
+                    }}
+                  >
+                    View Org Profile
+                  </Link>
                 </div>
 
                 {course.status === 'published' && (

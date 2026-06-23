@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Navbar from '../../components/common/Navbar';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
-import { createCourse } from '../../services/courseService';
+import { createCourse, getOrgCourse, updateCourse } from '../../services/courseService';
 import {
   COURSE_CATEGORIES,
   DELIVERY_MODES,
@@ -12,6 +12,8 @@ import {
 
 const CourseForm = () => {
   const navigate = useNavigate();
+  const { id: courseId } = useParams();
+  const isEditMode = Boolean(courseId);
 
   const [form, setForm] = useState({
     title: '',
@@ -32,7 +34,48 @@ const CourseForm = () => {
   const [questions, setQuestions] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(isEditMode);
   const [coverPreview, setCoverPreview] = useState('');
+
+  useEffect(() => {
+    if (!isEditMode) {
+      setInitialLoading(false);
+      return;
+    }
+
+    const fetchCourse = async () => {
+      try {
+        const res = await getOrgCourse(courseId);
+        const data = res?.data || {};
+
+        setForm((current) => ({
+          ...current,
+          title: data.title || '',
+          description: data.description || '',
+          category: data.category || '',
+          targetAudience: data.targetAudience || '',
+          gender: data.gender || 'both',
+          location: data.location || 'Kakuma',
+          deliveryMode: data.deliveryMode || '',
+          startDate: data.startDate ? String(data.startDate).slice(0, 10) : '',
+          endDate: data.endDate ? String(data.endDate).slice(0, 10) : '',
+          applicationDeadline: data.applicationDeadline ? String(data.applicationDeadline).slice(0, 10) : '',
+          totalSlots: data.totalSlots ? String(data.totalSlots) : '',
+          googleFormLink: data.googleFormLink || '',
+          coverImage: null
+        }));
+
+        setQuestions(Array.isArray(data.applicationQuestions) ? data.applicationQuestions : []);
+        setCoverPreview(data.coverImage || '');
+      } catch (err) {
+        setError(err.response?.data?.message || 'Failed to load course');
+      } finally {
+        setInitialLoading(false);
+      }
+    };
+
+    fetchCourse();
+  }, [courseId, isEditMode]);
 
   useEffect(() => {
     return () => {
@@ -111,10 +154,14 @@ const CourseForm = () => {
     setLoading(true);
 
     try {
-      await createCourse(buildPayload());
+      if (isEditMode) {
+        await updateCourse(courseId, buildPayload());
+      } else {
+        await createCourse(buildPayload());
+      }
       navigate('/org/courses');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create course');
+      setError(err.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'create'} course`);
     } finally {
       setLoading(false);
     }
@@ -130,6 +177,17 @@ const CourseForm = () => {
     borderRadius: 'var(--radius)',
     marginBottom: '16px'
   };
+
+  if (initialLoading) {
+    return (
+      <div style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
+        <Navbar />
+        <div style={{ maxWidth: '680px', margin: '0 auto', padding: '40px 24px' }}>
+          <p style={{ color: '#7A9BB5', fontSize: '0.95rem' }}>Loading course...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
@@ -159,14 +217,16 @@ const CourseForm = () => {
           color: '#FFFFFF',
           marginBottom: '8px'
         }}>
-          Post a New Course
+          {isEditMode ? 'Edit Course' : 'Post a New Course'}
         </h1>
         <p style={{
           fontSize: '0.9rem',
           color: '#7A9BB5',
           marginBottom: '32px'
         }}>
-          Fill in the details below. You can save as draft and publish later.
+          {isEditMode
+            ? 'Update the course details below. Changes are saved to your posted course.'
+            : 'Fill in the details below. You can save as draft and publish later.'}
         </p>
 
         {error && (
@@ -187,10 +247,7 @@ const CourseForm = () => {
 
           {/* Basic Info */}
           <div style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius)',
-            padding: '24px',
+            padding: '0',
             marginBottom: '20px'
           }}>
             <h2 style={{
@@ -316,10 +373,7 @@ const CourseForm = () => {
 
           {/* Targeting */}
           <div style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius)',
-            padding: '24px',
+            padding: '0',
             marginBottom: '20px'
           }}>
             <h2 style={{
@@ -376,10 +430,7 @@ const CourseForm = () => {
 
           {/* Logistics */}
           <div style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius)',
-            padding: '24px',
+            padding: '0',
             marginBottom: '20px'
           }}>
             <h2 style={{
@@ -484,10 +535,7 @@ const CourseForm = () => {
 
           {/* Application Questions */}
           <div style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius)',
-            padding: '24px',
+            padding: '0',
             marginBottom: '24px'
           }}>
             <div style={{
@@ -529,7 +577,6 @@ const CourseForm = () => {
 
             {questions.length === 0 ? (
               <div style={{
-                textAlign: 'center',
                 padding: '24px',
                 border: '1px dashed #2A4A6B',
                 borderRadius: 'var(--radius)'
@@ -719,7 +766,7 @@ const CourseForm = () => {
           </div>
 
           <Button type="submit" fullWidth loading={loading}>
-            Save as Draft
+            {isEditMode ? 'Save Changes' : 'Save as Draft'}
           </Button>
         </form>
       </div>

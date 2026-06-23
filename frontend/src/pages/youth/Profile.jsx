@@ -173,7 +173,7 @@ const YouthProfile = () => {
       });
       setSaveNotice('Profile updated successfully.');
       setTimeout(() => setSaveNotice(''), 3000);
-      setEditMode(false);
+      setEditMode(false);   
     } catch (err) {
       setSaveError(err.response?.data?.message || err.message || 'Failed to save profile');
     } finally {

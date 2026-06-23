@@ -7,6 +7,8 @@ import api from '../../services/api';
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [searchInput, setSearchInput] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -25,13 +27,48 @@ const Dashboard = () => {
   if (loading) return <Loader />;
 
   const statCards = [
-    { label: 'Total Youth', value: stats?.totalYouth, link: '/admin/users' },
-    { label: 'Approved Organisations', value: stats?.totalOrganisations, link: '/admin/organisations' },
+    { label: `Users (${stats?.totalYouth || 0})`, value: stats?.totalYouth, link: '/admin/users' },
+    { label: `Organisations (${stats?.totalOrganisations || 0})`, value: stats?.totalOrganisations, link: '/admin/organisations' },
     { label: 'Pending Approval', value: stats?.pendingOrganisations, link: '/admin/organisations?status=pending' },
     { label: 'Total Courses', value: stats?.totalCourses, link: '/admin/courses' },
     { label: 'Published Courses', value: stats?.publishedCourses, link: '/admin/courses?status=published' },
     { label: 'Total Applications', value: stats?.totalApplications, link: '/admin/courses' }
   ];
+
+  const quickActions = [
+    {
+      title: 'Review Organisations',
+      desc: 'Approve or reject pending organisations',
+      link: '/admin/organisations',
+      urgent: stats?.pendingOrganisations > 0
+    },
+    {
+      title: 'Monitor Courses',
+      desc: 'View and manage all posted courses',
+      link: '/admin/courses',
+      urgent: false
+    },
+    {
+      title: `Youth Profiles (${stats?.totalYouth || 0})`,
+      desc: 'View and manage all youth profiles',
+      link: '/admin/users',
+      urgent: false
+    },
+    {
+      title: `Organisations (${stats?.totalOrganisations || 0})`,
+      desc: 'View and manage organisation profiles',
+      link: '/admin/organisations',
+      urgent: false
+    }
+  ];
+
+  const q = searchTerm.trim().toLowerCase();
+  const filteredStatCards = q
+    ? statCards.filter((item) => item.label.toLowerCase().includes(q))
+    : statCards;
+  const filteredActions = q
+    ? quickActions.filter((item) => `${item.title} ${item.desc}`.toLowerCase().includes(q))
+    : quickActions;
 
   return (
     <div style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
@@ -60,34 +97,76 @@ const Dashboard = () => {
 
       <div className="fh-container">
 
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '20px' }}>
+          <input
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search dashboard"
+            style={{
+              flex: '1 1 260px',
+              maxWidth: '420px',
+              padding: '10px 12px',
+              borderRadius: '10px',
+              border: '1px solid #2A4A6B',
+              background: '#10223A',
+              color: '#FFFFFF'
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => setSearchTerm(searchInput)}
+            style={{
+              background: '#F5A623',
+              color: '#1E3A5F',
+              border: 'none',
+              borderRadius: '999px',
+              padding: '10px 14px',
+              fontSize: '0.84rem',
+              fontWeight: 800,
+              cursor: 'pointer'
+            }}
+          >
+            Search
+          </button>
+          <Link
+            to="/admin/settings"
+            style={{
+              color: '#F5A623',
+              fontSize: '0.86rem',
+              fontWeight: 800,
+              textDecoration: 'none'
+            }}
+          >
+            Menu: Settings
+          </Link>
+        </div>
+
         {/* Stats */}
-        <div className="fh-stats-grid fh-stats-6" style={{ marginBottom: '32px' }}>
-          {statCards.map((stat, i) => (
+        <div style={{ display: 'grid', gap: '10px', marginBottom: '28px' }}>
+          {filteredStatCards.map((stat, i) => (
             <Link key={i} to={stat.link} style={{ textDecoration: 'none' }}>
               <div style={{
-                background: '#1A3357',
-                border: stat.label === 'Pending Approval' && stats?.pendingOrganisations > 0
+                borderBottom: stat.label === 'Pending Approval' && stats?.pendingOrganisations > 0
                   ? '1px solid #F5A623' : '1px solid #2A4A6B',
-                borderRadius: '14px',
-                padding: '20px 12px',
-                textAlign: 'center',
-                boxShadow: 'var(--card-shadow)',
-                transition: 'var(--transition)',
+                padding: '10px 0',
+                display: 'flex',
+                alignItems: 'baseline',
+                justifyContent: 'space-between',
+                gap: '12px',
                 cursor: 'pointer'
               }}>
                 <div style={{
-                  fontSize: '2rem',
+                  fontSize: '1.2rem',
                   fontWeight: 800,
-                  letterSpacing: '-0.5px',
                   color: '#F5A623'
                 }}>
                   {stat.value}
                 </div>
                 <div style={{
-                  fontSize: '0.76rem',
-                  color: '#7A9BB5',
-                  marginTop: '6px',
-                  fontWeight: 600
+                  fontSize: '0.86rem',
+                  color: '#B8D0E8',
+                  fontWeight: 700,
+                  textAlign: 'right'
                 }}>
                   {stat.label}
                 </div>
@@ -107,39 +186,14 @@ const Dashboard = () => {
             Quick Actions
           </h2>
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-            gap: '16px'
-          }}>
-            {[
-              {
-                title: 'Review Organisations',
-                desc: 'Approve or reject pending organisations',
-                link: '/admin/organisations',
-                urgent: stats?.pendingOrganisations > 0
-              },
-              {
-                title: 'Monitor Courses',
-                desc: 'View and manage all posted courses',
-                link: '/admin/courses',
-                urgent: false
-              },
-              {
-                title: 'Manage Users',
-                desc: 'View and manage all youth accounts',
-                link: '/admin/users',
-                urgent: false
-              }
-            ].map((action, i) => (
+          <div style={{ display: 'grid', gap: '12px' }}>
+            {filteredActions.map((action, i) => (
               <Link key={i} to={action.link} style={{ textDecoration: 'none' }}>
                 <div style={{
-                  border: `1px solid ${action.urgent ? '#F5A623' : '#2A4A6B'}`,
-                  borderRadius: 'var(--radius)',
-                  padding: '20px',
+                  borderBottom: `1px solid ${action.urgent ? '#F5A623' : '#2A4A6B'}`,
+                  padding: '10px 0',
                   cursor: 'pointer',
-                  transition: 'var(--transition)',
-                  background: action.urgent ? 'rgba(245,166,35,0.08)' : '#1A3357'
+                  transition: 'var(--transition)'
                 }}>
                   <h3 style={{
                     fontSize: '0.95rem',

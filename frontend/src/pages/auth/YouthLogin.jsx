@@ -51,11 +51,7 @@ const YouthLogin = () => {
       <div style={{
         width: '100%',
         maxWidth: '400px',
-        background: '#1A3357',
-        border: '1px solid #2A4A6B',
-        borderRadius: '20px',
         padding: '32px 20px',
-        boxShadow: '0 8px 40px rgba(0, 0, 0, 0.4)',
         marginTop: '24px'
       }}>
         {/* Logo */}

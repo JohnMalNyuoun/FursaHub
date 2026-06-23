@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect, useContext } from 'react';
 import { getUnreadCount } from '../services/notificationService';
+import api from '../services/api';
 import useAuth from '../hooks/useAuth';
 
 export const NotificationContext = createContext();
@@ -9,10 +10,21 @@ export const NotificationProvider = ({ children }) => {
 	const [unreadCount, setUnreadCount] = useState(0);
 
 	const fetchUnreadCount = async () => {
-		if (!user || user.role !== 'youth') return;
+		if (!user) return;
 		try {
-			const res = await getUnreadCount();
-			setUnreadCount(res.data.count);
+			if (user.role === 'youth') {
+				const res = await getUnreadCount();
+				setUnreadCount(res.data.count);
+				return;
+			}
+
+			if (user.role === 'admin') {
+				const res = await api.get('/admin/courses/stats');
+				setUnreadCount(res?.data?.data?.pendingOrganisations || 0);
+				return;
+			}
+
+			setUnreadCount(0);
 		} catch (err) {
 			console.error(err);
 		}

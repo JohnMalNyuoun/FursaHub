@@ -50,6 +50,16 @@ export const getOrgProfile = async () => {
   return response.data;
 };
 
+export const updateOrgProfile = async (payload) => {
+  const response = await api.put('/org/profile', payload);
+  return response.data;
+};
+
+export const updateOrgLogo = async (formData) => {
+  const response = await api.put('/org/profile/logo', formData);
+  return response.data;
+};
+
 export const updateYouthLanguage = async (language) => {
   const response = await api.put('/youth/profile/language', { language });
   return response.data;
