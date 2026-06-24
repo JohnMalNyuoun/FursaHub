@@ -166,6 +166,7 @@ const Navbar = () => {
     { label: t('nav.dashboard'),    path: '/org/dashboard',    icon: 'grid' },
     { label: t('nav.courses'),      path: '/org/courses',      icon: 'book' },
     { label: t('nav.applications'),   path: '/org/applications', icon: 'users' },
+    { label: t('nav.notifications'), path: '/org/notifications', icon: 'bell' },
     { label: t('profile.helpSupport'),       path: '/org/impact',       icon: 'trending' }
   ];
 
@@ -173,6 +174,7 @@ const Navbar = () => {
     { label: t('nav.dashboard'), path: '/admin/dashboard',     icon: 'grid' },
     { label: t('nav.profile'),      path: '/admin/organisations', icon: 'building' },
     { label: t('nav.courses'),   path: '/admin/courses',       icon: 'book' },
+    { label: 'Updates',          path: '/admin/updates',       icon: 'bell' },
     { label: t('nav.notifications'), path: '/admin/notifications', icon: 'bell' }
   ];
 

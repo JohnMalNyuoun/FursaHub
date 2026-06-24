@@ -263,6 +263,21 @@ const Notifications = () => {
                   }}>
                     {notification.message}
                   </p>
+                  {notification.image && (
+                    <img
+                      src={notification.image}
+                      alt={notification.title}
+                      style={{
+                        display: 'block',
+                        marginTop: '4px',
+                        marginBottom: '8px',
+                        maxWidth: '100%',
+                        maxHeight: '240px',
+                        borderRadius: '10px',
+                        border: '1px solid #2A4A6B'
+                      }}
+                    />
+                  )}
                   <p style={{ fontSize: '0.78rem', color: '#7A9BB5' }}>
                     {new Date(notification.createdAt).toLocaleString()}
                   </p>

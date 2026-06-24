@@ -37,6 +37,8 @@ import AdminUsers from './pages/admin/Users';
 import AdminSettings from './pages/admin/Settings';
 import AdminCourseDetail from './pages/admin/CourseDetail';
 import AdminNotifications from './pages/admin/Notifications';
+import AdminUpdates from './pages/admin/Updates';
+import OrgNotifications from './pages/organisation/Notifications';
 import Landing from './pages/Landing';
 import Impact from './pages/organisation/Impact';
 import CourseOutcomes from './pages/organisation/CourseOutcomes';
@@ -129,7 +131,9 @@ function App () {
       <Route path="/admin/courses/:id" element={<AdminRoute><AdminCourseDetail /></AdminRoute>} />
       <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
       <Route path="/admin/notifications" element={<AdminRoute><AdminNotifications /></AdminRoute>} />
+      <Route path="/admin/updates" element={<AdminRoute><AdminUpdates /></AdminRoute>} />
       <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
+      <Route path="/org/notifications" element={<OrgRoute><OrgNotifications /></OrgRoute>} />
 
       {/* Organisation impact */}
 <Route path="/org/impact" element={<OrgRoute><Impact /></OrgRoute>} />

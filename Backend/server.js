@@ -48,6 +48,7 @@ app.use('/api/profiles', require('./routes/profiles'));
 app.use('/api/admin/organisations', require('./routes/admin/organisations'));
 app.use('/api/admin/courses', require('./routes/admin/courses'));
 app.use('/api/admin/users', require('./routes/admin/users'));
+app.use('/api/admin/broadcasts', require('./routes/admin/broadcasts'));
 app.use('/api/org/impact', require('./routes/organisation/impact'));
 app.use('/api/youth/outcomes', require('./routes/youth/outcomes'));
 

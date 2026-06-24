@@ -30,16 +30,20 @@ const notificationSchema = new mongoose.Schema({
       'application_rejected',
       'course_published',
       'org_approved',
-      'org_rejected'
+      'org_rejected',
+      'admin_broadcast'
     ],
     required: true
+  },
+  image: {
+    type: String
   },
   reference: {
     type: mongoose.Schema.Types.ObjectId
   },
   referenceModel: {
     type: String,
-    enum: ['Course', 'Application', 'Organisation', 'User']
+    enum: ['Course', 'Application', 'Organisation', 'User', 'Broadcast']
   },
   sender: {
     type: mongoose.Schema.Types.ObjectId,
