@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import api from '../../services/api';
+import { capture } from '../../lib/posthog';
 
 const SHARE_TARGETS = [
   {
@@ -43,6 +45,8 @@ const ShareButton = ({
   text,
   label = 'Share',
   compact = false,
+  entityType = 'page',
+  entityId = null,
   style: extraStyle
 }) => {
   const [open, setOpen] = useState(false);
@@ -51,6 +55,16 @@ const ShareButton = ({
 
   const resolvedUrl =
     url || (typeof window !== 'undefined' ? window.location.href : '');
+
+  const recordShare = (target) => {
+    capture('share_clicked', { entityType, entityId, target, url: resolvedUrl });
+    api.post('/track/share', {
+      entityType,
+      entityId,
+      target,
+      url: resolvedUrl
+    }).catch(() => { /* tracking is best-effort */ });
+  };
 
   useEffect(() => {
     if (!open) return undefined;
@@ -67,6 +81,7 @@ const ShareButton = ({
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({ title, text, url: resolvedUrl });
+        recordShare('native');
         return true;
       } catch (err) {
         if (err?.name === 'AbortError') return true;
@@ -88,6 +103,7 @@ const ShareButton = ({
     try {
       await navigator.clipboard.writeText(resolvedUrl);
       setCopied(true);
+      recordShare('copy_link');
       setTimeout(() => setCopied(false), 1800);
     } catch (err) {
       console.error('Copy failed', err);
@@ -99,6 +115,7 @@ const ShareButton = ({
     e.stopPropagation();
     const href = target.build({ url: resolvedUrl, title, text });
     window.open(href, '_blank', 'noopener,noreferrer,width=600,height=540');
+    recordShare(target.key);
     setOpen(false);
   };
 

@@ -3,6 +3,7 @@ const User = require('../../models/Users');
 const cloudinary = require('../../config/cloudinary');
 const { notify } = require('../../services/notificationService');
 const { success, error } = require('../../utils/apiResponse');
+const posthog = require('../../config/posthog');
 
 const parseQuestionsPayload = (questions) => {
   if (Array.isArray(questions)) return questions;
@@ -132,6 +133,19 @@ const createCourse = async (req, res) => {
       applicationQuestions: parsedQuestions,
       googleFormLink: googleFormLink || null,
       coverImage
+    });
+
+    posthog.capture({
+      distinctId: req.user.id,
+      event: 'course created',
+      properties: {
+        course_id: course._id.toString(),
+        course_title: course.title,
+        category: course.category,
+        delivery_mode: course.deliveryMode,
+        total_slots: course.totalSlots,
+        target_audience: course.targetAudience
+      }
     });
 
     return success(res, 201, 'Course created successfully', course);
@@ -330,6 +344,21 @@ const publishCourse = async (req, res) => {
       })
     ));
 
+    posthog.capture({
+      distinctId: req.user.id,
+      event: 'course published',
+      properties: {
+        course_id: course._id.toString(),
+        course_title: course.title,
+        category: course.category,
+        delivery_mode: course.deliveryMode,
+        total_slots: course.totalSlots,
+        location: course.location,
+        target_audience: course.targetAudience,
+        notified_youth_count: matchingYouth.length
+      }
+    });
+
     return success(res, 200, 'Course published successfully', course);
 
   } catch (err) {
@@ -353,6 +382,16 @@ const closeCourse = async (req, res) => {
 
     course.status = 'closed';
     await course.save();
+
+    posthog.capture({
+      distinctId: req.user.id,
+      event: 'course closed',
+      properties: {
+        course_id: course._id.toString(),
+        course_title: course.title,
+        category: course.category
+      }
+    });
 
     return success(res, 200, 'Course closed', course);
 

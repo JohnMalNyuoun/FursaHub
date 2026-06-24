@@ -31,6 +31,10 @@ const notificationSchema = new mongoose.Schema({
       'course_published',
       'org_approved',
       'org_rejected',
+      'org_suspended',
+      'org_reinstatement_request',
+      'org_reinstated',
+      'org_reinstatement_denied',
       'admin_broadcast'
     ],
     required: true

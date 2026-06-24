@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../../models/Users');
 const generateToken = require('../../utils/generateToken');
 const { success, error } = require('../../utils/apiResponse');
+const posthog = require('../../config/posthog');
 
 // @desc    Register youth
 // @route   POST /api/auth/youth/register
@@ -47,6 +48,25 @@ const registerYouth = async (req, res) => {
 
     // Generate token
     const token = generateToken(user._id, user.role);
+
+    posthog.identify({
+      distinctId: user._id.toString(),
+      properties: {
+        email: user.email,
+        name: user.fullName,
+        community_type: user.communityType,
+        role: user.role,
+        $set_once: { created_at: user.createdAt }
+      }
+    });
+    posthog.capture({
+      distinctId: user._id.toString(),
+      event: 'youth registered',
+      properties: {
+        community_type: user.communityType,
+        gender: user.gender
+      }
+    });
 
     return success(res, 201, 'Registration successful', {
       token,
@@ -94,8 +114,29 @@ const loginYouth = async (req, res) => {
       return error(res, 401, 'Invalid email or password');
     }
 
+    user.lastLoginAt = new Date();
+    user.loginCount = (user.loginCount || 0) + 1;
+    await user.save();
+
     // Generate token
     const token = generateToken(user._id, user.role);
+
+    posthog.identify({
+      distinctId: user._id.toString(),
+      properties: {
+        email: user.email,
+        name: user.fullName,
+        community_type: user.communityType,
+        role: user.role
+      }
+    });
+    posthog.capture({
+      distinctId: user._id.toString(),
+      event: 'youth logged in',
+      properties: {
+        login_count: user.loginCount
+      }
+    });
 
     return success(res, 200, 'Login successful', {
       token,

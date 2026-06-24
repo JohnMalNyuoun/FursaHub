@@ -6,6 +6,7 @@ import Button from '../../components/common/Button';
 import ShareButton from '../../components/common/ShareButton';
 import { getCourse } from '../../services/courseService';
 import { applyForCourse, getMyApplications } from '../../services/applicationService';
+import { capture } from '../../lib/posthog';
 
 const CourseDetail = () => {
   const { id } = useParams();
@@ -30,6 +31,13 @@ const CourseDetail = () => {
 
         const fetchedCourse = courseRes.data;
         setCourse(fetchedCourse);
+
+        capture('course_viewed', {
+          course_id: fetchedCourse._id,
+          course_title: fetchedCourse.title,
+          org_id: fetchedCourse.organisation?._id,
+          org_name: fetchedCourse.organisation?.name
+        });
 
         // Initialize answers
         setAnswers(fetchedCourse.applicationQuestions.map(q => ({

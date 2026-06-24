@@ -1,6 +1,7 @@
 const Application = require('../../models/Application');
 const { success, error } = require('../../utils/apiResponse');
 const { notify } = require('../../services/notificationService');
+const posthog = require('../../config/posthog');
 
 // @desc    Get all applications for organisation
 // @route   GET /api/org/applications
@@ -92,6 +93,16 @@ const shortlistApplicant = async (req, res) => {
       senderModel: 'Organisation'
     });
 
+    posthog.capture({
+      distinctId: req.user.id,
+      event: 'application shortlisted',
+      properties: {
+        application_id: application._id.toString(),
+        course_id: application.course?.toString(),
+        youth_id: application.youth?.toString()
+      }
+    });
+
     return success(res, 200, 'Applicant shortlisted', application);
 
   } catch (err) {
@@ -136,6 +147,16 @@ const acceptApplicant = async (req, res) => {
       referenceModel: 'Application',
       sender: req.user.id,
       senderModel: 'Organisation'
+    });
+
+    posthog.capture({
+      distinctId: req.user.id,
+      event: 'application accepted',
+      properties: {
+        application_id: application._id.toString(),
+        course_id: application.course?.toString(),
+        youth_id: application.youth?.toString()
+      }
     });
 
     return success(res, 200, 'Applicant accepted', application);
@@ -185,6 +206,16 @@ const rejectApplicant = async (req, res) => {
       referenceModel: 'Application',
       sender: req.user.id,
       senderModel: 'Organisation'
+    });
+
+    posthog.capture({
+      distinctId: req.user.id,
+      event: 'application rejected',
+      properties: {
+        application_id: application._id.toString(),
+        course_id: application.course?.toString(),
+        youth_id: application.youth?.toString()
+      }
     });
 
     return success(res, 200, 'Applicant rejected', application);

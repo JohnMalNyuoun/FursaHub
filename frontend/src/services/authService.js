@@ -19,3 +19,8 @@ export const orgLogin = async (data) => {
   const response = await api.post('/auth/org/login', data);
   return response.data;
 };
+
+export const orgReinstateRequest = async (data) => {
+  const response = await api.post('/auth/org/reinstate-request', data);
+  return response.data;
+};

@@ -60,6 +60,31 @@ const organisationSchema = new mongoose.Schema({
   rejectionReason: {
     type: String
   },
+  suspensionReason: {
+    type: String
+  },
+  suspendedAt: {
+    type: Date
+  },
+  suspendedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  reinstatement: {
+    status: {
+      type: String,
+      enum: ['none', 'pending', 'approved', 'denied'],
+      default: 'none'
+    },
+    requestMessage: { type: String },
+    requestedAt: { type: Date },
+    reviewedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    reviewedAt: { type: Date },
+    reviewNote: { type: String }
+  },
   isActive: {
     type: Boolean,
     default: true

@@ -8,6 +8,11 @@ import { getAllCourses, addCourseComment, toggleCourseReaction } from '../../ser
 import { getMyApplications } from '../../services/applicationService';
 import useAuth from '../../hooks/useAuth';
 
+const normalizeImageUrl = (url) => {
+  if (!url || typeof url !== 'string') return '';
+  return url.startsWith('http://') ? url.replace('http://', 'https://') : url;
+};
+
 const Courses = () => {
   const { user } = useAuth();
   const [courses, setCourses] = useState([]);
@@ -288,6 +293,8 @@ const Courses = () => {
               const isFull = course.filledSlots >= course.totalSlots;
               const alreadyApplied = appliedCourseIds.has(course._id);
               const canApply = !alreadyApplied && !isDeadlinePassed && !isFull;
+              const orgLogo = normalizeImageUrl(course.organisation?.logo);
+              const courseCoverImage = normalizeImageUrl(course.coverImage);
 
               return (
                 <article key={item.id} style={{
@@ -296,8 +303,8 @@ const Courses = () => {
                 }}>
                   {/* Org header */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                    {course.organisation?.logo ? (
-                      <img src={course.organisation.logo} alt={course.organisation?.name || 'Organisation'}
+                    {orgLogo ? (
+                      <img src={orgLogo} alt={course.organisation?.name || 'Organisation'}
                         style={{ width: '40px', height: '40px', borderRadius: '999px', objectFit: 'cover' }} />
                     ) : (
                       <div style={{
@@ -327,13 +334,34 @@ const Courses = () => {
                     {course.description}
                   </p>
 
-                  {course.coverImage && (
-                    <img src={course.coverImage} alt={course.title}
-                      onError={e => { e.currentTarget.style.display = 'none'; }}
-                      style={{
-                        width: '100%', maxHeight: '320px', objectFit: 'cover',
-                        borderRadius: '10px', border: '1px solid #2A4A6B', marginBottom: '12px'
-                      }} />
+                  {courseCoverImage && (
+                    <Link
+                      to={`/courses/${course._id}`}
+                      style={{ display: 'block', textDecoration: 'none', marginBottom: '12px' }}
+                    >
+                      <div style={{
+                        width: '100%',
+                        aspectRatio: '4 / 5',
+                        minHeight: '220px',
+                        maxHeight: '520px',
+                        overflow: 'hidden',
+                        borderRadius: '12px',
+                        border: '1px solid #2A4A6B',
+                        background: '#081626'
+                      }}>
+                        <img
+                          src={courseCoverImage}
+                          alt={course.title}
+                          onError={e => { e.currentTarget.style.display = 'none'; }}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            display: 'block'
+                          }}
+                        />
+                      </div>
+                    </Link>
                   )}
 
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', marginBottom: '12px' }}>

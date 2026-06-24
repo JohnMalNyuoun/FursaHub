@@ -12,6 +12,10 @@ const Organisations = () => {
   const [filterStatus, setFilterStatus] = useState('');
   const [rejectModal, setRejectModal] = useState(null);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [suspendModal, setSuspendModal] = useState(null);
+  const [suspendReason, setSuspendReason] = useState('');
+  const [denyModal, setDenyModal] = useState(null);
+  const [denyNote, setDenyNote] = useState('');
 
   const fetchOrganisations = async () => {
     try {
@@ -56,11 +60,45 @@ const Organisations = () => {
     }
   };
 
-  const handleSuspend = async (id) => {
-    if (!window.confirm('Suspend this organisation?')) return;
-    setActionLoading(id + '_suspend');
+  const handleSuspend = async () => {
+    if (!suspendReason.trim()) return;
+    setActionLoading('suspend');
     try {
-      await api.put(`/admin/organisations/${id}/suspend`);
+      await api.put(`/admin/organisations/${suspendModal}/suspend`, {
+        suspensionReason: suspendReason.trim()
+      });
+      setSuspendModal(null);
+      setSuspendReason('');
+      fetchOrganisations();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleReinstate = async (id) => {
+    if (!window.confirm('Approve reinstatement and return this organisation to active status?')) return;
+    setActionLoading(id + '_reinstate');
+    try {
+      await api.put(`/admin/organisations/${id}/reinstate`);
+      fetchOrganisations();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleDenyReinstatement = async () => {
+    if (!denyNote.trim()) return;
+    setActionLoading('deny');
+    try {
+      await api.put(`/admin/organisations/${denyModal}/deny-reinstatement`, {
+        reviewNote: denyNote.trim()
+      });
+      setDenyModal(null);
+      setDenyNote('');
       fetchOrganisations();
     } catch (err) {
       console.error(err);
@@ -200,6 +238,53 @@ const Organisations = () => {
                   {org.description}
                 </p>
 
+                {/* Suspension + reinstatement context */}
+                {org.status === 'suspended' && (
+                  <div style={{
+                    background: '#2A1812',
+                    border: '1px solid #5A2A1F',
+                    borderRadius: '8px',
+                    padding: '10px 12px',
+                    marginBottom: '12px'
+                  }}>
+                    <div style={{ fontSize: '0.78rem', color: '#FCA5A5', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
+                      Suspended
+                    </div>
+                    {org.suspensionReason && (
+                      <div style={{ fontSize: '0.82rem', color: '#FDE2E2', marginBottom: '4px' }}>
+                        Reason: {org.suspensionReason}
+                      </div>
+                    )}
+                    {org.suspendedAt && (
+                      <div style={{ fontSize: '0.74rem', color: '#B8D0E8' }}>
+                        Since {new Date(org.suspendedAt).toLocaleDateString()}
+                      </div>
+                    )}
+                    {org.reinstatement?.status === 'pending' && (
+                      <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #5A2A1F' }}>
+                        <div style={{ fontSize: '0.78rem', color: '#F5A623', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
+                          Reinstatement requested
+                        </div>
+                        {org.reinstatement.requestMessage && (
+                          <div style={{ fontSize: '0.82rem', color: '#B8D0E8', whiteSpace: 'pre-wrap' }}>
+                            “{org.reinstatement.requestMessage}”
+                          </div>
+                        )}
+                        {org.reinstatement.requestedAt && (
+                          <div style={{ fontSize: '0.74rem', color: '#7A9BB5', marginTop: '4px' }}>
+                            {new Date(org.reinstatement.requestedAt).toLocaleString()}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {org.reinstatement?.status === 'denied' && (
+                      <div style={{ marginTop: '8px', fontSize: '0.78rem', color: '#7A9BB5' }}>
+                        Previous reinstatement denied{org.reinstatement.reviewNote ? `: ${org.reinstatement.reviewNote}` : ''}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <div style={{
                   display: 'flex',
                   gap: '16px',
@@ -240,11 +325,38 @@ const Organisations = () => {
                   {org.status === 'approved' && (
                     <Button
                       variant="outline"
-                      loading={actionLoading === org._id + '_suspend'}
-                      onClick={() => handleSuspend(org._id)}
+                      onClick={() => setSuspendModal(org._id)}
                       style={{ fontSize: '0.85rem', padding: '8px 16px' }}
                     >
                       Suspend
+                    </Button>
+                  )}
+                  {org.status === 'suspended' && org.reinstatement?.status === 'pending' && (
+                    <>
+                      <Button
+                        loading={actionLoading === org._id + '_reinstate'}
+                        onClick={() => handleReinstate(org._id)}
+                        style={{ fontSize: '0.85rem', padding: '8px 16px' }}
+                      >
+                        Approve reinstatement
+                      </Button>
+                      <Button
+                        variant="danger"
+                        onClick={() => setDenyModal(org._id)}
+                        style={{ fontSize: '0.85rem', padding: '8px 16px' }}
+                      >
+                        Deny reinstatement
+                      </Button>
+                    </>
+                  )}
+                  {org.status === 'suspended' && org.reinstatement?.status !== 'pending' && (
+                    <Button
+                      variant="outline"
+                      loading={actionLoading === org._id + '_reinstate'}
+                      onClick={() => handleReinstate(org._id)}
+                      style={{ fontSize: '0.85rem', padding: '8px 16px' }}
+                    >
+                      Reinstate
                     </Button>
                   )}
                 </div>
@@ -321,6 +433,146 @@ const Organisations = () => {
                 fullWidth
                 variant="outline"
                 onClick={() => { setRejectModal(null); setRejectionReason(''); }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Suspend Modal */}
+      {suspendModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '24px'
+        }}>
+          <div style={{
+            background: 'var(--bg-card)',
+            borderRadius: 'var(--radius)',
+            padding: '32px',
+            width: '100%',
+            maxWidth: '440px'
+          }}>
+            <h2 style={{
+              fontSize: '1.1rem',
+              fontWeight: 700,
+              color: 'var(--text-primary)',
+              marginBottom: '6px'
+            }}>
+              Suspend Organisation
+            </h2>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '20px' }}>
+              The organisation will be notified and can submit a reinstatement request.
+            </p>
+
+            <textarea
+              placeholder="Reason for suspension"
+              value={suspendReason}
+              onChange={(e) => setSuspendReason(e.target.value)}
+              rows={3}
+              style={{
+                width: '100%',
+                padding: '12px 14px',
+                fontSize: '0.9rem',
+                color: '#FFFFFF',
+                background: '#152A47',
+                border: '1px solid #2A4A6B',
+                borderRadius: 'var(--radius)',
+                resize: 'vertical',
+                marginBottom: '20px'
+              }}
+            />
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <Button
+                fullWidth
+                variant="danger"
+                loading={actionLoading === 'suspend'}
+                onClick={handleSuspend}
+              >
+                Confirm Suspend
+              </Button>
+              <Button
+                fullWidth
+                variant="outline"
+                onClick={() => { setSuspendModal(null); setSuspendReason(''); }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Deny Reinstatement Modal */}
+      {denyModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '24px'
+        }}>
+          <div style={{
+            background: 'var(--bg-card)',
+            borderRadius: 'var(--radius)',
+            padding: '32px',
+            width: '100%',
+            maxWidth: '440px'
+          }}>
+            <h2 style={{
+              fontSize: '1.1rem',
+              fontWeight: 700,
+              color: 'var(--text-primary)',
+              marginBottom: '6px'
+            }}>
+              Deny Reinstatement
+            </h2>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '20px' }}>
+              The organisation will stay suspended and will be notified of your decision.
+            </p>
+
+            <textarea
+              placeholder="Reason for denial"
+              value={denyNote}
+              onChange={(e) => setDenyNote(e.target.value)}
+              rows={3}
+              style={{
+                width: '100%',
+                padding: '12px 14px',
+                fontSize: '0.9rem',
+                color: '#FFFFFF',
+                background: '#152A47',
+                border: '1px solid #2A4A6B',
+                borderRadius: 'var(--radius)',
+                resize: 'vertical',
+                marginBottom: '20px'
+              }}
+            />
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <Button
+                fullWidth
+                variant="danger"
+                loading={actionLoading === 'deny'}
+                onClick={handleDenyReinstatement}
+              >
+                Confirm Denial
+              </Button>
+              <Button
+                fullWidth
+                variant="outline"
+                onClick={() => { setDenyModal(null); setDenyNote(''); }}
               >
                 Cancel
               </Button>

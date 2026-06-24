@@ -5,6 +5,7 @@ const User = require('../../models/Users');
 const Organisation = require('../../models/Organisation');
 const cloudinary = require('../../config/cloudinary');
 const { success, error } = require('../../utils/apiResponse');
+const posthog = require('../../config/posthog');
 
 const uploadBroadcastImage = async (file) => {
   if (!file) return null;
@@ -119,6 +120,17 @@ const createBroadcast = async (req, res) => {
 
     broadcast.recipientCount = recipients.length;
     await broadcast.save();
+
+    posthog.capture({
+      distinctId: req.user?.id || 'admin',
+      event: 'admin broadcast sent',
+      properties: {
+        broadcast_id: broadcast._id.toString(),
+        audience: normalizedAudience,
+        recipient_count: recipients.length,
+        has_image: !!broadcast.image
+      }
+    });
 
     return success(res, 201, 'Broadcast sent', broadcast);
 

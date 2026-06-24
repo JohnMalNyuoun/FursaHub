@@ -4,12 +4,17 @@ const dotenv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
 const compression = require('compression');
+
+// Load environment variables BEFORE any module that reads process.env at import time
+// (e.g. ./config/posthog instantiates the PostHog client using POSTHOG_API_KEY).
+dotenv.config({ path: path.join(__dirname, '.env') });
+
 const connectDB = require('./config/db');
 const jwt =require('jsonwebtoken');
 const requestLogger = require('./middleware/requestLogger');
+const posthog = require('./config/posthog');
+const { setupExpressRequestContext, setupExpressErrorHandler } = require('posthog-node');
 
-// Load environment variables from Backend/.env
-dotenv.config({ path: path.join(__dirname, '.env') });
 connectDB();
 
 const app = express();
@@ -25,6 +30,7 @@ app.use(cors({
 app.use(compression());
 app.use(express.json());
 app.use(requestLogger);
+setupExpressRequestContext(posthog, app);
 
 // Auth routes
 app.use('/api/auth/youth', require('./routes/auth/youthAuth'));
@@ -49,6 +55,7 @@ app.use('/api/admin/organisations', require('./routes/admin/organisations'));
 app.use('/api/admin/courses', require('./routes/admin/courses'));
 app.use('/api/admin/users', require('./routes/admin/users'));
 app.use('/api/admin/broadcasts', require('./routes/admin/broadcasts'));
+app.use('/api/admin/analytics', require('./routes/admin/analytics'));
 app.use('/api/org/impact', require('./routes/organisation/impact'));
 app.use('/api/youth/outcomes', require('./routes/youth/outcomes'));
 
@@ -56,6 +63,7 @@ app.use('/api/youth/outcomes', require('./routes/youth/outcomes'));
 app.use('/api/profiles', require('./routes/profiles'));
 app.use('/api/follow', require('./routes/follow'));
 app.use('/api/broadcasts', require('./routes/broadcasts'));
+app.use('/api/track', require('./routes/track'));
 
 // Time Log routes
 app.use('/api/timelog', require('./routes/timeLog'));
@@ -75,6 +83,7 @@ app.get('/api/debug/token', (req, res) => {
 });
 
 // Catch unexpected route errors and keep server alive with visible terminal logs
+setupExpressErrorHandler(posthog, app);
 app.use((err, req, res, next) => {
   console.error('UNHANDLED ROUTE ERROR:', err && err.stack ? err.stack : err);
   if (res.headersSent) return next(err);

@@ -2,6 +2,7 @@ const Application = require('../../models/Application');
 const Course = require('../../models/course');
 const { success, error } = require('../../utils/apiResponse');
 const { notify } = require('../../services/notificationService');
+const posthog = require('../../config/posthog');
 
 // @desc    Apply for a course
 // @route   POST /api/youth/applications/:courseId
@@ -83,6 +84,18 @@ const applyForCourse = async (req, res) => {
       senderModel: 'User'
     });
 
+    posthog.capture({
+      distinctId: req.user.id,
+      event: 'course application submitted',
+      properties: {
+        course_id: courseId,
+        course_title: course.title,
+        course_category: course.category,
+        organisation_id: course.organisation?.toString(),
+        application_id: application._id.toString()
+      }
+    });
+
     return success(res, 201, 'Application submitted successfully', application);
 
   } catch (err) {
@@ -138,6 +151,15 @@ const withdrawApplication = async (req, res) => {
     // Decrement filled slots
     await Course.findByIdAndUpdate(application.course, {
       $inc: { filledSlots: -1 }
+    });
+
+    posthog.capture({
+      distinctId: req.user.id,
+      event: 'course application withdrawn',
+      properties: {
+        application_id: application._id.toString(),
+        course_id: application.course?.toString()
+      }
     });
 
     return success(res, 200, 'Application withdrawn', application);

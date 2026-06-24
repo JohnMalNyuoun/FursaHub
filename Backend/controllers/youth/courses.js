@@ -1,4 +1,5 @@
 const Course = require('../../models/course');
+const posthog = require('../../config/posthog');
 const CourseEngagement = require('../../models/CourseEngagement');
 const { success, error } = require('../../utils/apiResponse');
 
@@ -103,6 +104,17 @@ const getCourse = async (req, res) => {
     if (!course) {
       return error(res, 404, 'Course not found');
     }
+
+    posthog.capture({
+      distinctId: req.user.id.toString(),
+      event: 'course viewed',
+      properties: {
+        course_id: course._id.toString(),
+        course_title: course.title,
+        org_id: course.organisation?._id?.toString(),
+        org_name: course.organisation?.name
+      }
+    });
 
     return success(res, 200, 'Course fetched', course);
 

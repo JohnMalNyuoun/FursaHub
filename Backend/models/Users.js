@@ -120,6 +120,13 @@ const userSchema = new mongoose.Schema({
   },
   emailChangeExpires: {
     type: Date
+  },
+  lastLoginAt: {
+    type: Date
+  },
+  loginCount: {
+    type: Number,
+    default: 0
   }
 }, { timestamps: true });
 

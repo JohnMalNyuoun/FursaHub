@@ -1,6 +1,7 @@
 const Application = require('../../models/Application');
 const Course = require('../../models/course');
 const { success, error } = require('../../utils/apiResponse');
+const posthog = require('../../config/posthog');
 
 // @desc    Get pending outcome forms for youth
 // @route   GET /api/youth/outcomes
@@ -66,6 +67,16 @@ const submitOutcome = async (req, res) => {
     application.outcomeSubmitted = true;
     application.outcomeSubmittedAt = new Date();
     await application.save();
+
+    posthog.capture({
+      distinctId: req.user.id,
+      event: 'outcome submitted',
+      properties: {
+        application_id: application._id.toString(),
+        course_id: application.course?._id?.toString(),
+        course_title: application.course?.title
+      }
+    });
 
     return success(res, 201, 'Outcome form submitted successfully', application);
 

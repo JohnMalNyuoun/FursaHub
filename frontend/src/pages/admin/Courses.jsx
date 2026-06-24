@@ -7,6 +7,7 @@ import api from '../../services/api';
 
 const Courses = () => {
   const [courses, setCourses] = useState([]);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [filterStatus, setFilterStatus] = useState('');
@@ -29,6 +30,12 @@ const Courses = () => {
   useEffect(() => {
     fetchCourses();
   }, [filterStatus]);
+
+  useEffect(() => {
+    api.get('/admin/courses/stats')
+      .then((res) => setStats(res.data.data))
+      .catch((err) => console.error(err));
+  }, []);
 
   const handleCancel = async (id) => {
     if (!window.confirm('Cancel this course?')) return;
@@ -80,6 +87,40 @@ const Courses = () => {
       </div>
 
       <div className="fh-container">
+
+        {/* Course counts */}
+        <div style={{ display: 'grid', gap: '10px', marginBottom: '20px' }}>
+          <div style={{
+            borderBottom: '1px solid #2A4A6B',
+            padding: '10px 0',
+            display: 'flex',
+            alignItems: 'baseline',
+            justifyContent: 'space-between',
+            gap: '12px'
+          }}>
+            <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#F5A623' }}>
+              {stats?.totalCourses ?? 0}
+            </div>
+            <div style={{ fontSize: '0.86rem', color: '#B8D0E8', fontWeight: 700, textAlign: 'right' }}>
+              Total Courses
+            </div>
+          </div>
+          <div style={{
+            borderBottom: '1px solid #2A4A6B',
+            padding: '10px 0',
+            display: 'flex',
+            alignItems: 'baseline',
+            justifyContent: 'space-between',
+            gap: '12px'
+          }}>
+            <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#F5A623' }}>
+              {stats?.publishedCourses ?? 0}
+            </div>
+            <div style={{ fontSize: '0.86rem', color: '#B8D0E8', fontWeight: 700, textAlign: 'right' }}>
+              Published Courses
+            </div>
+          </div>
+        </div>
 
         {/* Filter + Search */}
         <div style={{ marginBottom: '24px', display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>

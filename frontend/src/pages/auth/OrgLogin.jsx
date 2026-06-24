@@ -86,6 +86,20 @@ const OrgLogin = () => {
             color: '#FCA5A5'
           }}>
             {error}
+            {/suspended/i.test(error) && (
+              <div style={{ marginTop: '10px' }}>
+                <Link
+                  to="/org/reinstate"
+                  style={{
+                    color: '#F5A623',
+                    fontWeight: 800,
+                    textDecoration: 'underline'
+                  }}
+                >
+                  Request reinstatement →
+                </Link>
+              </div>
+            )}
           </div>
         )}
 

@@ -6,6 +6,7 @@ import YouthLogin from './pages/auth/YouthLogin';
 import YouthRegister from './pages/auth/YouthRegister';
 import OrgLogin from './pages/auth/OrgLogin';
 import OrgRegister from './pages/auth/OrgRegister';
+import OrgReinstate from './pages/auth/OrgReinstate';
 
 // Youth pages
 import YouthHome from './pages/youth/Home';
@@ -93,6 +94,7 @@ function App () {
       <Route path="/register" element={<YouthRegister />} />
       <Route path="/org/login" element={<OrgLogin />} />
       <Route path="/org/register" element={<OrgRegister />} />
+      <Route path="/org/reinstate" element={<OrgReinstate />} />
 
       {/* Shared profiles */}
       <Route path="/profiles/youth/:id" element={<AuthRoute><PublicYouthProfile /></AuthRoute>} />

@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect } from 'react';
+import { identifyUser, resetPosthog } from '../lib/posthog';
 
 export const AuthContext = createContext();
 
@@ -27,7 +28,9 @@ export const AuthProvider = ({ children }) => {
     if (storedToken && storedUser) {
       try {
         setToken(storedToken);
-        setUser(JSON.parse(storedUser));
+        const parsed = JSON.parse(storedUser);
+        setUser(parsed);
+        identifyUser(parsed);
       } catch (err) {
         sessionStorage.removeItem('token');
         sessionStorage.removeItem('user');
@@ -46,6 +49,7 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.setItem('user', JSON.stringify(userData));
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    identifyUser(userData);
   };
 
   const logout = () => {
@@ -55,6 +59,7 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.removeItem('user');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    resetPosthog();
   };
 
   const updateUser = (partialUserData) => {
