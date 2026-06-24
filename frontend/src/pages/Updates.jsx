@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 import Loader from '../components/common/Loader';
+import ShareButton from '../components/common/ShareButton';
 
 const Updates = () => {
   const [loading, setLoading] = useState(true);
@@ -134,15 +135,23 @@ const Updates = () => {
                     year: 'numeric', month: 'short', day: 'numeric'
                   })}
                 </p>
-                <h2 style={{
-                  fontSize: '1.15rem',
-                  fontWeight: 800,
-                  color: 'var(--text-primary)',
-                  marginBottom: '10px',
-                  lineHeight: 1.3
-                }}>
-                  {b.title}
-                </h2>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+                  <h2 style={{
+                    fontSize: '1.15rem',
+                    fontWeight: 800,
+                    color: 'var(--text-primary)',
+                    marginBottom: '10px',
+                    lineHeight: 1.3
+                  }}>
+                    {b.title}
+                  </h2>
+                  <ShareButton
+                    url={`${window.location.origin}/updates`}
+                    title={b.title}
+                    text={b.message?.slice(0, 200)}
+                    compact
+                  />
+                </div>
                 <p style={{
                   fontSize: '0.92rem',
                   color: 'var(--text-secondary)',

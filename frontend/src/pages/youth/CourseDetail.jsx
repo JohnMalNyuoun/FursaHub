@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
 import Button from '../../components/common/Button';
+import ShareButton from '../../components/common/ShareButton';
 import { getCourse } from '../../services/courseService';
 import { applyForCourse, getMyApplications } from '../../services/applicationService';
 
@@ -175,6 +176,14 @@ const CourseDetail = () => {
           }}>
             {course.title}
           </h1>
+
+          <div style={{ marginBottom: '12px' }}>
+            <ShareButton
+              title={course.title}
+              text={`${course.organisation?.name || ''} · ${course.location || ''}`.trim()}
+              compact
+            />
+          </div>
 
           <p style={{
             fontSize: '0.95rem',

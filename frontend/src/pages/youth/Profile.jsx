@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
+import ShareButton from '../../components/common/ShareButton';
 import { getYouthProfile, updateYouthProfile, updateYouthPhoto } from '../../services/profileService';
 import * as followService from '../../services/followService';
 import { COURSE_CATEGORIES } from '../../utils/constants';
@@ -275,6 +276,12 @@ const YouthProfile = () => {
                   <path d="m14.06 4.94 3.75 3.75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
+              <ShareButton
+                url={`${window.location.origin}/profiles/youth/${profile?._id || profile?.id || ''}`}
+                title={profile?.fullName || 'Youth on FursaHub'}
+                text={profile?.bio?.slice(0, 140) || 'On FursaHub'}
+                compact
+              />
             </div>
           </div>
 

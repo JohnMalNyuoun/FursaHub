@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
+import ShareButton from '../../components/common/ShareButton';
 import api from '../../services/api';
 import * as followService from '../../services/followService';
 import useAuth from '../../hooks/useAuth';
@@ -159,26 +160,34 @@ const PublicYouthProfile = () => {
                 <span style={{ color: '#B8D0E8', fontSize: '0.82rem', display: 'block', marginBottom: '8px' }}>
                   <strong style={{ color: '#FFFFFF' }}>{followerCount}</strong> followers
                 </span>
-                {user && user.id !== id && (
-                  <button
-                    onClick={handleFollowClick}
-                    disabled={followLoading}
-                    style={{
-                      padding: '6px 14px',
-                      borderRadius: '6px',
-                      border: isFollowing ? '1px solid #4A9EFF' : 'none',
-                      background: isFollowing ? 'transparent' : '#4A9EFF',
-                      color: isFollowing ? '#4A9EFF' : '#1A3357',
-                      fontWeight: 700,
-                      fontSize: '0.82rem',
-                      cursor: followLoading ? 'not-allowed' : 'pointer',
-                      opacity: followLoading ? 0.6 : 1,
-                      transition: 'all 0.3s ease'
-                    }}
-                  >
-                    {followLoading ? '...' : isFollowing ? 'Following' : 'Follow'}
-                  </button>
-                )}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  {user && user.id !== id && (
+                    <button
+                      onClick={handleFollowClick}
+                      disabled={followLoading}
+                      style={{
+                        padding: '6px 14px',
+                        borderRadius: '6px',
+                        border: isFollowing ? '1px solid #4A9EFF' : 'none',
+                        background: isFollowing ? 'transparent' : '#4A9EFF',
+                        color: isFollowing ? '#4A9EFF' : '#1A3357',
+                        fontWeight: 700,
+                        fontSize: '0.82rem',
+                        cursor: followLoading ? 'not-allowed' : 'pointer',
+                        opacity: followLoading ? 0.6 : 1,
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      {followLoading ? '...' : isFollowing ? 'Following' : 'Follow'}
+                    </button>
+                  )}
+                  <ShareButton
+                    url={`${window.location.origin}/profiles/youth/${id}`}
+                    title={profile?.fullName || 'Youth Profile'}
+                    text={profile?.bio?.slice(0, 140) || 'On FursaHub'}
+                    compact
+                  />
+                </div>
               </div>
             </div>
 

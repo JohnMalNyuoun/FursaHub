@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
+import ShareButton from '../../components/common/ShareButton';
 import { getOrgProfile, updateOrgLogo, updateOrgProfile } from '../../services/profileService';
 import * as followService from '../../services/followService';
 import { useLanguage } from '../../hooks/useLanguage';
@@ -380,26 +381,34 @@ const OrgProfile = () => {
 
               <div style={{ marginLeft: 'auto' }}>
                 {!isEditing ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setNotice('');
-                      setError('');
-                      setIsEditing(true);
-                    }}
-                    style={{
-                      border: '1px solid #F5A623',
-                      background: 'rgba(245, 166, 35, 0.12)',
-                      color: '#F5A623',
-                      borderRadius: '10px',
-                      padding: '8px 12px',
-                      fontSize: '0.82rem',
-                      fontWeight: 800,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Edit Profile
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                    <ShareButton
+                      url={`${window.location.origin}/profiles/organisation/${profile?._id || profile?.id || ''}`}
+                      title={profile?.name || 'Organisation on FursaHub'}
+                      text={profile?.description?.slice(0, 140) || profile?.bio?.slice(0, 140) || `${profile?.type || ''} on FursaHub`}
+                      compact
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNotice('');
+                        setError('');
+                        setIsEditing(true);
+                      }}
+                      style={{
+                        border: '1px solid #F5A623',
+                        background: 'rgba(245, 166, 35, 0.12)',
+                        color: '#F5A623',
+                        borderRadius: '10px',
+                        padding: '8px 12px',
+                        fontSize: '0.82rem',
+                        fontWeight: 800,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Edit Profile
+                    </button>
+                  </div>
                 ) : (
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                     <button

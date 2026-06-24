@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
+import ShareButton from '../../components/common/ShareButton';
 import api from '../../services/api';
 import * as followService from '../../services/followService';
 import useAuth from '../../hooks/useAuth';
@@ -132,7 +133,7 @@ const PublicOrganisationProfile = () => {
                 <p style={{ color: '#F5A623', fontSize: '0.86rem', fontWeight: 700, marginBottom: '8px' }}>
                   {profile?.type}
                 </p>
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
                   <span style={{ color: '#B8D0E8', fontSize: '0.82rem' }}>
                     <strong style={{ color: '#FFFFFF' }}>{followerCount}</strong> followers
                   </span>
@@ -156,6 +157,12 @@ const PublicOrganisationProfile = () => {
                       {followLoading ? '...' : isFollowing ? 'Following' : 'Follow'}
                     </button>
                   )}
+                  <ShareButton
+                    url={`${window.location.origin}/profiles/organisation/${id}`}
+                    title={profile?.name || 'Organisation'}
+                    text={profile?.description?.slice(0, 140) || `${profile?.type || ''} on FursaHub`}
+                    compact
+                  />
                 </div>
               </div>
             </div>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
+import ShareButton from '../../components/common/ShareButton';
 import { getOrgCourse } from '../../services/courseService';
 
 const OrgCourseDetail = () => {
@@ -94,7 +95,15 @@ const OrgCourseDetail = () => {
               <h2 style={{ color: '#FFFFFF', fontSize: '1.25rem', fontWeight: 800 }}>
                 {course.title}
               </h2>
-              <span className={`fh-badge fh-badge-${course.status}`}>{course.status}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <ShareButton
+                  url={`${window.location.origin}/courses/${course._id}`}
+                  title={course.title}
+                  text={course.description?.slice(0, 140)}
+                  compact
+                />
+                <span className={`fh-badge fh-badge-${course.status}`}>{course.status}</span>
+              </div>
             </div>
 
             <p style={{ color: '#B8D0E8', fontSize: '0.92rem', lineHeight: 1.6 }}>
