@@ -95,37 +95,6 @@ const Landing = () => {
             all in one place.
           </p>
 
-          <div style={{
-            display: 'flex',
-            gap: '12px',
-            justifyContent: 'center',
-            flexWrap: 'wrap'
-          }}>
-            <Link to="/register" style={{
-              background: '#F5A623',
-              color: '#1E3A5F',
-              padding: '14px 28px',
-              borderRadius: '12px',
-              fontSize: '0.98rem',
-              fontWeight: 800,
-              textDecoration: 'none',
-              boxShadow: '0 4px 16px rgba(245,166,35,0.35)'
-            }}>
-              Find Opportunities
-            </Link>
-            <Link to="/org/register" style={{
-              background: 'rgba(255,255,255,0.1)',
-              color: '#FFFFFF',
-              padding: '14px 28px',
-              borderRadius: '12px',
-              fontSize: '0.98rem',
-              fontWeight: 700,
-              textDecoration: 'none',
-              border: '2px solid rgba(255,255,255,0.4)'
-            }}>
-              Post a Course
-            </Link>
-          </div>
         </div>
       </div>
 
