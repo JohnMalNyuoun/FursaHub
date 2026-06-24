@@ -1,20 +1,32 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import Navbar from '../../components/common/Navbar';
 import Loader from '../../components/common/Loader';
 import { getOrgCourses } from '../../services/courseService';
 import { getOrgApplications } from '../../services/applicationService';
 import useAuth from '../../hooks/useAuth';
 
+const dayMs = 24 * 60 * 60 * 1000;
+
+const trendOf = (current, previous) => {
+  if (!previous) {
+    if (!current) return { direction: 'steady', changePct: 0 };
+    return { direction: 'up', changePct: 100 };
+  }
+  const diff = current - previous;
+  const changePct = Math.round((diff / previous) * 100);
+  if (changePct > 2) return { direction: 'up', changePct };
+  if (changePct < -2) return { direction: 'down', changePct };
+  return { direction: 'steady', changePct };
+};
+
 const Dashboard = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [courseFilter, setCourseFilter] = useState('all');
+  const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeMetric, setActiveMetric] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -23,8 +35,8 @@ const Dashboard = () => {
           getOrgCourses(),
           getOrgApplications()
         ]);
-        setCourses(coursesRes.data);
-        setApplications(appsRes.data);
+        setCourses(coursesRes.data || []);
+        setApplications(appsRes.data || []);
       } catch (err) {
         console.error(err);
       } finally {
@@ -36,365 +48,524 @@ const Dashboard = () => {
 
   if (loading) return <Loader />;
 
-  const stats = [
-    { label: 'Total Courses', value: courses.length, key: 'total_courses', color: '#F5A623' },
-    { label: 'Published', value: courses.filter(c => c.status === 'published').length, key: 'published', color: '#FFD27A' },
-    { label: 'Total Applications', value: applications.length, key: 'total_apps', color: '#9DBBE3' },
-    { label: 'Shortlisted', value: applications.filter(a => a.status === 'shortlisted').length, key: 'shortlisted', color: '#B8D0E8' },
-    { label: 'Accepted', value: applications.filter(a => a.status === 'accepted').length, key: 'accepted', color: '#F5A623' },
-    { label: 'Pending Review', value: applications.filter(a => a.status === 'submitted').length, key: 'pending', color: '#7A9BB5' }
-  ];
+  const now = Date.now();
+  const window7Start = now - (7 * dayMs);
+  const window14Start = now - (14 * dayMs);
 
-  const filteredCourses = courses.filter((course) => {
-    const matchesSearch = course.title?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = courseFilter === 'all' || course.status === courseFilter;
-    return matchesSearch && matchesFilter;
-  });
+  const totalCourses = courses.length;
+  const publishedCourses = courses.filter((c) => c.status === 'published').length;
+  const draftCourses = courses.filter((c) => c.status === 'draft').length;
+  const closedCourses = courses.filter((c) => c.status === 'closed' || c.status === 'cancelled').length;
 
-  const funnelStages = [
-    { label: 'Published Courses', value: stats[1].value, color: '#F5A623', hint: 'Active course supply' },
-    { label: 'Total Applications', value: stats[2].value, color: '#FFD27A', hint: 'Youth engagement' },
-    { label: 'Shortlisted', value: stats[3].value, color: '#9DBBE3', hint: 'In review stage' },
-    { label: 'Accepted', value: stats[4].value, color: '#B8D0E8', hint: 'Final outcomes' }
-  ];
+  const totalApplications = applications.length;
+  const pendingApplications = applications.filter((a) => a.status === 'submitted').length;
+  const shortlistedApplications = applications.filter((a) => a.status === 'shortlisted').length;
+  const acceptedApplications = applications.filter((a) => a.status === 'accepted').length;
+  const rejectedApplications = applications.filter((a) => a.status === 'rejected').length;
 
-  const rejectedCount = applications.filter((a) => a.status === 'rejected').length;
-  const conversionRate = stats[2].value > 0
-    ? Math.round((stats[4].value / stats[2].value) * 100)
+  const appsLast7d = applications.filter((a) => {
+    const ts = new Date(a.createdAt).getTime();
+    return ts >= window7Start;
+  }).length;
+  const appsPrev7d = applications.filter((a) => {
+    const ts = new Date(a.createdAt).getTime();
+    return ts >= window14Start && ts < window7Start;
+  }).length;
+
+  const acceptedLast7d = applications.filter((a) => {
+    const ts = new Date(a.updatedAt || a.createdAt).getTime();
+    return a.status === 'accepted' && ts >= window7Start;
+  }).length;
+  const acceptedPrev7d = applications.filter((a) => {
+    const ts = new Date(a.updatedAt || a.createdAt).getTime();
+    return a.status === 'accepted' && ts >= window14Start && ts < window7Start;
+  }).length;
+
+  const conversionRate = totalApplications > 0
+    ? Math.round((acceptedApplications / totalApplications) * 100)
     : 0;
 
+  const recentApplications = [...applications]
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 5)
+    .map((a) => ({
+      id: a._id,
+      applicant: a.youth?.fullName || a.user?.fullName || 'Applicant',
+      courseTitle: a.course?.title || 'Course',
+      status: a.status || 'submitted'
+    }));
 
+  const statCards = [
+    { label: `Courses (${totalCourses})`, value: totalCourses, link: '/org/courses' },
+    { label: `Applications (${totalApplications})`, value: totalApplications, link: '/org/applications' },
+    { label: 'Pending Review', value: pendingApplications, link: '/org/applications?status=submitted' }
+  ];
+
+  const quickActions = [
+    {
+      title: 'Review Applications',
+      desc: 'Shortlist, accept or reject applicants',
+      link: '/org/applications',
+      urgent: pendingApplications > 0
+    },
+    {
+      title: 'Manage Courses',
+      desc: 'Create, edit, publish and close courses',
+      link: '/org/courses',
+      urgent: false
+    },
+    {
+      title: 'Course Analytics',
+      desc: 'Track course and application performance',
+      link: '/org/analytics',
+      urgent: false
+    },
+    {
+      title: 'Organisation Profile',
+      desc: 'Update your organisation information',
+      link: '/org/profile',
+      urgent: false
+    }
+  ];
+
+  const q = searchTerm.trim().toLowerCase();
+  const filteredStatCards = q
+    ? statCards.filter((item) => item.label.toLowerCase().includes(q))
+    : statCards;
+  const filteredActions = q
+    ? quickActions.filter((item) => `${item.title} ${item.desc}`.toLowerCase().includes(q))
+    : quickActions;
+
+  const analytics = {
+    courses: {
+      total: totalCourses,
+      published: publishedCourses,
+      drafts: draftCourses,
+      closed: closedCourses
+    },
+    applications: {
+      total: totalApplications,
+      pending: pendingApplications,
+      shortlisted: shortlistedApplications,
+      accepted: acceptedApplications,
+      rejected: rejectedApplications,
+      last7d: appsLast7d,
+      prev7d: appsPrev7d,
+      trend: trendOf(appsLast7d, appsPrev7d)
+    },
+    outcomes: {
+      conversionRate,
+      acceptedLast7d,
+      acceptedPrev7d,
+      trend: trendOf(acceptedLast7d, acceptedPrev7d)
+    },
+    recentApplications
+  };
 
   return (
-    <div style={{ background: 'linear-gradient(180deg, #0D1C31 0%, #10223A 45%, #0F2035 100%)', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
       <Navbar />
 
-      {/* Header */}
       <div style={{
-        background: 'linear-gradient(135deg, #10223A 0%, #1A3357 60%, #243F66 100%)',
-        padding: '36px 20px 40px',
-        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.35)'
+        background: 'linear-gradient(135deg, #0F2035 0%, #1E3A5F 100%)',
+        padding: '32px 20px 36px'
       }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '20px', flexWrap: 'wrap' }}>
-          <div>
-            <p style={{ margin: '0 0 8px 0', color: '#FFD27A', fontSize: '0.82rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-              Organisation Dashboard
-            </p>
-            <h1 style={{
-              fontSize: 'clamp(1.6rem, 5vw, 2.1rem)',
-              fontWeight: 800,
-              color: '#FFFFFF',
-              marginBottom: '6px',
-              letterSpacing: '-0.3px'
-            }}>
-              Welcome, {user?.name} 👋
-            </h1>
-            <p style={{ fontSize: '0.95rem', color: '#B8D0E8', margin: 0 }}>
-              Manage your courses and review youth applications from one clean workspace.
-            </p>
-          </div>
+        <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+          <h1 style={{
+            fontSize: 'clamp(1.4rem, 5vw, 1.6rem)',
+            fontWeight: 800,
+            color: '#FFFFFF',
+            marginBottom: '6px',
+            letterSpacing: '-0.3px'
+          }}>
+            Organisation Dashboard
+          </h1>
+          <p style={{ fontSize: '0.92rem', color: '#B8D0E8' }}>
+            Hello {user?.name || 'Organisation'} - manage courses and applications in one place.
+          </p>
+        </div>
+      </div>
+
+      <div className="fh-container">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '20px' }}>
+          <input
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search dashboard"
+            style={{
+              flex: '1 1 260px',
+              maxWidth: '420px',
+              padding: '10px 12px',
+              borderRadius: '10px',
+              border: '1px solid #2A4A6B',
+              background: '#10223A',
+              color: '#FFFFFF'
+            }}
+          />
           <button
-            onClick={() => navigate('/org/analytics')}
+            type="button"
+            onClick={() => setSearchTerm(searchInput)}
             style={{
               background: '#F5A623',
               color: '#1E3A5F',
               border: 'none',
               borderRadius: '999px',
-              padding: '12px 18px',
+              padding: '10px 14px',
+              fontSize: '0.84rem',
               fontWeight: 800,
-              cursor: 'pointer',
-              boxShadow: '0 8px 20px rgba(0,0,0,0.12)'
+              cursor: 'pointer'
             }}
           >
-            Open Course Analytics
-          </button>
-        </div>
-      </div>
-
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px 20px 40px' }}>
-
-        {/* Top Search */}
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#F5A623', marginBottom: '6px' }}>
             Search
-          </label>
-          <input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search courses or youth"
+          </button>
+          <Link
+            to="/org/settings"
             style={{
-              width: '100%',
-              maxWidth: '420px',
-              padding: '12px 14px',
-              borderRadius: '12px',
-              border: '1px solid #2A4A6B',
-              outline: 'none',
-              background: '#10223A',
-              color: '#FFFFFF'
+              color: '#F5A623',
+              fontSize: '0.86rem',
+              fontWeight: 800,
+              textDecoration: 'none'
             }}
-          />
+          >
+            Menu: Settings
+          </Link>
         </div>
 
-        {/* Flat metric links */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '18px', alignItems: 'center', marginBottom: '20px' }}>
-          <button
-            type="button"
-            onClick={() => {
-              setActiveMetric('registration');
-              setCourseFilter('all');
-            }}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              padding: 0,
-              textAlign: 'left',
-              color: activeMetric === 'registration' ? '#F5A623' : '#B8D0E8',
-              fontSize: '0.95rem',
-              fontWeight: 800,
-              cursor: 'pointer',
-              textDecoration: activeMetric === 'registration' ? 'underline' : 'none',
-              textUnderlineOffset: '4px'
-            }}
-          >
-            Registration Metric: {stats[0].value}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setActiveMetric('operational');
-              setCourseFilter('published');
-            }}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              padding: 0,
-              textAlign: 'left',
-              color: activeMetric === 'operational' ? '#FFD27A' : '#B8D0E8',
-              fontSize: '0.95rem',
-              fontWeight: 800,
-              cursor: 'pointer',
-              textDecoration: activeMetric === 'operational' ? 'underline' : 'none',
-              textUnderlineOffset: '4px'
-            }}
-          >
-            Operational Status: {stats[1].value}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveMetric('outcome')}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              padding: 0,
-              textAlign: 'left',
-              color: activeMetric === 'outcome' ? '#9DBBE3' : '#B8D0E8',
-              fontSize: '0.95rem',
-              fontWeight: 800,
-              cursor: 'pointer',
-              textDecoration: activeMetric === 'outcome' ? 'underline' : 'none',
-              textUnderlineOffset: '4px'
-            }}
-          >
-            Outcome/Performance: {stats[4].value}
-          </button>
+        <div style={{ display: 'grid', gap: '10px', marginBottom: '28px' }}>
+          {filteredStatCards.map((stat, i) => (
+            <Link key={i} to={stat.link} style={{ textDecoration: 'none' }}>
+              <div style={{
+                borderBottom: stat.label === 'Pending Review' && pendingApplications > 0
+                  ? '1px solid #F5A623' : '1px solid #2A4A6B',
+                padding: '10px 0',
+                display: 'flex',
+                alignItems: 'baseline',
+                justifyContent: 'space-between',
+                gap: '12px',
+                cursor: 'pointer'
+              }}>
+                <div style={{
+                  fontSize: '1.2rem',
+                  fontWeight: 800,
+                  color: '#F5A623'
+                }}>
+                  {stat.value}
+                </div>
+                <div style={{
+                  fontSize: '0.86rem',
+                  color: '#B8D0E8',
+                  fontWeight: 700,
+                  textAlign: 'right'
+                }}>
+                  {stat.label}
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
 
-        {/* Controls Ribbon */}
-        {activeMetric === 'registration' && (
-        <div style={{
-          background: '#152A47',
-          border: '1px solid #2A4A6B',
-          borderRadius: '18px',
-          padding: '16px',
-          marginBottom: '24px',
-          boxShadow: '0 10px 24px rgba(0, 0, 0, 0.18)',
-          display: 'flex',
-          gap: '12px',
-          flexWrap: 'wrap',
-          alignItems: 'center'
-        }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#F5A623', marginBottom: '6px' }}>
-              Course Status
-            </label>
-            <select
-              value={courseFilter}
-              onChange={(e) => setCourseFilter(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px 14px',
-                borderRadius: '12px',
-                border: '1px solid #2A4A6B',
-                outline: 'none',
-                background: '#10223A',
-                color: '#FFFFFF'
-              }}
-            >
-              <option value="all">All courses</option>
-              <option value="published">Published</option>
-              <option value="draft">Draft</option>
-            </select>
+        <OrgActivityPanel analytics={analytics} />
+
+        <div>
+          <h2 style={{
+            fontSize: '1.2rem',
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            marginBottom: '20px'
+          }}>
+            Quick Actions
+          </h2>
+
+          <div style={{ display: 'grid', gap: '12px' }}>
+            {filteredActions.map((action, i) => (
+              <Link key={i} to={action.link} style={{ textDecoration: 'none' }}>
+                <div style={{
+                  borderBottom: `1px solid ${action.urgent ? '#F5A623' : '#2A4A6B'}`,
+                  padding: '10px 0',
+                  cursor: 'pointer',
+                  transition: 'var(--transition)'
+                }}>
+                  <h3 style={{
+                    fontSize: '0.95rem',
+                    fontWeight: 700,
+                    color: '#FFFFFF',
+                    marginBottom: '6px'
+                  }}>
+                    {action.title}
+                    {action.urgent && (
+                      <span style={{
+                        marginLeft: '8px',
+                        background: '#F5A623',
+                        color: '#1E3A5F',
+                        fontSize: '0.7rem',
+                        fontWeight: 800,
+                        padding: '2px 8px',
+                        borderRadius: '20px'
+                      }}>
+                        Action needed
+                      </span>
+                    )}
+                  </h3>
+                  <p style={{
+                    fontSize: '0.82rem',
+                    color: '#7A9BB5'
+                  }}>
+                    {action.desc}
+                  </p>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
-        )}
+      </div>
+    </div>
+  );
+};
 
-        {/* Workspace */}
-        <div>
-          {!activeMetric && (
-            <div style={{
-              color: '#B8D0E8',
-              fontSize: '0.92rem',
-              border: '1px dashed #2A4A6B',
-              borderRadius: '12px',
-              padding: '16px'
-            }}>
-              Select one metric above to view its section.
+const TOKENS = {
+  surface: '#10223A',
+  surfaceMuted: '#0F2035',
+  border: '#2A4A6B',
+  textPrimary: '#FFFFFF',
+  textMuted: '#B8D0E8',
+  textDim: '#7A9BB5',
+  accent: '#F5A623',
+  success: '#10B981',
+  danger: '#EF4444',
+  radius: '8px'
+};
+
+const TREND_GLYPH = {
+  up: { icon: '↑', color: TOKENS.success, label: 'Increasing' },
+  down: { icon: '↓', color: TOKENS.danger, label: 'Declining' },
+  steady: { icon: '–', color: TOKENS.textDim, label: 'Steady' }
+};
+
+const TrendBadge = ({ trend }) => {
+  const t = TREND_GLYPH[trend?.direction] || TREND_GLYPH.steady;
+  const pct = typeof trend?.changePct === 'number' ? trend.changePct : 0;
+  return (
+    <span style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '4px',
+      color: t.color,
+      fontSize: '0.74rem',
+      fontWeight: 700,
+      textTransform: 'uppercase',
+      letterSpacing: '0.04em'
+    }}>
+      <span>{t.icon}</span>
+      <span>{pct > 0 ? `+${pct}` : pct}%</span>
+      <span style={{ color: TOKENS.textDim, fontWeight: 600 }}>{t.label}</span>
+    </span>
+  );
+};
+
+const MetricTile = ({ label, value, sub, trend }) => (
+  <div style={{
+    background: TOKENS.surface,
+    border: `1px solid ${TOKENS.border}`,
+    borderRadius: TOKENS.radius,
+    padding: '14px 16px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+    minHeight: '108px'
+  }}>
+    <div style={{
+      fontSize: '0.7rem',
+      fontWeight: 700,
+      color: TOKENS.textDim,
+      textTransform: 'uppercase',
+      letterSpacing: '0.06em'
+    }}>
+      {label}
+    </div>
+    <div style={{ fontSize: '1.6rem', fontWeight: 800, color: TOKENS.accent, lineHeight: 1 }}>
+      {value}
+    </div>
+    {sub && (
+      <div style={{ fontSize: '0.76rem', color: TOKENS.textMuted }}>
+        {sub}
+      </div>
+    )}
+    {trend && <TrendBadge trend={trend} />}
+  </div>
+);
+
+const InfoRow = ({ label, value }) => (
+  <div style={{
+    display: 'flex',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    gap: '12px',
+    padding: '8px 0',
+    borderBottom: `1px solid ${TOKENS.border}`
+  }}>
+    <span style={{ fontSize: '0.8rem', color: TOKENS.textMuted, fontWeight: 600 }}>{label}</span>
+    <span style={{ fontSize: '0.92rem', color: TOKENS.textPrimary, fontWeight: 800 }}>{value}</span>
+  </div>
+);
+
+const SubPanel = ({ title, children }) => (
+  <div style={{
+    background: TOKENS.surface,
+    border: `1px solid ${TOKENS.border}`,
+    borderRadius: TOKENS.radius,
+    padding: '14px 16px'
+  }}>
+    <div style={{
+      fontSize: '0.78rem',
+      fontWeight: 800,
+      color: TOKENS.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: '0.06em',
+      marginBottom: '8px'
+    }}>
+      {title}
+    </div>
+    {children}
+  </div>
+);
+
+const OrgActivityPanel = ({ analytics }) => {
+  const heading = (
+    <div style={{ marginBottom: '14px' }}>
+      <h2 style={{
+        fontSize: '1.05rem',
+        fontWeight: 800,
+        color: TOKENS.textPrimary,
+        margin: 0,
+        letterSpacing: '-0.2px'
+      }}>
+        Organisation Activity
+      </h2>
+      <p style={{ fontSize: '0.8rem', color: TOKENS.textDim, marginTop: '4px' }}>
+        Course pipeline, applicant flow and acceptance outcomes.
+      </p>
+    </div>
+  );
+
+  if (!analytics) {
+    return (
+      <div style={{ marginBottom: '28px' }}>
+        {heading}
+        <div style={{
+          background: TOKENS.surface,
+          border: `1px solid ${TOKENS.border}`,
+          borderRadius: TOKENS.radius,
+          padding: '16px',
+          color: TOKENS.textDim,
+          fontSize: '0.86rem'
+        }}>
+          Loading metrics...
+        </div>
+      </div>
+    );
+  }
+
+  const { courses, applications, outcomes, recentApplications } = analytics;
+
+  return (
+    <div style={{ marginBottom: '28px' }}>
+      {heading}
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+        gap: '10px',
+        marginBottom: '12px'
+      }}>
+        <MetricTile
+          label="Published courses"
+          value={courses?.published ?? 0}
+          sub={`${courses?.total ?? 0} total courses`}
+        />
+        <MetricTile
+          label="Applications"
+          value={applications?.total ?? 0}
+          sub={`${applications?.last7d ?? 0} new · last 7d`}
+          trend={applications?.trend}
+        />
+        <MetricTile
+          label="Accepted"
+          value={applications?.accepted ?? 0}
+          sub={`${applications?.pending ?? 0} pending review`}
+        />
+        <MetricTile
+          label="Acceptance rate"
+          value={`${outcomes?.conversionRate ?? 0}%`}
+          sub={`${outcomes?.acceptedLast7d ?? 0} accepted · last 7d`}
+          trend={outcomes?.trend}
+        />
+      </div>
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+        gap: '10px'
+      }}>
+        <SubPanel title="Application pipeline">
+          <InfoRow label="Pending review" value={applications?.pending ?? 0} />
+          <InfoRow label="Shortlisted" value={applications?.shortlisted ?? 0} />
+          <InfoRow label="Accepted" value={applications?.accepted ?? 0} />
+          <div style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            justifyContent: 'space-between',
+            gap: '12px',
+            padding: '8px 0'
+          }}>
+            <span style={{ fontSize: '0.8rem', color: TOKENS.textMuted, fontWeight: 600 }}>Rejected</span>
+            <span style={{ fontSize: '0.92rem', color: TOKENS.textPrimary, fontWeight: 800 }}>
+              {applications?.rejected ?? 0}
+            </span>
+          </div>
+        </SubPanel>
+
+        <SubPanel title="Course status mix">
+          <InfoRow label="Published" value={courses?.published ?? 0} />
+          <InfoRow label="Draft" value={courses?.drafts ?? 0} />
+          <InfoRow label="Closed" value={courses?.closed ?? 0} />
+          <div style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            justifyContent: 'space-between',
+            gap: '12px',
+            padding: '8px 0'
+          }}>
+            <span style={{ fontSize: '0.8rem', color: TOKENS.textMuted, fontWeight: 600 }}>Total</span>
+            <span style={{ fontSize: '0.92rem', color: TOKENS.textPrimary, fontWeight: 800 }}>
+              {courses?.total ?? 0}
+            </span>
+          </div>
+        </SubPanel>
+
+        <SubPanel title="Recent applications">
+          {Array.isArray(recentApplications) && recentApplications.length > 0 ? (
+            <div style={{ display: 'grid', gap: '8px' }}>
+              {recentApplications.map((row) => (
+                <div key={row.id} style={{
+                  borderBottom: `1px solid ${TOKENS.border}`,
+                  paddingBottom: '8px'
+                }}>
+                  <div style={{ color: TOKENS.textPrimary, fontSize: '0.86rem', fontWeight: 700 }}>
+                    {row.applicant}
+                  </div>
+                  <div style={{ color: TOKENS.textDim, fontSize: '0.76rem' }}>
+                    {row.courseTitle} · {row.status}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ fontSize: '0.82rem', color: TOKENS.textDim }}>
+              No applications yet.
             </div>
           )}
-
-          <div style={{ display: 'grid', gap: '24px' }}>
-            {activeMetric === 'operational' && (
-            <div
-              style={{
-              background: '#152A47',
-              border: '1px solid #2A4A6B',
-              borderRadius: '18px',
-              padding: '24px',
-              boxShadow: '0 10px 24px rgba(0, 0, 0, 0.18)'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', marginBottom: '18px' }}>
-                <div>
-                  <p style={{ margin: '0 0 6px 0', color: '#F5A623', fontSize: '0.78rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                    Main Component
-                  </p>
-                  <h2 style={{ margin: 0, color: '#FFFFFF', fontSize: '1.15rem', fontWeight: 800 }}>
-                    Course Funnel
-                  </h2>
-                </div>
-                <button
-                  onClick={() => navigate('/org/analytics')}
-                  style={{
-                    background: '#F5A623',
-                    color: '#1E3A5F',
-                    border: 'none',
-                    borderRadius: '999px',
-                    padding: '10px 14px',
-                    fontWeight: 800,
-                    cursor: 'pointer'
-                  }}
-                >
-                  View analytics
-                </button>
-              </div>
-
-              <div style={{ display: 'grid', gap: '14px' }}>
-                {funnelStages.map((stage, index) => (
-                  <div key={stage.label} style={{
-                    position: 'relative',
-                    background: index === 0 ? '#1E3A5F' : '#10223A',
-                    border: '1px solid #2A4A6B',
-                    borderRadius: '14px',
-                    padding: '16px 18px'
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      gap: '12px',
-                      marginBottom: '10px'
-                    }}>
-                      <div>
-                        <div style={{ color: '#FFFFFF', fontWeight: 800, fontSize: '0.98rem' }}>{stage.label}</div>
-                        <div style={{ color: '#B8D0E8', fontSize: '0.8rem' }}>{stage.hint}</div>
-                      </div>
-                      <div style={{ color: stage.color, fontSize: '1.5rem', fontWeight: 900 }}>{stage.value}</div>
-                    </div>
-                    <div style={{ height: '10px', borderRadius: '999px', background: '#274868', overflow: 'hidden' }}>
-                      <div style={{ width: `${Math.max((stage.value / Math.max(stats[2].value, 1)) * 100, 12)}%`, height: '100%', background: `linear-gradient(90deg, ${stage.color}, #FFE2A7)`, borderRadius: '999px' }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            )}
-
-            {activeMetric === 'registration' && (
-            <div
-              style={{
-              background: '#152A47',
-              border: '1px solid #2A4A6B',
-              borderRadius: '18px',
-              padding: '24px',
-              boxShadow: '0 10px 24px rgba(0, 0, 0, 0.18)'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-                <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#FFFFFF' }}>
-                  Posted Courses
-                </h2>
-                <Link to="/org/courses" style={{ color: '#F5A623', fontWeight: 700, textDecoration: 'none' }}>
-                  View all →
-                </Link>
-              </div>
-
-              <div style={{
-                border: '1px solid #2A4A6B',
-                borderRadius: '14px',
-                padding: '20px',
-                display: 'grid',
-                gap: '12px'
-              }}>
-                <p style={{ color: '#B8D0E8', margin: 0, fontSize: '0.9rem' }}>
-                  Number of courses posted
-                </p>
-                <p style={{ color: '#F5A623', margin: 0, fontSize: '2rem', fontWeight: 900 }}>
-                  {filteredCourses.length}
-                </p>
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                  <Link to="/org/courses" style={{ color: '#F5A623', fontWeight: 700, textDecoration: 'none' }}>
-                    View Courses
-                  </Link>
-                  <Link to="/org/courses/new" style={{ color: '#B8D0E8', fontWeight: 700, textDecoration: 'none' }}>
-                    Post New
-                  </Link>
-                </div>
-              </div>
-            </div>
-            )}
-
-            {activeMetric === 'outcome' && (
-              <div style={{
-                background: '#152A47',
-                border: '1px solid #2A4A6B',
-                borderRadius: '18px',
-                padding: '24px',
-                boxShadow: '0 10px 24px rgba(0, 0, 0, 0.18)'
-              }}>
-                <h2 style={{ margin: '0 0 12px 0', color: '#FFFFFF', fontSize: '1.1rem', fontWeight: 800 }}>
-                  Outcome Summary
-                </h2>
-                <div style={{ display: 'grid', gap: '8px' }}>
-                  {[
-                    ['Accepted', stats[4].value],
-                    ['Shortlisted', stats[3].value],
-                    ['Rejected', rejectedCount],
-                    ['Pending Review', stats[5].value],
-                    ['Acceptance Rate', `${conversionRate}%`]
-                  ].map(([label, value]) => (
-                    <div key={label} style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: '12px' }}>
-                      <span style={{ color: '#7A9BB5', fontWeight: 700, fontSize: '0.85rem' }}>{label}</span>
-                      <span style={{ color: '#FFFFFF', fontWeight: 700, fontSize: '0.88rem' }}>{value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
+        </SubPanel>
       </div>
-
     </div>
   );
 };
