@@ -13,16 +13,36 @@ const uploadBroadcastImage = async (file) => {
     throw new Error('Cloudinary is not configured on the server.');
   }
 
-  const uploadResult = await cloudinary.uploader.upload(
-    `data:${file.mimetype};base64,${file.buffer.toString('base64')}`,
-    {
-      resource_type: 'image',
-      folder: 'fursahub/broadcasts',
-      transformation: [{ width: 1200, crop: 'limit' }]
-    }
-  );
+  const dataUri = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+  const baseOptions = {
+    resource_type: 'image',
+    folder: 'fursahub/broadcasts',
+    transformation: [{ width: 1200, crop: 'limit' }]
+  };
 
-  return uploadResult.secure_url;
+  try {
+    const uploadResult = await cloudinary.uploader.upload(dataUri, {
+      ...baseOptions,
+      upload_preset: 'fursahub-courses',
+      type: 'upload'
+    });
+    return uploadResult.secure_url;
+  } catch (err) {
+    if (err?.http_code === 403 || (err?.message || '').includes('status code - 403')) {
+      try {
+        const uploadResult = await cloudinary.uploader.upload(dataUri, baseOptions);
+        return uploadResult.secure_url;
+      } catch (signedErr) {
+        throw new Error(`Image upload failed: ${signedErr.message}`);
+      }
+    }
+    throw new Error(`Image upload failed: ${err.message}`);
+  }
+};
+
+const shouldIgnoreImageFailure = (err) => {
+  const msg = err?.message || '';
+  return msg.includes('status code - 403') || msg.includes('Cloudinary is not configured');
 };
 
 // @desc    Create an admin broadcast and fan out to all recipients
@@ -44,7 +64,11 @@ const createBroadcast = async (req, res) => {
     try {
       image = await uploadBroadcastImage(req.file);
     } catch (uploadErr) {
-      return error(res, 400, uploadErr.message);
+      if (!shouldIgnoreImageFailure(uploadErr)) {
+        return error(res, 400, uploadErr.message);
+      }
+      console.warn('Broadcast image upload skipped:', uploadErr.message);
+      image = null;
     }
 
     const broadcast = await Broadcast.create({
