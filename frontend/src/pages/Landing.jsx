@@ -1,6 +1,24 @@
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import api from '../services/api';
 
 const Landing = () => {
+  const [updates, setUpdates] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadUpdates = async () => {
+      try {
+        const res = await api.get('/broadcasts', { params: { limit: 3 } });
+        if (!cancelled) setUpdates(res?.data?.data || []);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadUpdates();
+    return () => { cancelled = true; };
+  }, []);
+
   return (
     <div style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
 
@@ -27,6 +45,14 @@ const Landing = () => {
         </span>
 
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <Link to="/updates" style={{
+            fontSize: '0.88rem',
+            fontWeight: 700,
+            color: 'var(--text-secondary)',
+            textDecoration: 'none'
+          }}>
+            Updates
+          </Link>
           <Link to="/login" style={{
             fontSize: '0.88rem',
             fontWeight: 700,
@@ -582,6 +608,119 @@ const Landing = () => {
           </div>
         </div>
       </div>
+
+      {/* Latest Updates */}
+      {updates.length > 0 && (
+        <div style={{ padding: '72px 24px', background: 'var(--bg-base)' }}>
+          <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'baseline',
+              gap: '16px',
+              flexWrap: 'wrap',
+              marginBottom: '28px'
+            }}>
+              <div>
+                <h3 style={{
+                  fontSize: '0.95rem',
+                  fontWeight: 800,
+                  color: '#F5A623',
+                  marginBottom: '8px',
+                  letterSpacing: '0.05em'
+                }}>
+                  From the FursaHub Team
+                </h3>
+                <h2 style={{
+                  fontSize: '1.6rem',
+                  fontWeight: 800,
+                  color: 'var(--text-primary)',
+                  margin: 0
+                }}>
+                  Latest Updates
+                </h2>
+              </div>
+              <Link to="/updates" style={{
+                fontSize: '0.88rem',
+                color: '#F5A623',
+                fontWeight: 800,
+                textDecoration: 'none'
+              }}>
+                View all →
+              </Link>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+              gap: '20px'
+            }}>
+              {updates.map((u) => (
+                <Link
+                  key={u._id}
+                  to="/updates"
+                  style={{
+                    textDecoration: 'none',
+                    background: 'var(--bg-card)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '14px',
+                    padding: '20px',
+                    display: 'block',
+                    boxShadow: 'var(--card-shadow)'
+                  }}
+                >
+                  {u.image && (
+                    <img
+                      src={u.image}
+                      alt={u.title}
+                      style={{
+                        width: '100%',
+                        height: '140px',
+                        objectFit: 'cover',
+                        borderRadius: '10px',
+                        marginBottom: '12px'
+                      }}
+                    />
+                  )}
+                  <p style={{
+                    fontSize: '0.74rem',
+                    color: '#F5A623',
+                    fontWeight: 800,
+                    letterSpacing: '0.04em',
+                    textTransform: 'uppercase',
+                    marginBottom: '6px'
+                  }}>
+                    {new Date(u.createdAt).toLocaleDateString(undefined, {
+                      month: 'short', day: 'numeric'
+                    })}
+                  </p>
+                  <h3 style={{
+                    fontSize: '1rem',
+                    fontWeight: 800,
+                    color: 'var(--text-primary)',
+                    marginBottom: '6px',
+                    lineHeight: 1.3
+                  }}>
+                    {u.title}
+                  </h3>
+                  <p style={{
+                    fontSize: '0.86rem',
+                    color: 'var(--text-secondary)',
+                    lineHeight: 1.55,
+                    margin: 0,
+                    display: '-webkit-box',
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden'
+                  }}>
+                    {u.message}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* CTA Banner */}
       <div style={{

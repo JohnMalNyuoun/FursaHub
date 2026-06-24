@@ -1,0 +1,178 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import api from '../services/api';
+import Loader from '../components/common/Loader';
+
+const Updates = () => {
+  const [loading, setLoading] = useState(true);
+  const [broadcasts, setBroadcasts] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const res = await api.get('/broadcasts');
+        if (!cancelled) setBroadcasts(res?.data?.data || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
+  return (
+    <div style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
+      {/* Top bar */}
+      <nav style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        background: 'var(--nav-bg)',
+        borderBottom: '1px solid var(--border-color)',
+        padding: '0 20px',
+        height: '60px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }}>
+        <Link to="/" style={{
+          fontSize: '1.4rem',
+          fontWeight: 900,
+          color: '#F5A623',
+          letterSpacing: '-0.5px',
+          textDecoration: 'none'
+        }}>
+          FursaHub
+        </Link>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <Link to="/login" style={{
+            fontSize: '0.88rem',
+            fontWeight: 700,
+            color: 'var(--text-secondary)',
+            textDecoration: 'none'
+          }}>
+            Sign In
+          </Link>
+          <Link to="/register" style={{
+            background: '#F5A623',
+            color: '#1E3A5F',
+            padding: '10px 18px',
+            borderRadius: '10px',
+            fontSize: '0.88rem',
+            fontWeight: 700,
+            textDecoration: 'none'
+          }}>
+            Get Started
+          </Link>
+        </div>
+      </nav>
+
+      {/* Header */}
+      <div style={{
+        background: 'linear-gradient(160deg, #0F2035 0%, #1E3A5F 100%)',
+        padding: '48px 20px',
+        textAlign: 'center'
+      }}>
+        <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+          <h3 style={{
+            fontSize: '0.95rem',
+            fontWeight: 800,
+            color: '#F5A623',
+            marginBottom: '10px',
+            letterSpacing: '0.05em'
+          }}>
+            Public Feed
+          </h3>
+          <h1 style={{
+            fontSize: 'clamp(1.6rem, 5vw, 2.4rem)',
+            fontWeight: 800,
+            color: '#FFFFFF',
+            marginBottom: '12px',
+            lineHeight: 1.2
+          }}>
+            Latest Updates
+          </h1>
+          <p style={{ color: '#B8D0E8', fontSize: '0.95rem', lineHeight: 1.6 }}>
+            Announcements from the FursaHub team — open opportunities, deadlines, and platform news.
+          </p>
+        </div>
+      </div>
+
+      {/* Feed */}
+      <div style={{ maxWidth: '720px', margin: '0 auto', padding: '32px 20px 64px' }}>
+        {loading ? (
+          <Loader />
+        ) : broadcasts.length === 0 ? (
+          <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>
+            No updates yet. Check back soon.
+          </p>
+        ) : (
+          <div style={{ display: 'grid', gap: '20px' }}>
+            {broadcasts.map((b) => (
+              <article
+                key={b._id}
+                style={{
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '14px',
+                  padding: '20px',
+                  boxShadow: 'var(--card-shadow)'
+                }}
+              >
+                <p style={{
+                  fontSize: '0.78rem',
+                  color: '#F5A623',
+                  fontWeight: 800,
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase',
+                  marginBottom: '8px'
+                }}>
+                  {new Date(b.createdAt).toLocaleDateString(undefined, {
+                    year: 'numeric', month: 'short', day: 'numeric'
+                  })}
+                </p>
+                <h2 style={{
+                  fontSize: '1.15rem',
+                  fontWeight: 800,
+                  color: 'var(--text-primary)',
+                  marginBottom: '10px',
+                  lineHeight: 1.3
+                }}>
+                  {b.title}
+                </h2>
+                <p style={{
+                  fontSize: '0.92rem',
+                  color: 'var(--text-secondary)',
+                  lineHeight: 1.65,
+                  whiteSpace: 'pre-wrap',
+                  marginBottom: b.image ? '14px' : 0
+                }}>
+                  {b.message}
+                </p>
+                {b.image && (
+                  <img
+                    src={b.image}
+                    alt={b.title}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      maxHeight: '360px',
+                      objectFit: 'cover',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border-color)'
+                    }}
+                  />
+                )}
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Updates;

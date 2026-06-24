@@ -40,6 +40,7 @@ import AdminNotifications from './pages/admin/Notifications';
 import AdminUpdates from './pages/admin/Updates';
 import OrgNotifications from './pages/organisation/Notifications';
 import Landing from './pages/Landing';
+import Updates from './pages/Updates';
 import Impact from './pages/organisation/Impact';
 import CourseOutcomes from './pages/organisation/CourseOutcomes';
 import OutcomeForm from './pages/youth/OutcomeForm';
@@ -87,6 +88,7 @@ function App () {
       {/* Public */}
 
       <Route path="/" element={<Landing />} />
+      <Route path="/updates" element={<Updates />} />
       <Route path="/login" element={<YouthLogin />} />
       <Route path="/register" element={<YouthRegister />} />
       <Route path="/org/login" element={<OrgLogin />} />

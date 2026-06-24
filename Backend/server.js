@@ -55,6 +55,7 @@ app.use('/api/youth/outcomes', require('./routes/youth/outcomes'));
 // Shared routes
 app.use('/api/profiles', require('./routes/profiles'));
 app.use('/api/follow', require('./routes/follow'));
+app.use('/api/broadcasts', require('./routes/broadcasts'));
 
 // Time Log routes
 app.use('/api/timelog', require('./routes/timeLog'));
