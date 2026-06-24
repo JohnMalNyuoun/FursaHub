@@ -233,10 +233,10 @@ const Landing = () => {
       {/* For Youth / For Orgs */}
       <div style={{ padding: '72px 24px', background: 'var(--bg-base)' }}>
         <div style={{
-          maxWidth: '1000px',
+          maxWidth: '720px',
           margin: '0 auto',
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gridTemplateColumns: '1fr',
           gap: '60px'
         }}>
           {/* Youth */}
