@@ -2,6 +2,9 @@ import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import api from '../services/api';
 
+const stripEmoji = (str) =>
+  str ? str.replace(/\p{Extended_Pictographic}/gu, '').replace(/\s{2,}/g, ' ').trim() : str;
+
 const Landing = () => {
   const [updates, setUpdates] = useState([]);
 
@@ -665,8 +668,7 @@ const Landing = () => {
                     border: '1px solid var(--border-color)',
                     borderRadius: '14px',
                     padding: '20px',
-                    display: 'block',
-                    boxShadow: 'var(--card-shadow)'
+                    display: 'block'
                   }}
                 >
                   {u.image && (
@@ -701,7 +703,7 @@ const Landing = () => {
                     marginBottom: '6px',
                     lineHeight: 1.3
                   }}>
-                    {u.title}
+                    {stripEmoji(u.title)}
                   </h3>
                   <p style={{
                     fontSize: '0.86rem',
@@ -713,7 +715,7 @@ const Landing = () => {
                     WebkitBoxOrient: 'vertical',
                     overflow: 'hidden'
                   }}>
-                    {u.message}
+                    {stripEmoji(u.message)}
                   </p>
                 </Link>
               ))}

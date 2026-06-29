@@ -4,6 +4,9 @@ import api from '../services/api';
 import Loader from '../components/common/Loader';
 import ShareButton from '../components/common/ShareButton';
 
+const stripEmoji = (str) =>
+  str ? str.replace(/\p{Extended_Pictographic}/gu, '').replace(/\s{2,}/g, ' ').trim() : str;
+
 const Updates = () => {
   const [loading, setLoading] = useState(true);
   const [broadcasts, setBroadcasts] = useState([]);
@@ -119,8 +122,7 @@ const Updates = () => {
                   background: 'var(--bg-card)',
                   border: '1px solid var(--border-color)',
                   borderRadius: '14px',
-                  padding: '20px',
-                  boxShadow: 'var(--card-shadow)'
+                  padding: '20px'
                 }}
               >
                 <p style={{
@@ -143,7 +145,7 @@ const Updates = () => {
                     marginBottom: '10px',
                     lineHeight: 1.3
                   }}>
-                    {b.title}
+                    {stripEmoji(b.title)}
                   </h2>
                   <ShareButton
                     url={`${window.location.origin}/updates`}
@@ -159,7 +161,7 @@ const Updates = () => {
                   whiteSpace: 'pre-wrap',
                   marginBottom: b.image ? '14px' : 0
                 }}>
-                  {b.message}
+                  {stripEmoji(b.message)}
                 </p>
                 {b.image && (
                   <img
