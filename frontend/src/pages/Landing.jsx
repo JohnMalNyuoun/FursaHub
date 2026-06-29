@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 
 const Landing = () => {
+  return (
     <div style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
 
       {/* Navbar */}
